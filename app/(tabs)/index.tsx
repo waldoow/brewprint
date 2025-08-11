@@ -1,70 +1,123 @@
-import { StyleSheet } from 'react-native';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { BrewHeader } from "@/components/BrewHeader";
+import { ThemedButton } from "@/components/ThemedButton";
+import { ThemedInput } from "@/components/ThemedInput";
+import { ThemedText } from "@/components/ThemedText";
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D2691E', dark: '#8B4513' }}
-      headerImage={
-        <IconSymbol
-          size={250}
-          color="rgba(255,255,255,0.3)"
-          name="house.fill"
-          style={styles.headerImage}
+    <>
+      <BrewHeader
+        title="Brewprint"
+        subtitle="Your Coffee Journey"
+        showBackButton={false}
+        customContent={
+          <View>
+            {/* Custom progress bar */}
+            <View style={styles.progressSection}>
+              <View style={styles.progressTrack}>
+                <View style={[styles.progressFill, { width: "65%" }]} />
+              </View>
+            </View>
+
+            {/* Custom stats */}
+            <View style={styles.statsSection}>
+              <View style={styles.statItem}>
+                <ThemedText style={styles.statValue} type="defaultSemiBold">
+                  12
+                </ThemedText>
+                <ThemedText style={styles.statLabel} type="default">
+                  Recipes
+                </ThemedText>
+              </View>
+              <View style={styles.statItem}>
+                <ThemedText style={styles.statValue} type="defaultSemiBold">
+                  3
+                </ThemedText>
+                <ThemedText style={styles.statLabel} type="default">
+                  Brews Today
+                </ThemedText>
+              </View>
+              <View style={styles.statItem}>
+                <ThemedText style={styles.statValue} type="defaultSemiBold">
+                  87%
+                </ThemedText>
+                <ThemedText style={styles.statLabel} type="default">
+                  Success Rate
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+        }
+      />
+      <ScrollView style={styles.container}>
+        <ThemedButton
+          title="New Brew"
+          onPress={() => {
+            console.log("New Brew");
+          }}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Brewprint</ThemedText>
-        <IconSymbol size={32} name="house.fill" />
-      </ThemedView>
-      
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Recent Brews</ThemedText>
+        <ThemedInput
+          placeholder="Search"
+          value={"Search"}
+          onChangeText={(text) => {
+            console.log(text);
+          }}
+        />
         <ThemedText>
-          Quick access to your latest brewing sessions and favorite recipes.
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
+          quos.
         </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Today's Recommendations</ThemedText>
-        <ThemedText>
-          Personalized recipe suggestions based on your preferences and available beans.
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Quick Actions</ThemedText>
-        <ThemedText>
-          Start a new brew, add beans to your inventory, or create a recipe from templates.
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Brewing Stats</ThemedText>
-        <ThemedText>
-          Track your brewing progress, success rate, and discover your coffee patterns.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    bottom: -50,
-    left: 50,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    paddingTop: 20, // Add spacing between header and content
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  header: {
+    marginBottom: 20, // Add bottom margin to the header
   },
   sectionContainer: {
     gap: 8,
     marginBottom: 16,
+    paddingHorizontal: 20,
+  },
+  progressSection: {
+    marginBottom: 24,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: "#8B4513", // Coffee brown color
+  },
+  statsSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+  },
+  statItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    opacity: 0.6,
+    textTransform: "capitalize",
   },
 });
