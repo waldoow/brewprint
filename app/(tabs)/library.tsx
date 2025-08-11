@@ -4,48 +4,48 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+export default function LibraryScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D2691E', dark: '#8B4513' }}
+      headerBackgroundColor={{ light: '#8B4513', dark: '#654321' }}
       headerImage={
         <IconSymbol
           size={250}
           color="rgba(255,255,255,0.3)"
-          name="house.fill"
+          name="books.vertical.fill"
           style={styles.headerImage}
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Brewprint</ThemedText>
-        <IconSymbol size={32} name="house.fill" />
+        <ThemedText type="title">Coffee Library</ThemedText>
+        <IconSymbol size={32} name="books.vertical.fill" />
       </ThemedView>
       
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Recent Brews</ThemedText>
+        <ThemedText type="subtitle">Recipe Collection</ThemedText>
         <ThemedText>
-          Quick access to your latest brewing sessions and favorite recipes.
+          Browse and organize all your coffee recipes, from espresso shots to pour-over methods.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Today's Recommendations</ThemedText>
+        <ThemedText type="subtitle">Bean Database</ThemedText>
         <ThemedText>
-          Personalized recipe suggestions based on your preferences and available beans.
+          Track your coffee beans with origin details, tasting notes, and brewing recommendations.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Quick Actions</ThemedText>
+        <ThemedText type="subtitle">Equipment Profiles</ThemedText>
         <ThemedText>
-          Start a new brew, add beans to your inventory, or create a recipe from templates.
+          Manage your grinder settings, brewing equipment, and calibration data.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Brewing Stats</ThemedText>
+        <ThemedText type="subtitle">Brewing Templates</ThemedText>
         <ThemedText>
-          Track your brewing progress, success rate, and discover your coffee patterns.
+          Access popular brewing method templates and create your own starter recipes.
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>

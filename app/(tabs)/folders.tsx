@@ -4,48 +4,48 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+export default function FoldersScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D2691E', dark: '#8B4513' }}
+      headerBackgroundColor={{ light: '#DAA520', dark: '#B8860B' }}
       headerImage={
         <IconSymbol
           size={250}
           color="rgba(255,255,255,0.3)"
-          name="house.fill"
+          name="folder.fill"
           style={styles.headerImage}
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Brewprint</ThemedText>
-        <IconSymbol size={32} name="house.fill" />
+        <ThemedText type="title">Recipe Folders</ThemedText>
+        <IconSymbol size={32} name="folder.fill" />
       </ThemedView>
       
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Recent Brews</ThemedText>
+        <ThemedText type="subtitle">Custom Collections</ThemedText>
         <ThemedText>
-          Quick access to your latest brewing sessions and favorite recipes.
+          Organize your recipes into custom folders like "Morning Brews", "Weekend Specials", or "Espresso Blends".
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Today's Recommendations</ThemedText>
+        <ThemedText type="subtitle">Brewing Methods</ThemedText>
         <ThemedText>
-          Personalized recipe suggestions based on your preferences and available beans.
+          Sort recipes by brewing method: V60, Chemex, French Press, AeroPress, and Espresso.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Quick Actions</ThemedText>
+        <ThemedText type="subtitle">Favorites & Archive</ThemedText>
         <ThemedText>
-          Start a new brew, add beans to your inventory, or create a recipe from templates.
+          Keep your go-to recipes easily accessible and archive experiments you want to revisit.
         </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="subtitle">Brewing Stats</ThemedText>
+        <ThemedText type="subtitle">Shared Collections</ThemedText>
         <ThemedText>
-          Track your brewing progress, success rate, and discover your coffee patterns.
+          Discover and save recipe collections shared by the coffee community.
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
