@@ -4,6 +4,7 @@ import { ThemedInput } from "@/components/ui/ThemedInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
+import { toast } from "sonner-native";
 
 export default function HomeScreen() {
   return (
@@ -18,7 +19,7 @@ export default function HomeScreen() {
         <ThemedButton
           title="New Brew"
           onPress={() => {
-            console.log("New Brew");
+            toast.success("New Brew");
           }}
         />
         <ThemedInput
