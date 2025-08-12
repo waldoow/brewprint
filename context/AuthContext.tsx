@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { supabase } from "@/lib/supabase";
+import { Session, User } from "@supabase/supabase-js";
+import { router } from "expo-router";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -39,22 +39,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.email);
 
-        // Handle navigation based on auth state
-        if (event === 'SIGNED_IN') {
-          router.replace('/(tabs)');
-        } else if (event === 'SIGNED_OUT') {
-          router.replace('/(auth)');
-        }
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      // Handle navigation based on auth state
+      if (event === "SIGNED_IN") {
+        router.replace("/(tabs)");
+      } else if (event === "SIGNED_OUT") {
+        router.replace("/(auth)");
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(true);
       await supabase.auth.signOut();
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     } finally {
       setLoading(false);
     }
