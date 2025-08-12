@@ -21,6 +21,16 @@ Brewprint is a Coffee Recipe Tracker - a minimalist React Native app for coffee 
 ### Project Management
 - `npm run reset-project` - Reset to blank template (DO NOT USE - will delete coffee app code)
 
+## Database Schema
+
+Complete PostgreSQL database schema designed for Supabase with Row Level Security (RLS). See `@docs/database-schema.md` for full documentation including:
+
+- **10 Core Tables**: profiles, beans, grinders, brewers, water_profiles, brewprints, brewing_sessions, folders, folder_brewprints, tags
+- **User Data Isolation**: All data scoped via `user_id` foreign keys with RLS policies
+- **JSONB Flexibility**: Complex brewing parameters, steps, and metrics stored as JSONB
+- **Automated Features**: Triggers for timestamps and bean freshness calculations
+- **Performance Optimized**: Comprehensive indexes for user queries and relationships
+
 ## Architecture
 
 ### Silo-Based Organization
@@ -243,10 +253,14 @@ Currently in **Authentication Complete Phase**:
 - Focus on coffee enthusiast workflows and brewing precision
 - **Authentication is mandatory** - all users must create accounts to access the app
 - **Supabase Environment**: Requires `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` environment variables
+- **Database Setup**: Reference `@docs/database-schema.md` for complete schema documentation
 - Offline-first architecture is crucial for kitchen/brewing environment usage (post-authentication)
 - The reset-project script should NOT be used as it will delete the coffee app code
 - **Toast Management**: Always use centralized toast notifications to prevent duplicates
 - **Auth Context**: Use `useAuth()` hook for all authentication-related operations
+
+### Files to Ignore
+- `@docs/tables-creation-query.md` - Raw SQL creation queries (for reference only)
 
 ### Environment Setup
 ```bash
