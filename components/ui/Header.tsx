@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 
-export interface BrewHeaderProps {
+export interface HeaderProps {
   title: string;
   subtitle?: string;
   onBackPress?: () => void;
@@ -22,7 +22,7 @@ export interface BrewHeaderProps {
   style?: ViewStyle;
 }
 
-export function BrewHeader({
+export function Header({
   title,
   subtitle,
   onBackPress,
@@ -30,7 +30,7 @@ export function BrewHeader({
   backButtonTitle,
   customContent,
   style,
-}: BrewHeaderProps) {
+}: HeaderProps) {
   const textColor = useThemeColor({}, "text");
   const iconColor = useThemeColor({}, "icon");
   const insets = useSafeAreaInsets();

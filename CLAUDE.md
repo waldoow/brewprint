@@ -32,19 +32,22 @@ The app follows a **silo-based architecture** where each major feature area is s
 
 Each silo contains its own stack navigator, business logic, components, and type definitions.
 
-### Current Structure (Expo Template Base)
+### Current Structure (Enhanced Expo Template)
 - **File-based routing** with Expo Router v5
 - **Root layout**: `app/_layout.tsx` - Theme provider, font loading
-- **Tab layout**: `app/(tabs)/_layout.tsx` - Bottom navigation
-- **Themed components**: `components/ThemedText.tsx`, `components/ThemedView.tsx`
+- **Tab layout**: `app/(tabs)/_layout.tsx` - Bottom navigation with haptic feedback
+- **Navigation**: React Navigation v7 with bottom tabs, elements, and native integration
 - **Color system**: `constants/Colors.ts` - Light/dark theme support
+- **UI Components**: Complete themed component library (see Component Library section)
+- **Enhanced UX**: Haptic feedback, blur effects, gesture handling, reanimations
 
 ### Planned Architecture Evolution
-The current Expo template structure will be reorganized into the silo-based approach:
-- Move from file-based routing to React Navigation v6 stack navigators per silo
-- Implement feature-specific folder organization
+The current enhanced template structure will be reorganized into the silo-based approach:
+- Organize existing React Navigation v7 into stack navigators per silo
+- Implement feature-specific folder organization using existing components
 - Add Supabase for backend data sync
-- Integrate Lucide React Native for iconography
+- Replace Expo Symbols with Lucide React Native for consistent iconography
+- Migrate to dedicated React Navigation structure (already partially implemented)
 
 ## Design System
 
@@ -53,12 +56,69 @@ The current Expo template structure will be reorganized into the silo-based appr
 - **Typography**: Manrope (UI), Playfair Display (headings)
 - **Current font**: SpaceMono (will be replaced)
 - **Minimalist interface**: Clean, distraction-free experience
+- **Icons**: Expo Symbols (current) → Lucide React Native (planned)
 
 ### Component Philosophy  
-- **Themed components**: Automatic light/dark mode switching
+- **Themed components**: Automatic light/dark mode switching across all UI elements
 - **No FABs**: Header-based actions for accessibility
 - **Contextual actions**: Right action, right place, right time
 - **Guided workflows**: Step-by-step processes for complex tasks
+- **Form-first design**: React Hook Form integration for data collection
+- **Haptic feedback**: Enhanced tactile interactions for brewing workflows
+
+## Component Library
+
+The component library is organized into logical folders for better maintainability and alignment with the silo-based architecture:
+
+### `/components/ui/` - Core UI Components
+**Core Themed Components**
+- **ThemedView** - Container with automatic theme switching
+- **ThemedText** - Typography with theme support
+
+**Form Components (React Hook Form Integration)**
+- **ThemedInput** - Text input with validation support
+- **ThemedTextArea** - Multi-line text input for notes and descriptions
+- **ThemedSelect** - Dropdown/picker for equipment and bean selections
+- **ThemedCheckBox** - Checkbox with theme support for preferences
+- **ThemedSwitch** - Toggle switch for settings and brewing parameters
+- **ThemedLabel** - Form labels with consistent styling
+
+**Interactive Components**
+- **ThemedButton** - Primary action button with haptic feedback
+- **ThemedTabs** - Tab navigation for content organization
+- **ThemedBadge** - Status indicators and tags
+- **ThemedSeparator** - Visual dividers and section breaks
+
+**Platform Components**
+- **HapticTab** - Tab bar items with tactile feedback
+- **TabBarBackground** - Platform-specific tab bar styling (iOS blur effects)
+- **IconSymbol** - Platform-specific icon rendering
+
+### `/components/coffee/` - Coffee-Specific Components
+- **BrewHeader** - Coffee-specific header component with brewing context
+
+### `/components/` - Generic Utility Components
+- **ParallaxScrollView** - Enhanced scrolling experience
+- **Collapsible** - Expandable content sections
+- **ExternalLink** - External URL handling
+- **HelloWave** - Animated welcome component
+
+### `/components/examples/` - Component Examples
+- **BrewHeaderExample** - Usage examples for BrewHeader component
+
+### Import Patterns
+```typescript
+// UI components
+import { ThemedButton, ThemedInput } from '@/components/ui/ThemedButton';
+import { ThemedText, ThemedView } from '@/components/ui/ThemedText';
+
+// Coffee-specific components
+import { BrewHeader } from '@/components/coffee/BrewHeader';
+
+// Utility components
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { Collapsible } from '@/components/Collapsible';
+```
 
 ## Key Features to Implement
 
@@ -70,10 +130,13 @@ The current Expo template structure will be reorganized into the silo-based appr
 5. **Journal & Analytics**: Complete brew history with performance metrics
 
 ### Technical Integration
-- **Supabase**: Database, authentication, real-time sync
+- **Supabase**: Database, authentication, real-time sync (planned)
 - **State Management**: React Context + useReducer (not Redux)
+- **Form Management**: React Hook Form for data collection and validation
+- **Notifications**: Sonner Native for toast notifications and brewing alerts
 - **Offline-First**: Core functionality must work without internet
 - **Cross-Platform**: iOS, Android, and Web support
+- **Enhanced UX**: Haptic feedback, blur effects, gesture handling, smooth animations
 
 ## Development Guidelines
 
@@ -84,19 +147,46 @@ The current Expo template structure will be reorganized into the silo-based appr
 - **Naming Conventions**: camelCase for files, PascalCase for components
 
 ### Project Status
-Currently in **Foundation Phase**:
-- Basic Expo template structure in place
-- Need to implement silo-based architecture
+Currently in **Enhanced Foundation Phase**:
+- Complete themed component library implemented
+- React Navigation v7 integrated with Expo Router
+- Form handling with React Hook Form ready
+- Enhanced UX features (haptics, animations, blur effects) integrated
+- Need to implement silo-based architecture using existing components
 - Core type definitions required
 - Theme system needs coffee-inspired color palette
-- Navigation architecture planning required
+- Ready to build coffee-specific features
 
 ### Technology Stack
-- **Framework**: React Native (Expo SDK ~53.0)
+
+#### Core Framework
+- **Framework**: React Native (Expo SDK ~53.0.20)
 - **Language**: TypeScript 5.8.3 (strict mode)
-- **Current Navigation**: Expo Router v5 → migrate to React Navigation v6
+- **Routing**: Expo Router v5 with React Navigation v7 integration
+
+#### Navigation & UX
+- **Navigation**: React Navigation v7 (bottom tabs, elements, native integration)
+- **Gestures**: react-native-gesture-handler v2.24
+- **Animations**: react-native-reanimated v3.17
+- **Haptics**: expo-haptics for tactile feedback
+- **Visual Effects**: expo-blur for iOS-native blur effects
+
+#### Form & State Management
+- **Forms**: React Hook Form v7.62 for data collection and validation
+- **State**: React Context + useReducer (not Redux)
+- **Notifications**: Sonner Native v0.21 for toast notifications
+
+#### UI & Assets
 - **Styling**: StyleSheet + Theme system (no external styling libraries)
-- **Icons**: Expo Symbols → migrate to Lucide React Native
+- **Icons**: Expo Symbols v0.4 → migrate to Lucide React Native
+- **Images**: expo-image v2.4 for optimized image handling
+- **Fonts**: expo-font v13.3 for typography management
+
+#### Platform Integration
+- **System UI**: expo-system-ui for status bar and navigation bar
+- **Safe Areas**: react-native-safe-area-context for screen boundaries
+- **Web Support**: react-native-web v0.20 for cross-platform compatibility
+- **WebView**: react-native-webview v13.13 for embedded web content
 
 ## Important Notes
 

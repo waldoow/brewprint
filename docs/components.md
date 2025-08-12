@@ -59,7 +59,7 @@ interface BrewHeaderProps {
 
 **Usage Example:**
 ```tsx
-import { BrewHeader } from "@/components/BrewHeader";
+import { BrewHeader } from "@/components/coffee/BrewHeader";
 
 <BrewHeader
   title="Brewing Timer"
@@ -106,7 +106,7 @@ interface ThemedTextProps {
 
 **Usage Example:**
 ```tsx
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/ui/ThemedText";
 
 <ThemedText type="title">Brewing Recipe</ThemedText>
 <ThemedText type="subtitle">Ethiopian Yirgacheffe</ThemedText>
@@ -135,7 +135,7 @@ interface ThemedViewProps {
 
 **Usage Example:**
 ```tsx
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedView } from "@/components/ui/ThemedView";
 
 <ThemedView style={styles.container}>
   <ThemedText>Content with themed background</ThemedText>
@@ -163,7 +163,7 @@ interface ThemedButtonProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedButton } from "@/components/ThemedButton";
+import { ThemedButton } from "@/components/ui/ThemedButton";
 
 // Primary action
 <ThemedButton title="Start Brew" />
@@ -200,7 +200,7 @@ interface ThemedInputProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedInput } from "@/components/ThemedInput";
+import { ThemedInput } from "@/components/ui/ThemedInput";
 
 // Text input with label
 <ThemedInput 
@@ -257,7 +257,7 @@ interface ThemedTextAreaProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedTextArea } from "@/components/ThemedTextArea";
+import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 
 // Basic textarea
 <ThemedTextArea 
@@ -293,7 +293,7 @@ interface ThemedCheckBoxProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedCheckBox } from "@/components/ThemedCheckBox";
+import { ThemedCheckBox } from "@/components/ui/ThemedCheckBox";
 
 // Basic checkbox
 <ThemedCheckBox
@@ -343,7 +343,7 @@ interface SelectOption {
 
 **Usage Examples:**
 ```tsx
-import { ThemedSelect } from "@/components/ThemedSelect";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 
 const grindSizes = [
   { label: 'Extra Fine', value: 'extra-fine' },
@@ -378,7 +378,7 @@ interface ThemedSwitchProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedSwitch } from "@/components/ThemedSwitch";
+import { ThemedSwitch } from "@/components/ui/ThemedSwitch";
 
 // Basic switch
 <ThemedSwitch
@@ -418,7 +418,7 @@ interface TabItem {
 
 **Usage Examples:**
 ```tsx
-import { ThemedTabs } from "@/components/ThemedTabs";
+import { ThemedTabs } from "@/components/ui/ThemedTabs";
 
 const recipeTabs = [
   { 
@@ -461,7 +461,7 @@ interface ThemedLabelProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedLabel } from "@/components/ThemedLabel";
+import { ThemedLabel } from "@/components/ui/ThemedLabel";
 
 // Standard label
 <ThemedLabel>Coffee Weight</ThemedLabel>
@@ -488,7 +488,7 @@ interface ThemedBadgeProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedBadge } from "@/components/ThemedBadge";
+import { ThemedBadge } from "@/components/ui/ThemedBadge";
 
 // Status badges
 <ThemedBadge variant="success">Perfect</ThemedBadge>
@@ -518,7 +518,7 @@ interface ThemedSeparatorProps {
 
 **Usage Examples:**
 ```tsx
-import { ThemedSeparator } from "@/components/ThemedSeparator";
+import { ThemedSeparator } from "@/components/ui/ThemedSeparator";
 
 // Horizontal divider
 <ThemedSeparator />

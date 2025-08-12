@@ -1,55 +1,18 @@
-import { BrewHeader } from "@/components/BrewHeader";
-import { ThemedButton } from "@/components/ThemedButton";
-import { ThemedInput } from "@/components/ThemedInput";
-import { ThemedText } from "@/components/ThemedText";
+import { Header } from "@/components/ui/Header";
+import { ThemedButton } from "@/components/ui/ThemedButton";
+import { ThemedInput } from "@/components/ui/ThemedInput";
+import { ThemedText } from "@/components/ui/ThemedText";
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 
 export default function HomeScreen() {
   return (
     <>
-      <BrewHeader
+      <Header
         title="Brewprint"
         subtitle="Your Coffee Journey"
         showBackButton={false}
-        customContent={
-          <View>
-            {/* Custom progress bar */}
-            <View style={styles.progressSection}>
-              <View style={styles.progressTrack}>
-                <View style={[styles.progressFill, { width: "65%" }]} />
-              </View>
-            </View>
-
-            {/* Custom stats */}
-            <View style={styles.statsSection}>
-              <View style={styles.statItem}>
-                <ThemedText style={styles.statValue} type="defaultSemiBold">
-                  12
-                </ThemedText>
-                <ThemedText style={styles.statLabel} type="default">
-                  Recipes
-                </ThemedText>
-              </View>
-              <View style={styles.statItem}>
-                <ThemedText style={styles.statValue} type="defaultSemiBold">
-                  3
-                </ThemedText>
-                <ThemedText style={styles.statLabel} type="default">
-                  Brews Today
-                </ThemedText>
-              </View>
-              <View style={styles.statItem}>
-                <ThemedText style={styles.statValue} type="defaultSemiBold">
-                  87%
-                </ThemedText>
-                <ThemedText style={styles.statLabel} type="default">
-                  Success Rate
-                </ThemedText>
-              </View>
-            </View>
-          </View>
-        }
+        customContent={<ThemedButton title="New Brew" onPress={() => {}} />}
       />
       <ScrollView style={styles.container}>
         <ThemedButton

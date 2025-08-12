@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Alert } from 'react-native';
-import { BrewHeader } from '../BrewHeader';
+import { BrewHeader } from '../coffee/BrewHeader';
 
 export function BrewHeaderExample() {
   const handleBackPress = () => {
