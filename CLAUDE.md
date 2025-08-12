@@ -93,9 +93,7 @@ The component library is organized into logical folders for better maintainabili
 - **HapticTab** - Tab bar items with tactile feedback
 - **TabBarBackground** - Platform-specific tab bar styling (iOS blur effects)
 - **IconSymbol** - Platform-specific icon rendering
-
-### `/components/coffee/` - Coffee-Specific Components
-- **BrewHeader** - Coffee-specific header component with brewing context
+- **Header** - Generic header component with navigation and custom content support
 
 ### `/components/` - Generic Utility Components
 - **ParallaxScrollView** - Enhanced scrolling experience
@@ -104,16 +102,14 @@ The component library is organized into logical folders for better maintainabili
 - **HelloWave** - Animated welcome component
 
 ### `/components/examples/` - Component Examples
-- **BrewHeaderExample** - Usage examples for BrewHeader component
+- **BrewHeaderExample** - Usage examples for Header component (legacy name)
 
 ### Import Patterns
 ```typescript
 // UI components
 import { ThemedButton, ThemedInput } from '@/components/ui/ThemedButton';
 import { ThemedText, ThemedView } from '@/components/ui/ThemedText';
-
-// Coffee-specific components
-import { BrewHeader } from '@/components/coffee/BrewHeader';
+import { Header } from '@/components/ui/Header';
 
 // Utility components
 import ParallaxScrollView from '@/components/ParallaxScrollView';
