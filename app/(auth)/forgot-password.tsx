@@ -26,10 +26,7 @@ const forgotPasswordSchema = z.object({
   email: z
     .string()
     .min(1, "Email is required")
-    .regex(
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      "Please enter a valid email address"
-    ),
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
@@ -81,9 +78,7 @@ export default function ForgotPassword({
     } catch (error) {
       toast.error("Reset failed", {
         description:
-          error instanceof Error
-            ? error.message
-            : "Please try again later.",
+          error instanceof Error ? error.message : "Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -146,7 +141,9 @@ export default function ForgotPassword({
 
                     {/* Reset Password Button */}
                     <ThemedButton
-                      title={isLoading ? "Sending..." : "Send Reset Instructions"}
+                      title={
+                        isLoading ? "Sending..." : "Send Reset Instructions"
+                      }
                       onPress={handleSubmit(onSubmit)}
                       disabled={isLoading}
                       loading={isLoading}
@@ -157,11 +154,10 @@ export default function ForgotPassword({
                   <ThemedView style={styles.emailSentContainer}>
                     {/* Success Message */}
                     <ThemedView style={styles.successMessage}>
-                      <ThemedText style={styles.checkEmailText}>
-                        📧
-                      </ThemedText>
+                      <ThemedText style={styles.checkEmailText}>📧</ThemedText>
                       <ThemedText style={styles.instructionsText}>
-                        If an account with that email exists, you&apos;ll receive password reset instructions shortly.
+                        If an account with that email exists, you&apos;ll
+                        receive password reset instructions shortly.
                       </ThemedText>
                     </ThemedView>
 
@@ -184,7 +180,10 @@ export default function ForgotPassword({
                     disabled={isLoading}
                     style={styles.backToSignInButton}
                   >
-                    <ArrowLeft size={16} color={Colors[colorScheme ?? 'light'].tint} />
+                    <ArrowLeft
+                      size={16}
+                      color={Colors[colorScheme ?? "light"].tint}
+                    />
                     <ThemedText type="link" style={styles.backToSignInText}>
                       Back to Sign In
                     </ThemedText>

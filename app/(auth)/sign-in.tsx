@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -171,12 +170,11 @@ export default function SignIn({
                   <ThemedText style={styles.signUpText}>
                     Don&apos;t have an account?{" "}
                   </ThemedText>
-                  <TouchableOpacity
+                  <ThemedButton
+                    variant="link"
+                    title="Sign Up"
                     onPress={onNavigateToSignUp}
-                    disabled={isLoading}
-                  >
-                    <ThemedButton variant="link" title="Sign Up" />
-                  </TouchableOpacity>
+                  />
                 </ThemedView>
               </ThemedView>
             </ThemedView>

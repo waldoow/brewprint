@@ -20,16 +20,12 @@ import { ThemedView } from "@/components/ui/ThemedView";
 // Zod schema for sign-up validation
 const signUpSchema = z
   .object({
-    firstName: z
+    username: z
       .string()
-      .min(1, "First name is required")
-      .min(2, "First name must be at least 2 characters")
-      .max(50, "First name must be less than 50 characters"),
-    lastName: z
-      .string()
-      .min(1, "Last name is required")
-      .min(2, "Last name must be at least 2 characters")
-      .max(50, "Last name must be less than 50 characters"),
+      .min(1, "Username is required")
+      .min(3, "Username must be at least 3 characters")
+      .max(30, "Username must be less than 30 characters")
+      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
     email: z
       .string()
       .min(1, "Email is required")
@@ -85,8 +81,7 @@ export default function SignUp({
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -148,52 +143,24 @@ export default function SignUp({
 
               {/* Form */}
               <ThemedView style={styles.form}>
-                {/* Name Row */}
-                <ThemedView style={styles.nameRow}>
-                  {/* First Name */}
-                  <Controller
-                    control={control}
-                    name="firstName"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <ThemedInput
-                        label="First Name"
-                        placeholder="First name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        error={errors.firstName?.message}
-                        autoCapitalize="words"
-                        editable={!isLoading}
-                        containerStyle={StyleSheet.flatten([
-                          styles.inputContainer,
-                          styles.nameInput,
-                        ])}
-                      />
-                    )}
-                  />
-
-                  {/* Last Name */}
-                  <Controller
-                    control={control}
-                    name="lastName"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <ThemedInput
-                        label="Last Name"
-                        placeholder="Last name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        error={errors.lastName?.message}
-                        autoCapitalize="words"
-                        editable={!isLoading}
-                        containerStyle={StyleSheet.flatten([
-                          styles.inputContainer,
-                          styles.nameInput,
-                        ])}
-                      />
-                    )}
-                  />
-                </ThemedView>
+                {/* Username Input */}
+                <Controller
+                  control={control}
+                  name="username"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <ThemedInput
+                      label="Username"
+                      placeholder="Choose a username"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={errors.username?.message}
+                      autoCapitalize="none"
+                      editable={!isLoading}
+                      containerStyle={styles.inputContainer}
+                    />
+                  )}
+                />
 
                 {/* Email Input */}
                 <Controller
@@ -354,15 +321,6 @@ const styles = StyleSheet.create({
   },
   form: {
     width: "100%",
-  },
-  nameRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  nameInput: {
-    flex: 1,
-    marginHorizontal: 4,
   },
   inputContainer: {
     marginBottom: 16,
