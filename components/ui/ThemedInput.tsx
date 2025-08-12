@@ -9,6 +9,7 @@ import {
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 
 import { Colors } from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -169,9 +170,11 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
             style={styles.passwordToggle}
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Text style={[styles.passwordToggleText, { color: iconColor }]}>
-              {showPassword ? '🙈' : '👁️'}
-            </Text>
+            {showPassword ? (
+              <EyeOff size={20} color={iconColor} />
+            ) : (
+              <Eye size={20} color={iconColor} />
+            )}
           </TouchableOpacity>
         )}
       </View>
@@ -210,10 +213,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 12,
     padding: 4,
-  },
-  
-  passwordToggleText: {
-    fontSize: 16,
   },
   
   // Size variants

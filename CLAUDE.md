@@ -141,6 +141,7 @@ import { Collapsible } from '@/components/Collapsible';
 - **Functional Components**: No class components
 - **Separation of Concerns**: UI and business logic separated
 - **Naming Conventions**: camelCase for files, PascalCase for components
+- **Theme Colors**: Always use `@constants/Colors.ts` with `useColorScheme()` hook for theme-aware colors. Never hardcode color values.
 
 ### Project Status
 Currently in **Enhanced Foundation Phase**:
