@@ -64,9 +64,6 @@ export default function ForgotPassword({
       if (onResetPassword) {
         await onResetPassword(data);
         setEmailSent(true);
-        toast.success("Reset email sent!", {
-          description: "Please check your email for reset instructions.",
-        });
       } else {
         // Mock reset password for demo
         await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -76,10 +73,8 @@ export default function ForgotPassword({
         });
       }
     } catch (error) {
-      toast.error("Reset failed", {
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
-      });
+      // Let the parent component handle the error toast
+      throw error;
     } finally {
       setIsLoading(false);
     }

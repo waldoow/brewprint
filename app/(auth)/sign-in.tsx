@@ -62,9 +62,6 @@ export default function SignIn({
 
       if (onSignIn) {
         await onSignIn(data);
-        toast.success("Welcome back!", {
-          description: "You have successfully signed in.",
-        });
         reset();
       } else {
         // Mock sign-in for demo
@@ -75,12 +72,8 @@ export default function SignIn({
         reset();
       }
     } catch (error) {
-      toast.error("Sign in failed", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Please check your credentials and try again.",
-      });
+      // Let the parent component handle the error toast
+      throw error;
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { router } from "expo-router";
 
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner-native";
 import ForgotPassword from "./forgot-password";
 import SignIn from "./sign-in";
 import SignUp from "./sign-up";
@@ -10,23 +13,77 @@ export default function AuthIndex() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>("sign-in");
 
   const handleSignIn = async (data: { email: string; password: string }) => {
-    console.log("Sign in data:", data);
-    // TODO: Implement actual authentication logic
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Welcome back!");
+      router.replace("/(tabs)");
+    } catch (error) {
+      toast.error("Sign in failed", {
+        description: error instanceof Error ? error.message : "Invalid email or password",
+      });
+      // Don't re-throw, let this function handle the error completely
+    }
   };
 
   const handleSignUp = async (data: {
-    firstName: string;
-    lastName: string;
+    username: string;
     email: string;
     password: string;
   }) => {
-    console.log("Sign up data:", data);
-    // TODO: Implement actual registration logic
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            username: data.username,
+          },
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Account created successfully", {
+        description: "Please check your email to verify your account.",
+      });
+      setCurrentScreen("sign-in");
+    } catch (error) {
+      toast.error("Registration failed", {
+        description: error instanceof Error ? error.message : "Please try again later.",
+      });
+      // Don't re-throw, let this function handle the error completely
+    }
   };
 
   const handleResetPassword = async (data: { email: string }) => {
-    console.log("Reset password data:", data);
-    // TODO: Implement actual password reset logic
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: 'com.brewprint://reset-password',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Reset email sent!", {
+        description: "Please check your email for reset instructions.",
+      });
+    } catch (error) {
+      toast.error("Reset failed", {
+        description: error instanceof Error ? error.message : "Please try again later.",
+      });
+      // Don't re-throw, let this function handle the error completely
+    }
   };
 
   const handleForgotPassword = () => {
@@ -41,15 +98,6 @@ export default function AuthIndex() {
     setCurrentScreen("sign-up");
   };
 
-  const handleTermsPress = () => {
-    console.log("Terms of Service pressed");
-    // TODO: Navigate to terms of service
-  };
-
-  const handlePrivacyPress = () => {
-    console.log("Privacy Policy pressed");
-    // TODO: Navigate to privacy policy
-  };
 
   switch (currentScreen) {
     case "sign-up":
@@ -57,8 +105,6 @@ export default function AuthIndex() {
         <SignUp
           onSignUp={handleSignUp}
           onNavigateToSignIn={handleNavigateToSignIn}
-          onTermsPress={handleTermsPress}
-          onPrivacyPress={handlePrivacyPress}
         />
       );
 

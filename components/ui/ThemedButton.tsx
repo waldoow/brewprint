@@ -153,18 +153,20 @@ export function ThemedButton({
       activeOpacity={0.7}
       {...rest}
     >
-      {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={
-            variant === "default" || variant === "destructive"
-              ? "#ffffff"
-              : textColor
-          }
-        />
-      ) : (
+      <>
+        {loading && (
+          <ActivityIndicator
+            size="small"
+            color={
+              variant === "default" || variant === "destructive"
+                ? "#ffffff"
+                : getTextColor()
+            }
+            style={{ marginRight: 8 }}
+          />
+        )}
         <Text style={getTextStyles()}>{title}</Text>
-      )}
+      </>
     </TouchableOpacity>
   );
 }

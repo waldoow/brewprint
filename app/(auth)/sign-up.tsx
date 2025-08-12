@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -25,7 +24,10 @@ const signUpSchema = z
       .min(1, "Username is required")
       .min(3, "Username must be at least 3 characters")
       .max(30, "Username must be less than 30 characters")
-      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores"
+      ),
     email: z
       .string()
       .min(1, "Email is required")
@@ -42,12 +44,6 @@ const signUpSchema = z
         "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
     confirmPassword: z.string().min(1, "Please confirm your password"),
-    acceptTerms: z
-      .boolean()
-      .refine(
-        (val) => val === true,
-        "You must accept the terms and conditions"
-      ),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -58,18 +54,14 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 interface SignUpProps {
   onSignUp?: (
-    data: Omit<SignUpFormData, "confirmPassword" | "acceptTerms">
+    data: Omit<SignUpFormData, "confirmPassword">
   ) => Promise<void>;
   onNavigateToSignIn?: () => void;
-  onTermsPress?: () => void;
-  onPrivacyPress?: () => void;
 }
 
 export default function SignUp({
   onSignUp,
   onNavigateToSignIn,
-  onTermsPress,
-  onPrivacyPress,
 }: SignUpProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,7 +77,6 @@ export default function SignUp({
       email: "",
       password: "",
       confirmPassword: "",
-      acceptTerms: false,
     },
   });
 
@@ -93,13 +84,10 @@ export default function SignUp({
     try {
       setIsLoading(true);
 
-      const { confirmPassword, acceptTerms, ...submitData } = data;
+      const { confirmPassword, ...submitData } = data;
 
       if (onSignUp) {
         await onSignUp(submitData);
-        toast.success("Account created successfully!", {
-          description: "Welcome to our platform. You can now sign in.",
-        });
         reset();
       } else {
         // Mock sign-up for demo
@@ -110,10 +98,8 @@ export default function SignUp({
         reset();
       }
     } catch (error) {
-      toast.error("Registration failed", {
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
-      });
+      // Let the parent component handle the error toast
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -272,12 +258,11 @@ export default function SignUp({
                   <ThemedText style={styles.signInText}>
                     Already have an account?{" "}
                   </ThemedText>
-                  <TouchableOpacity
+                  <ThemedButton
+                    variant="link"
+                    title="Sign In"
                     onPress={onNavigateToSignIn}
-                    disabled={isLoading}
-                  >
-                    <ThemedButton variant="link" title="Sign In" />
-                  </TouchableOpacity>
+                  />
                 </ThemedView>
               </ThemedView>
             </ThemedView>
