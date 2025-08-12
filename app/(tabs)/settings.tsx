@@ -1,10 +1,29 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ui/ThemedText';
 import { ThemedView } from '@/components/ui/ThemedView';
+import { ThemedButton } from '@/components/ui/ThemedButton';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SettingsScreen() {
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive',
+          onPress: signOut 
+        },
+      ]
+    );
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#708090', dark: '#2F4F4F' }}
@@ -54,6 +73,19 @@ export default function SettingsScreen() {
         <ThemedText>
           App version, support resources, community guidelines, and feedback options.
         </ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.sectionContainer}>
+        <ThemedText type="subtitle">Account</ThemedText>
+        <ThemedText style={{ marginBottom: 16 }}>
+          Signed in as: {user?.email}
+        </ThemedText>
+        <ThemedButton
+          title="Sign Out"
+          variant="outline"
+          onPress={handleSignOut}
+          style={{ alignSelf: 'flex-start' }}
+        />
       </ThemedView>
     </ParallaxScrollView>
   );
