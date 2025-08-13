@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Star } from "lucide-react-native";
 import React from "react";
@@ -14,45 +15,55 @@ export function RatingSection({ rating }: RatingSectionProps) {
   const warningColor = useThemeColor({}, "warning");
 
   return (
-    <ThemedView style={styles.section}>
+    <ThemedView style={styles.ratingCard}>
       <ThemedText style={styles.sectionTitle}>Ma note</ThemedText>
-      <ThemedView style={styles.ratingContainer}>
-        <ThemedView style={styles.starsContainer}>
+      <ThemedView noBackground style={styles.ratingContainer}>
+        <ThemedView noBackground style={styles.starsContainer}>
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
               key={star}
-              size={24}
+              size={18}
               color={star <= rating ? warningColor : iconColor}
               fill={star <= rating ? warningColor : "none"}
             />
           ))}
         </ThemedView>
-        <ThemedText style={styles.ratingText}>{rating}/5 étoiles</ThemedText>
+        <ThemedText style={styles.ratingText}>{rating}/5</ThemedText>
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
+  ratingCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBackgroundSecondary,
+    marginBottom: 16,
+    gap: 8,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    letterSpacing: -0.4,
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   ratingContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "space-between",
   },
   starsContainer: {
     flexDirection: "row",
-    gap: 4,
+    gap: 2,
   },
   ratingText: {
-    fontSize: 14,
+    fontSize: 12,
+    fontWeight: "600",
     opacity: 0.7,
   },
 });

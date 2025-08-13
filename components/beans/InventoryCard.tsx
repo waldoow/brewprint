@@ -4,6 +4,7 @@ import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import React from "react";
 import { StyleSheet } from "react-native";
+import { ThemedSeparator } from "../ui/ThemedSeparator";
 
 interface InventoryCardProps {
   remainingGrams: number;
@@ -29,112 +30,88 @@ export function InventoryCard({
   };
 
   return (
-    <ThemedView style={styles.section}>
-      <ThemedText style={styles.sectionTitle}>Inventaire</ThemedText>
-      <ThemedView style={styles.inventoryCard}>
-        <ThemedView style={styles.inventoryHeader}>
-          <ThemedView style={styles.inventoryAmounts}>
-            <ThemedText style={styles.inventoryAmount}>
-              {remainingGrams}g
-            </ThemedText>
-            <ThemedText style={styles.inventoryLabel}>restant</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.inventoryPercentage}>
-            <ThemedText
-              style={[
-                styles.percentageText,
-                {
-                  color: getProgressColor(),
-                },
-              ]}
-            >
-              {Math.round(percentageRemaining)}%
-            </ThemedText>
-          </ThemedView>
+    <ThemedView noBackground style={styles.inventoryCard}>
+      <ThemedView noBackground style={styles.inventoryHeader}>
+        <ThemedView noBackground style={styles.inventoryInfo}>
+          <ThemedText style={styles.inventoryLabel}>Inventaire</ThemedText>
+          <ThemedText style={styles.inventoryAmount}>
+            {remainingGrams}g / {totalGrams}g
+          </ThemedText>
         </ThemedView>
-
-        <ThemedView style={styles.progressContainer}>
-          <ThemedView style={styles.progressBar}>
-            <ThemedView
-              style={[
-                styles.progressFill,
-                {
-                  width: `${percentageRemaining}%`,
-                  backgroundColor: getProgressColor(),
-                },
-              ]}
-            />
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedText style={styles.inventorySubtext}>
-          Total: {totalGrams}g
+        <ThemedText
+          style={[
+            styles.percentageText,
+            { color: getProgressColor() },
+          ]}
+        >
+          {Math.round(percentageRemaining)}%
         </ThemedText>
+      </ThemedView>
+
+      <ThemedView noBackground style={styles.progressContainer}>
+        <ThemedView style={styles.progressBar}>
+          <ThemedView
+            style={[
+              styles.progressFill,
+              {
+                width: `${percentageRemaining}%`,
+                backgroundColor: getProgressColor(),
+              },
+            ]}
+          />
+        </ThemedView>
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    letterSpacing: -0.4,
-  },
   inventoryCard: {
     backgroundColor: Colors.dark.cardBackground,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 12,
     borderWidth: 1,
     borderColor: Colors.dark.cardBackgroundSecondary,
+    marginBottom: 16,
   },
   inventoryHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: 16,
+    alignItems: "center",
+    marginBottom: 8,
   },
-  inventoryAmounts: {
-    alignItems: "flex-start",
-  },
-  inventoryPercentage: {
-    alignItems: "flex-end",
-  },
-  inventoryAmount: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 2,
+  inventoryInfo: {
+    flex: 1,
   },
   inventoryLabel: {
-    fontSize: 14,
-    opacity: 0.7,
-    fontWeight: "500",
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 2,
   },
-  inventorySubtext: {
+  inventoryAmount: {
     fontSize: 14,
-    opacity: 0.6,
-    marginTop: 12,
-    textAlign: "center",
+    fontWeight: "600",
   },
   percentageText: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: "600",
   },
   progressContainer: {
-    marginBottom: 12,
+    marginTop: 4,
   },
   progressBar: {
-    height: 10,
-    backgroundColor: Colors.dark.cardBackgroundSecondary,
-    borderRadius: 6,
-    overflow: "hidden",
+    backgroundColor: "rgba(128, 128, 128, 0.2)",
+    borderWidth: 1,
+    borderRadius: 12,
+    borderColor: Colors.dark.background,
+    padding: 2,
   },
   progressFill: {
-    height: "100%",
-    borderRadius: 6,
+    height: 4,
+    borderRadius: 12,
+    overflow: "hidden",
   },
 });

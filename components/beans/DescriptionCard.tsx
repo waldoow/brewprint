@@ -11,35 +11,34 @@ interface DescriptionCardProps {
 
 export function DescriptionCard({ title, content }: DescriptionCardProps) {
   return (
-    <ThemedView style={styles.section}>
+    <ThemedView style={styles.descriptionCard}>
       <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
-      <ThemedView style={styles.descriptionCard}>
-        <ThemedText style={styles.descriptionText}>{content}</ThemedText>
-      </ThemedView>
+      <ThemedText style={styles.descriptionText}>{content}</ThemedText>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    letterSpacing: -0.4,
-  },
   descriptionCard: {
     backgroundColor: Colors.dark.cardBackground,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 12,
     borderWidth: 1,
     borderColor: Colors.dark.cardBackgroundSecondary,
+    marginBottom: 16,
+    gap: 8,
+  },
+  sectionTitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   descriptionText: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
     opacity: 0.9,
   },
 });

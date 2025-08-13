@@ -88,9 +88,10 @@ export function StatusCards({
   };
 
   return (
-    <ThemedView style={styles.statusSection}>
-      <ThemedView style={styles.statusCard}>
-        <ThemedView style={styles.statusHeader}>
+    <ThemedView noBackground style={styles.statusRow}>
+      <ThemedView noBackground style={styles.column}>
+        <ThemedText style={styles.columnTitle}>Torréfaction</ThemedText>
+        <ThemedView noBackground style={styles.roastInfo}>
           <ThemedView
             style={[styles.roastDot, { backgroundColor: getRoastLevelColor() }]}
           />
@@ -98,68 +99,75 @@ export function StatusCards({
             {getRoastLevelDisplay()}
           </ThemedText>
         </ThemedView>
-        <ThemedText style={styles.statusLabel}>Torréfaction</ThemedText>
       </ThemedView>
 
-      <ThemedView style={styles.statusCard}>
-        <ThemedView style={styles.statusHeader}>
-          <ThemedBadge variant={getFreshnessVariant() as any} size="sm">
-            {getFreshnessLabel()}
-          </ThemedBadge>
-        </ThemedView>
-        <ThemedText style={styles.statusLabel}>Fraîcheur</ThemedText>
+      <ThemedView noBackground style={styles.column}>
+        <ThemedText style={styles.columnTitle}>Fraîcheur</ThemedText>
+        <ThemedBadge variant={getFreshnessVariant() as any} size="sm">
+          {getFreshnessLabel()}
+        </ThemedBadge>
       </ThemedView>
 
-      <ThemedView style={styles.statusCard}>
-        <ThemedView style={styles.statusHeader}>
+      <ThemedView noBackground style={styles.column}>
+        <ThemedText style={styles.columnTitle}>Âge</ThemedText>
+        <ThemedView noBackground style={styles.daysInfo}>
           <ThemedText style={styles.statusValue}>{daysSinceRoast()}</ThemedText>
-          <ThemedText style={styles.statusUnit}>jours</ThemedText>
+          <ThemedText style={styles.statusUnit}>j</ThemedText>
         </ThemedView>
-        <ThemedText style={styles.statusLabel}>Depuis torréfaction</ThemedText>
       </ThemedView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  statusSection: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 24,
-  },
   statusCard: {
-    flex: 1,
     backgroundColor: Colors.dark.cardBackground,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    gap: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.dark.cardBackgroundSecondary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  statusHeader: {
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+  column: {
+    alignItems: "flex-start",
+    gap: 6,
+    flex: 1,
+  },
+  columnTitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  roastInfo: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
+    gap: 6,
+  },
+  daysInfo: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 2,
   },
   roastDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  statusLabel: {
-    fontSize: 12,
-    opacity: 0.7,
-    textAlign: "center",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   statusValue: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "600",
   },
   statusUnit: {
     fontSize: 12,
     fontWeight: "500",
-    opacity: 0.8,
+    opacity: 0.7,
   },
 });

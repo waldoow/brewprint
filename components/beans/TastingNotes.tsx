@@ -1,6 +1,7 @@
 import { ThemedBadge } from "@/components/ui/ThemedBadge";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import { Colors } from "@/constants/Colors";
 import React from "react";
 import { StyleSheet } from "react-native";
 
@@ -14,11 +15,11 @@ export function TastingNotes({ notes }: TastingNotesProps) {
   }
 
   return (
-    <ThemedView style={styles.section}>
+    <ThemedView style={styles.tastingCard}>
       <ThemedText style={styles.sectionTitle}>Notes de dégustation</ThemedText>
-      <ThemedView style={styles.tastingNotes}>
+      <ThemedView noBackground style={styles.tastingNotes}>
         {notes.map((note, index) => (
-          <ThemedBadge key={index} variant="outline" size="default">
+          <ThemedBadge key={index} variant="outline" size="sm">
             {note}
           </ThemedBadge>
         ))}
@@ -28,18 +29,26 @@ export function TastingNotes({ notes }: TastingNotesProps) {
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
+  tastingCard: {
+    backgroundColor: Colors.dark.cardBackground,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.cardBackgroundSecondary,
+    marginBottom: 16,
+    gap: 8,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    letterSpacing: -0.4,
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   tastingNotes: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: 6,
   },
 });
