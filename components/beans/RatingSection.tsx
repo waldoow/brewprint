@@ -2,7 +2,6 @@ import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Star } from "lucide-react-native";
 import React from "react";
 import { StyleSheet } from "react-native";
 
@@ -12,20 +11,34 @@ interface RatingSectionProps {
 
 export function RatingSection({ rating }: RatingSectionProps) {
   const iconColor = useThemeColor({}, "icon");
-  const warningColor = useThemeColor({}, "warning");
+  const textColor = useThemeColor({}, "text");
 
   return (
     <ThemedView style={styles.ratingCard}>
       <ThemedText style={styles.sectionTitle}>Ma note</ThemedText>
       <ThemedView noBackground style={styles.ratingContainer}>
-        <ThemedView noBackground style={styles.starsContainer}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Star
-              key={star}
-              size={18}
-              color={star <= rating ? warningColor : iconColor}
-              fill={star <= rating ? warningColor : "none"}
-            />
+        <ThemedView noBackground style={styles.circlesContainer}>
+          {[1, 2, 3, 4, 5].map((circle) => (
+            <ThemedView key={circle} style={styles.circleWrapper}>
+              {/* Outer Ring */}
+              <ThemedView
+                style={[
+                  styles.outerRing,
+                  {
+                    borderColor: circle <= rating ? textColor : iconColor,
+                  },
+                ]}
+              />
+              {/* Inner Circle */}
+              <ThemedView
+                style={[
+                  styles.innerCircle,
+                  {
+                    backgroundColor: circle <= rating ? textColor : "transparent",
+                  },
+                ]}
+              />
+            </ThemedView>
           ))}
         </ThemedView>
         <ThemedText style={styles.ratingText}>{rating}/5</ThemedText>
@@ -57,9 +70,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  starsContainer: {
+  circlesContainer: {
     flexDirection: "row",
-    gap: 2,
+    gap: 4,
+  },
+  circleWrapper: {
+    position: "relative",
+    width: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  outerRing: {
+    position: "absolute",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+  },
+  innerCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   ratingText: {
     fontSize: 12,

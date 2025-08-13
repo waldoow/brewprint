@@ -129,11 +129,11 @@ The component library is organized into logical folders for better maintainabili
 
 ### `/components/beans/` - Coffee Bean Components
 - **StatusCards** - Single horizontal row with roast level (dot + text), freshness badge, and days since roast
-- **DescriptionCard** - Bean description and metadata display
+- **DescriptionCard** - Compact card with integrated title and description text, 12px padding
 - **InfoSection** - Horizontal label-value pairs with icons, compact 12px padding layout
-- **InventoryCard** - Compact inventory display with horizontal label-value and slim progress bar
-- **RatingSection** - Coffee rating and evaluation interface
-- **TastingNotes** - Structured tasting notes interface
+- **InventoryCard** - Compact inventory display with horizontal label-value and borderless progress bar
+- **RatingSection** - Coffee rating with custom circle design (outer ring + inner circle, no color coding)
+- **TastingNotes** - Compact card with small badges for taste descriptors, 12px padding
 - **bean-card** - Individual bean card component for lists with minimalist design
 
 ### `/components/screens/` - Screen-Specific Components
@@ -237,12 +237,17 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 - **Component Styling**: Follow minimalist design principles with consistent 12px padding and border radius
 - **Information Layout**: Prefer horizontal label-value arrangements over vertical stacking for better space efficiency
 - **ThemedView Background**: Use `noBackground` prop when ThemedView is used purely for layout without visual styling
+- **Rating Design**: Use circle-based rating system with outer ring and inner circle, avoid color coding for neutrality
+- **Progress Bars**: Use borderless design with cardBackgroundSecondary for better header integration
+- **Header Enhancement**: Include essential information (status, inventory) in headers to reduce main content redundancy
 
 ### Project Status
-Currently in **Component System Complete Phase**:
+Currently in **Bean Detail Screen Complete Phase**:
 - ✅ **Complete themed component library with coffee-specific styling**
 - ✅ **Coffee color palette integrated (5-level roast progression)**
-- ✅ **Coffee bean components implemented (StatusCards, etc.)**
+- ✅ **Coffee bean components fully implemented with minimalist design**
+- ✅ **Bean detail screen with enhanced header layout (status + inventory)**
+- ✅ **All bean components updated to 12px padding standard**
 - ✅ React Navigation v7 integrated with Expo Router
 - ✅ Form handling with React Hook Form ready
 - ✅ Enhanced UX features (haptics, animations, blur effects) integrated
@@ -251,6 +256,7 @@ Currently in **Component System Complete Phase**:
 - ✅ **Enhanced ThemedButton with proper loading states**
 - ✅ **ThemedBadge with semantic color variants**
 - ✅ **Centralized toast notifications (no duplicates)**
+- ✅ **ThemedView with noBackground prop for layout flexibility**
 - Need to implement silo-based architecture using existing components
 - Core type definitions required for coffee data models
 - Ready to build remaining coffee-specific features (grinder profiles, brewing methods, etc.)
