@@ -1,10 +1,8 @@
+import { HomeBeansSection } from "@/components/screens/home/beans-section";
 import { Header } from "@/components/ui/Header";
 import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
-import { toast } from "sonner-native";
 
 export default function HomeScreen() {
   return (
@@ -16,23 +14,7 @@ export default function HomeScreen() {
         customContent={<ThemedButton title="New Brew" onPress={() => {}} />}
       />
       <ScrollView style={styles.container}>
-        <ThemedButton
-          title="New Brew"
-          onPress={() => {
-            toast.success("New Brew");
-          }}
-        />
-        <ThemedInput
-          placeholder="Search"
-          value={"Search"}
-          onChangeText={(text) => {
-            console.log(text);
-          }}
-        />
-        <ThemedText>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam,
-          quos.
-        </ThemedText>
+        <HomeBeansSection />
       </ScrollView>
     </>
   );
