@@ -1,10 +1,22 @@
 import { HomeBeansSection } from "@/components/screens/home/beans-section";
 import { Header } from "@/components/ui/Header";
 import { ThemedButton } from "@/components/ui/ThemedButton";
+import { BeanForm } from "@/forms";
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Modal } from "react-native";
 
 export default function HomeScreen() {
+  const [showBeanForm, setShowBeanForm] = React.useState(false);
+
+  const handleAddBeanSuccess = () => {
+    setShowBeanForm(false);
+    // TODO: Refresh beans data
+  };
+
+  const handleAddBeanCancel = () => {
+    setShowBeanForm(false);
+  };
+
   return (
     <>
       <Header
@@ -14,8 +26,19 @@ export default function HomeScreen() {
         customContent={<ThemedButton title="New Brew" onPress={() => {}} />}
       />
       <ScrollView style={styles.container}>
-        <HomeBeansSection />
+        <HomeBeansSection onAddBeanPress={() => setShowBeanForm(true)} />
       </ScrollView>
+
+      <Modal
+        visible={showBeanForm}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <BeanForm
+          onSuccess={handleAddBeanSuccess}
+          onCancel={handleAddBeanCancel}
+        />
+      </Modal>
     </>
   );
 }

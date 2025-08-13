@@ -35,7 +35,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        animation: Platform.OS === "ios" ? "shift" : "slide_from_right",
+        animation: "shift",
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect

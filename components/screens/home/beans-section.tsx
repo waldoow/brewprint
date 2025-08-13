@@ -1,14 +1,20 @@
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, TouchableOpacity } from "react-native";
 
 import { BeanCard, MOCK_BEANS } from "@/components/beans/bean-card";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
-import { Colors } from "@/constants/Colors";
 import { Plus } from "lucide-react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
-export function HomeBeansSection() {
+interface HomeBeansSectionProps {
+  onAddBeanPress?: () => void;
+}
+
+export function HomeBeansSection({ onAddBeanPress }: HomeBeansSectionProps) {
+  const iconColor = useThemeColor({}, 'icon');
+  
   const handleBeanPress = (bean: (typeof MOCK_BEANS)[0]) => {
     // Navigation vers le détail du grain - direct route
     router.push({
@@ -40,12 +46,12 @@ export function HomeBeansSection() {
         ))}
 
         {/* Add New Bean Card */}
-        <View style={styles.addCard}>
+        <TouchableOpacity style={styles.addCard} onPress={onAddBeanPress}>
           <ThemedView style={styles.addCardContent}>
-            <Plus size={16} color={Colors.dark.text} strokeWidth={2} />
-            <ThemedText>Ajouter</ThemedText>
+            <Plus size={16} color={iconColor} strokeWidth={2} />
+            <ThemedText style={styles.addCardText}>Ajouter</ThemedText>
           </ThemedView>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -94,8 +100,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     display: "flex",
     flexDirection: "row",
+    opacity: 0.5,
+  },
+
+  addCardText: {
     fontSize: 14,
     fontWeight: "500",
-    opacity: 0.5,
+    marginLeft: 8,
   },
 });

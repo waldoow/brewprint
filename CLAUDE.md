@@ -99,6 +99,9 @@ The component library is organized into logical folders for better maintainabili
 - **ThemedView** - Container with automatic theme switching
 - **ThemedText** - Typography with theme support
 - **ThemedScrollView** - Scrollable container with theme-aware styling
+- **ThemedCollapsible** - Expandable content sections with customizable styling
+  - Options: `showBorder` (false), `noPadding` (true), `noBackground` (true)
+  - Perfect for organizing form sections and optional content
 
 **Form Components (React Hook Form Integration)**
 - **ThemedInput** - Text input with validation support and theme-aware styling
@@ -126,6 +129,11 @@ The component library is organized into logical folders for better maintainabili
 - **TabBarBackground** - Platform-specific tab bar styling (iOS blur effects)
 - **IconSymbol** - Platform-specific icon rendering
 - **Header** - Generic header component with navigation and custom content support
+- **SheetHeader** - Specialized header for modals and sheets
+  - Clean design with title, subtitle, and close button
+  - Custom content area for additional actions
+  - Customizable colors and theming support
+  - Perfect for form modals and overlay screens
 
 ### `/components/beans/` - Coffee Bean Components
 - **StatusCards** - Single horizontal row with roast level (dot + text), freshness badge, and days since roast
@@ -146,7 +154,14 @@ The component library is organized into logical folders for better maintainabili
 - **HelloWave** - Animated welcome component
 
 ### `/components/examples/` - Component Examples
-- **BrewHeaderExample** - Usage examples for Header component (legacy name)
+- **SheetHeaderExample** - Usage examples for SheetHeader component
+
+### `/forms/` - Form Components
+- **BeanForm** - Comprehensive bean addition form with React Hook Form integration
+  - Organized into collapsible sections (Basic Info, Advanced Parameters, Purchase & Inventory)
+  - Zod validation schema matching database requirements
+  - Supabase integration for data persistence
+  - Enhanced UX with loading states and proper error handling
 
 ### Import Patterns
 ```typescript
@@ -156,11 +171,16 @@ import { ThemedInput } from '@/components/ui/ThemedInput';
 import { ThemedBadge } from '@/components/ui/ThemedBadge';
 import { ThemedText, ThemedView } from '@/components/ui/ThemedText';
 import { ThemedScrollView } from '@/components/ui/ThemedScrollView';
+import { ThemedCollapsible } from '@/components/ui/ThemedCollapsible';
 import { Header } from '@/components/ui/Header';
+import { SheetHeader } from '@/components/ui/SheetHeader';
 
 // Coffee-specific components
 import { StatusCards } from '@/components/beans/StatusCards';
 import { bean-card } from '@/components/beans/bean-card';
+
+// Forms
+import { BeanForm } from '@/forms/BeanForm';
 
 // Utility components
 import ParallaxScrollView from '@/components/ParallaxScrollView';

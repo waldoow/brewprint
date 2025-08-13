@@ -19,6 +19,7 @@ export interface HeaderProps {
   showBackButton?: boolean;
   backButtonTitle?: string; // Title of the previous screen
   customContent?: React.ReactNode; // Custom content for stats/progress section
+  showTopSpacing?: boolean; // Controls the space above the title
   style?: ViewStyle;
 }
 
@@ -29,16 +30,24 @@ export function Header({
   showBackButton = true,
   backButtonTitle,
   customContent,
+  showTopSpacing = true,
   style,
 }: HeaderProps) {
   const textColor = useThemeColor({}, "text");
   const iconColor = useThemeColor({}, "icon");
   const insets = useSafeAreaInsets();
 
+  const getContainerStyles = () => {
+    const safePadding = showTopSpacing ? insets.top + 20 : insets.top;
+    return [
+      showTopSpacing ? styles.container : styles.containerNoSpacing,
+      { paddingTop: safePadding },
+      style
+    ];
+  };
+
   return (
-    <ThemedView
-      style={[styles.container, { paddingTop: insets.top + 20 }, style]}
-    >
+    <ThemedView style={getContainerStyles()}>
       {/* Back Button Section */}
       {showBackButton && (
         <View style={styles.backButton}>
@@ -79,6 +88,16 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 40,
+    paddingBottom: 20,
+    borderRadius: 10,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  containerNoSpacing: {
+    paddingHorizontal: 20,
+    paddingTop: 0,
     paddingBottom: 20,
     borderRadius: 10,
     display: "flex",

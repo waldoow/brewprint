@@ -1,0 +1,1 @@
+export { BeanForm } from './BeanForm';
