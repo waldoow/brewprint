@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document defines the complete database schema for **Brewprints**, a coffee brewing assistant app. The schema is designed for **Supabase** (PostgreSQL) with Row Level Security (RLS) and uses UUID primary keys throughout.
+This document defines the complete database schema for **Brewprints**, a coffee brewing experimentation app. The schema is designed for **Supabase** (PostgreSQL) with Row Level Security (RLS) and uses UUID primary keys throughout.
+
+**Core Concept**: Each brewprint represents **one brewing experiment/test** with complete documentation of parameters, results, and evaluation. Users iterate through experiments until they perfect their recipes.
 
 ## Core Principles
 
@@ -12,6 +14,7 @@ This document defines the complete database schema for **Brewprints**, a coffee 
 - **JSONB for Flexibility**: Complex nested data stored as JSONB
 - **Normalization**: Proper foreign key relationships with cascade deletes
 - **Snake Case**: PostgreSQL naming conventions (snake_case)
+- **Experimentation Workflow**: Each brewprint = one brewing test with rating and notes
 
 ---
 
@@ -23,21 +26,19 @@ users (auth.users)
 ├── beans (1:many)
 ├── grinders (1:many)
 ├── brewers (1:many)
-├── brewprints (1:many)
-├── brewing_sessions (1:many)
+├── brewprints (1:many) ← Core experimentation entity
 ├── water_profiles (1:many)
 ├── folders (1:many)
 └── tags (1:many)
 
 brewprints
-├── brewing_sessions (1:many)
 ├── beans (many:1, optional)
 ├── grinders (many:1, optional)
 ├── brewers (many:1, optional)
+├── water_profiles (many:1, optional)
 └── parent brewprint (many:1, optional for versioning)
 
 folders ↔ brewprints (many:many via folder_brewprints)
-brewing_sessions → water_profiles (many:1, optional)
 ```
 
 ---
@@ -286,7 +287,7 @@ CREATE TABLE water_profiles (
 
 ### 6. Brewprints
 
-Recipe templates with brewing parameters and target metrics.
+Coffee brewing experiments with complete test documentation and results.
 
 ```sql
 CREATE TABLE brewprints (
@@ -306,15 +307,25 @@ CREATE TABLE brewprints (
   bean_id uuid REFERENCES beans(id) ON DELETE SET NULL,
   grinder_id uuid REFERENCES grinders(id) ON DELETE SET NULL,
   brewer_id uuid REFERENCES brewers(id) ON DELETE SET NULL,
+  water_profile_id uuid REFERENCES water_profiles(id) ON DELETE SET NULL,
 
-  -- Core Parameters
+  -- Target Parameters (what you plan to do)
   parameters jsonb NOT NULL,
 
-  -- Target Metrics (what we're aiming for)
+  -- Target Metrics (what you're aiming for)
   target_metrics jsonb,
 
   -- Brewing Steps
   steps jsonb NOT NULL DEFAULT '[]'::jsonb,
+
+  -- Actual Brewing Results (what happened when you tested this)
+  actual_parameters jsonb,       -- What you actually used
+  actual_metrics jsonb,          -- What you measured (TDS, extraction, etc.)
+  rating integer CHECK (rating >= 1 AND rating <= 5),
+  tasting_notes text[],          -- ["fruity", "bright", "balanced"]
+  brewing_notes text,            -- "Perfect! This is the sweet spot."
+  brew_date timestamptz,         -- When you tested this experiment
+  status text DEFAULT 'experimenting' CHECK (status IN ('experimenting', 'final', 'archived')),
 
   -- Versioning (flexible tree structure)
   parent_id uuid REFERENCES brewprints(id) ON DELETE SET NULL,
@@ -326,30 +337,47 @@ CREATE TABLE brewprints (
 );
 ```
 
-**Parameters JSONB Structure:**
+**Core Concept**: Each brewprint represents ONE brewing experiment/test. Users create new brewprints for each iteration until they achieve the perfect recipe.
+
+**Workflow Example**:
+
+```
+Ethiopian V60 Test #1 → status: 'experimenting', rating: 2, notes: "Too weak"
+Ethiopian V60 Test #2 → status: 'experimenting', rating: 4, notes: "Better, but still acidic"
+Ethiopian V60 Test #3 → status: 'final', rating: 5, notes: "PERFECT! This is the one."
+```
+
+**Actual Parameters JSONB Structure:**
 
 ```typescript
 {
-  coffee_grams: number,
-  water_grams: number,
-  ratio: string,           // "1:16"
-  grind_setting?: number,
-  water_temp: number,      // celsius
-  total_time: number,      // seconds
-  bloom_time?: number      // seconds
+  coffee_grams: number,        // What you actually weighed
+  water_grams: number,         // What you actually poured
+  grind_setting?: number,      // Actual grinder setting used
+  water_temp: number,          // Actual water temperature
+  bloom_time?: number,         // Actual bloom duration
+  total_time?: number          // How long it actually took
 }
 ```
 
-**Target Metrics JSONB Structure:**
+**Actual Metrics JSONB Structure:**
 
 ```typescript
 {
-  target_tds?: number,          // % (e.g., 1.35)
-  target_extraction?: number,   // % (e.g., 20)
-  target_strength?: number,     // mg/ml (e.g., 11)
-  target_volume?: number        // ml of final brew
+  tds?: number,                    // Measured Total Dissolved Solids (%)
+  extraction_yield?: number,       // Calculated extraction rate (%)
+  brew_strength?: number,          // Measured strength (mg/ml)
+  refractometer_reading?: number,  // Direct refractometer value
+  final_volume?: number,           // ml of final brew
+  water_retained?: number          // grams retained in coffee grounds
 }
 ```
+
+**Status Field Values:**
+
+- `experimenting` (default): Still testing and iterating
+- `final`: Recipe perfected, ready to brew consistently
+- `archived`: Old experiments kept for reference
 
 **Steps JSONB Structure:**
 
@@ -368,91 +396,7 @@ CREATE TABLE brewprints (
 ];
 ```
 
-### 7. Brewing Sessions
-
-Completed brewing sessions with actual results and metrics.
-
-```sql
-CREATE TABLE brewing_sessions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  brewprint_id uuid REFERENCES brewprints(id) ON DELETE CASCADE NOT NULL,
-  water_profile_id uuid REFERENCES water_profiles(id) ON DELETE SET NULL,
-
-  -- Session Details (always completed)
-  start_time timestamptz NOT NULL,
-  end_time timestamptz NOT NULL,
-  actual_duration integer NOT NULL, -- seconds
-
-  -- Actual Parameters Used
-  actual_parameters jsonb NOT NULL,
-
-  -- Step Tracking
-  step_timings jsonb DEFAULT '[]'::jsonb,
-
-  -- Results & Evaluation
-  rating integer CHECK (rating >= 1 AND rating <= 5),
-  feedback jsonb,
-  notes text,
-
-  -- Advanced Brewing Metrics (actual results)
-  advanced_metrics jsonb,
-
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-```
-
-**Actual Parameters JSONB Structure:**
-
-```typescript
-{
-  coffee_grams: number,
-  water_grams: number,
-  grind_setting?: number,
-  water_temp: number,
-  bloom_time?: number
-}
-```
-
-**Feedback JSONB Structure:**
-
-```typescript
-{
-  extraction?: 'under' | 'good' | 'over',
-  strength?: 'weak' | 'good' | 'strong',
-  flavor?: 'sour' | 'balanced' | 'bitter'
-}
-```
-
-**Advanced Metrics JSONB Structure:**
-
-```typescript
-{
-  tds?: number,                    // Total Dissolved Solids (%)
-  extraction_yield?: number,       // Extraction rate (%)
-  brew_strength?: number,          // mg/ml
-  refractometer_reading?: number,
-  final_volume?: number,           // ml of final brew
-  water_retained?: number          // grams retained in grounds
-}
-```
-
-**Step Timings JSONB Structure:**
-
-```typescript
-[
-  {
-    step_id: string, // matches brewprint step id
-    start_time: number, // offset from session start (seconds)
-    end_time: number,
-    actual_water_amount: number,
-    notes: string,
-  },
-];
-```
-
-### 8. Folders
+### 7. Folders
 
 Organization system for brewprints collections.
 
@@ -471,7 +415,7 @@ CREATE TABLE folders (
 );
 ```
 
-### 9. Folder Brewprints (Junction Table)
+### 8. Folder Brewprints (Junction Table)
 
 Many-to-many relationship between folders and brewprints.
 
@@ -487,7 +431,7 @@ CREATE TABLE folder_brewprints (
 );
 ```
 
-### 10. Tags
+### 9. Tags
 
 Tagging system for content organization.
 
@@ -523,23 +467,23 @@ CREATE INDEX idx_beans_user_id ON beans(user_id);
 CREATE INDEX idx_grinders_user_id ON grinders(user_id);
 CREATE INDEX idx_brewers_user_id ON brewers(user_id);
 CREATE INDEX idx_brewprints_user_id ON brewprints(user_id);
-CREATE INDEX idx_brewing_sessions_user_id ON brewing_sessions(user_id);
 CREATE INDEX idx_water_profiles_user_id ON water_profiles(user_id);
 CREATE INDEX idx_folders_user_id ON folders(user_id);
 CREATE INDEX idx_tags_user_id ON tags(user_id);
 
 -- Foreign key relationships
-CREATE INDEX idx_brewing_sessions_brewprint_id ON brewing_sessions(brewprint_id);
-CREATE INDEX idx_brewing_sessions_water_profile_id ON brewing_sessions(water_profile_id);
 CREATE INDEX idx_folder_brewprints_folder_id ON folder_brewprints(folder_id);
 CREATE INDEX idx_folder_brewprints_brewprint_id ON folder_brewprints(brewprint_id);
 CREATE INDEX idx_brewprints_parent_id ON brewprints(parent_id);
+CREATE INDEX idx_brewprints_water_profile_id ON brewprints(water_profile_id);
 
 -- Performance indexes
 CREATE INDEX idx_beans_roast_date ON beans(user_id, roast_date);
 CREATE INDEX idx_beans_freshness ON beans(user_id, freshness_status);
-CREATE INDEX idx_brewing_sessions_start_time ON brewing_sessions(user_id, start_time DESC);
 CREATE INDEX idx_brewprints_method ON brewprints(user_id, method);
+CREATE INDEX idx_brewprints_status ON brewprints(user_id, status);
+CREATE INDEX idx_brewprints_rating ON brewprints(user_id, rating DESC);
+CREATE INDEX idx_brewprints_brew_date ON brewprints(user_id, brew_date DESC);
 ```
 
 ---
@@ -556,7 +500,6 @@ ALTER TABLE grinders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brewers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE water_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brewprints ENABLE ROW LEVEL SECURITY;
-ALTER TABLE brewing_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE folder_brewprints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
@@ -639,6 +582,74 @@ CREATE TRIGGER calculate_bean_freshness_trigger
 5. **File Storage**: Use Supabase Storage for avatars and photos
 6. **Type Safety**: Generate TypeScript types from Supabase schema
 
+### Coffee Experimentation Workflow
+
+**Core Pattern**: Each brewprint represents ONE brewing experiment
+
+```typescript
+// Creating a new experiment
+const createExperiment = async (baseBrewprint, adjustments) => {
+  const newBrewprint = {
+    ...baseBrewprint,
+    parent_id: baseBrewprint.id,
+    version: getNextVersion(baseBrewprint.version),
+    parameters: { ...baseBrewprint.parameters, ...adjustments },
+    status: "experimenting",
+    created_at: new Date(),
+  };
+
+  return await supabase.from("brewprints").insert(newBrewprint);
+};
+
+// After brewing and tasting
+const recordResults = async (brewprintId, results) => {
+  return await supabase
+    .from("brewprints")
+    .update({
+      actual_parameters: results.actualParams,
+      actual_metrics: results.metrics,
+      rating: results.rating,
+      tasting_notes: results.tastingNotes,
+      brewing_notes: results.notes,
+      brew_date: new Date(),
+      status: results.rating >= 4 ? "final" : "experimenting",
+    })
+    .eq("id", brewprintId);
+};
+```
+
+### Query Patterns
+
+**Get user's final recipes:**
+
+```sql
+SELECT * FROM brewprints
+WHERE user_id = auth.uid() AND status = 'final'
+ORDER BY rating DESC, brew_date DESC;
+```
+
+**Get experimentation chain:**
+
+```sql
+WITH RECURSIVE experiment_chain AS (
+  SELECT * FROM brewprints WHERE id = $parent_id
+  UNION ALL
+  SELECT b.* FROM brewprints b
+  JOIN experiment_chain ec ON b.parent_id = ec.id
+)
+SELECT * FROM experiment_chain ORDER BY created_at;
+```
+
+**Find successful experiments by method:**
+
+```sql
+SELECT method, COUNT(*) as experiments, AVG(rating) as avg_rating
+FROM brewprints
+WHERE user_id = auth.uid() AND rating IS NOT NULL
+GROUP BY method
+ORDER BY avg_rating DESC;
+```
+
 ### Default Data Creation
 
 When a user signs up, automatically create:
@@ -649,9 +660,10 @@ When a user signs up, automatically create:
 
 ### Data Relationships
 
-- Brewprints can exist without specific equipment (generic templates)
-- Brewing sessions always reference a specific brewprint
+- Brewprints can exist without specific equipment (generic experiments)
+- Each brewprint represents a complete brewing test with results
 - Folders organize brewprints only (beans/grinders stay in Library)
-- Recipe versioning allows flexible parent-child relationships
+- Recipe versioning allows flexible parent-child experimentation chains
+- Status field tracks experiment lifecycle: experimenting → final → archived
 
-This schema supports all core Brewprints functionality while maintaining data integrity, performance, and extensibility for future features.
+This schema supports the coffee experimentation workflow where users iterate through brewing tests, document results, and build a knowledge base of perfected recipes.

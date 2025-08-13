@@ -1,10 +1,10 @@
 -- =====================================================
 -- Brewprints Complete Database Setup for Supabase
+-- Coffee Experimentation App - Final Schema
 -- =====================================================
 
 -- Drop existing tables if they exist (careful in production!)
 DROP TABLE IF EXISTS folder_brewprints CASCADE;
-DROP TABLE IF EXISTS brewing_sessions CASCADE;
 DROP TABLE IF EXISTS brewprints CASCADE;
 DROP TABLE IF EXISTS water_profiles CASCADE;
 DROP TABLE IF EXISTS tags CASCADE;
@@ -179,7 +179,7 @@ updated_at timestamptz DEFAULT now()
 );
 
 -- =====================================================
--- 6. BREWPRINTS TABLE
+-- 6. BREWPRINTS TABLE (Core Experimentation Entity)
 -- =====================================================
 CREATE TABLE brewprints (
 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -198,15 +198,25 @@ difficulty integer NOT NULL CHECK (difficulty >= 1 AND difficulty <= 3),
 bean_id uuid REFERENCES beans(id) ON DELETE SET NULL,
 grinder_id uuid REFERENCES grinders(id) ON DELETE SET NULL,
 brewer_id uuid REFERENCES brewers(id) ON DELETE SET NULL,
+water_profile_id uuid REFERENCES water_profiles(id) ON DELETE SET NULL,
 
--- Core Parameters
+-- Target Parameters (what you plan to do)
 parameters jsonb NOT NULL,
 
--- Target Metrics
+-- Target Metrics (what you're aiming for)
 target_metrics jsonb,
 
 -- Brewing Steps
 steps jsonb NOT NULL DEFAULT '[]'::jsonb,
+
+-- Actual Brewing Results (what happened when you tested this)
+actual_parameters jsonb,
+actual_metrics jsonb,
+rating integer CHECK (rating >= 1 AND rating <= 5),
+tasting_notes text[] DEFAULT '{}',
+brewing_notes text,
+brew_date timestamptz,
+status text DEFAULT 'experimenting' CHECK (status IN ('experimenting', 'final', 'archived')),
 
 -- Versioning
 parent_id uuid REFERENCES brewprints(id) ON DELETE SET NULL,
@@ -218,39 +228,7 @@ updated_at timestamptz DEFAULT now()
 );
 
 -- =====================================================
--- 7. BREWING SESSIONS TABLE
--- =====================================================
-CREATE TABLE brewing_sessions (
-id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-brewprint_id uuid REFERENCES brewprints(id) ON DELETE CASCADE NOT NULL,
-water_profile_id uuid REFERENCES water_profiles(id) ON DELETE SET NULL,
-
--- Session Details
-start_time timestamptz NOT NULL,
-end_time timestamptz NOT NULL,
-actual_duration integer NOT NULL,
-
--- Actual Parameters Used
-actual_parameters jsonb NOT NULL,
-
--- Step Tracking
-step_timings jsonb DEFAULT '[]'::jsonb,
-
--- Results & Evaluation
-rating integer CHECK (rating >= 1 AND rating <= 5),
-feedback jsonb,
-notes text,
-
--- Advanced Brewing Metrics
-advanced_metrics jsonb,
-
-created_at timestamptz DEFAULT now(),
-updated_at timestamptz DEFAULT now()
-);
-
--- =====================================================
--- 8. FOLDERS TABLE
+-- 7. FOLDERS TABLE
 -- =====================================================
 CREATE TABLE folders (
 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -266,7 +244,7 @@ updated_at timestamptz DEFAULT now()
 );
 
 -- =====================================================
--- 9. FOLDER BREWPRINTS JUNCTION TABLE
+-- 8. FOLDER BREWPRINTS JUNCTION TABLE
 -- =====================================================
 CREATE TABLE folder_brewprints (
 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -279,7 +257,7 @@ UNIQUE(folder_id, brewprint_id)
 );
 
 -- =====================================================
--- 10. TAGS TABLE
+-- 9. TAGS TABLE
 -- =====================================================
 CREATE TABLE tags (
 id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -308,23 +286,23 @@ CREATE INDEX idx_beans_user_id ON beans(user_id);
 CREATE INDEX idx_grinders_user_id ON grinders(user_id);
 CREATE INDEX idx_brewers_user_id ON brewers(user_id);
 CREATE INDEX idx_brewprints_user_id ON brewprints(user_id);
-CREATE INDEX idx_brewing_sessions_user_id ON brewing_sessions(user_id);
 CREATE INDEX idx_water_profiles_user_id ON water_profiles(user_id);
 CREATE INDEX idx_folders_user_id ON folders(user_id);
 CREATE INDEX idx_tags_user_id ON tags(user_id);
 
 -- Foreign key relationships
-CREATE INDEX idx_brewing_sessions_brewprint_id ON brewing_sessions(brewprint_id);
-CREATE INDEX idx_brewing_sessions_water_profile_id ON brewing_sessions(water_profile_id);
 CREATE INDEX idx_folder_brewprints_folder_id ON folder_brewprints(folder_id);
 CREATE INDEX idx_folder_brewprints_brewprint_id ON folder_brewprints(brewprint_id);
 CREATE INDEX idx_brewprints_parent_id ON brewprints(parent_id);
+CREATE INDEX idx_brewprints_water_profile_id ON brewprints(water_profile_id);
 
 -- Performance indexes
 CREATE INDEX idx_beans_roast_date ON beans(user_id, roast_date);
 CREATE INDEX idx_beans_freshness ON beans(user_id, freshness_status);
-CREATE INDEX idx_brewing_sessions_start_time ON brewing_sessions(user_id, start_time DESC);
 CREATE INDEX idx_brewprints_method ON brewprints(user_id, method);
+CREATE INDEX idx_brewprints_status ON brewprints(user_id, status);
+CREATE INDEX idx_brewprints_rating ON brewprints(user_id, rating DESC);
+CREATE INDEX idx_brewprints_brew_date ON brewprints(user_id, brew_date DESC);
 
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
@@ -364,10 +342,6 @@ CREATE TRIGGER update_water_profiles_updated_at
 
 CREATE TRIGGER update_brewprints_updated_at
     BEFORE UPDATE ON brewprints
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_brewing_sessions_updated_at
-    BEFORE UPDATE ON brewing_sessions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_folders_updated_at
@@ -429,7 +403,6 @@ ALTER TABLE grinders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brewers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE water_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brewprints ENABLE ROW LEVEL SECURITY;
-ALTER TABLE brewing_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE folder_brewprints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
@@ -458,10 +431,6 @@ CREATE POLICY "Users can manage their own water profiles" ON water_profiles
 
 -- Brewprints
 CREATE POLICY "Users can manage their own brewprints" ON brewprints
-  FOR ALL USING (auth.uid() = user_id);
-
--- Brewing Sessions
-CREATE POLICY "Users can manage their own brewing sessions" ON brewing_sessions
   FOR ALL USING (auth.uid() = user_id);
 
 -- Folders
@@ -496,7 +465,7 @@ BEGIN
 INSERT INTO profiles (id, display_name)
 VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'display_name', 'Coffee Enthusiast'));
 
--- Create default "All" folder
+-- Create default "ALL" folder
 INSERT INTO folders (user_id, name, description)
 VALUES (NEW.id, 'All', 'All your brewprints');
 
@@ -507,7 +476,7 @@ $$
 language 'plpgsql' SECURITY DEFINER;
 
 -- Trigger to create defaults when user signs up
-CREATE TRIGGER create_user_defaults_trigger
+DROP TRIGGER IF EXISTS create_user_defaults_trigger ON auth.users;
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION create_user_defaults();
 
@@ -526,6 +495,21 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 
 -- =====================================================
+-- ADD HELPFUL COMMENTS
+-- =====================================================
+
+COMMENT ON TABLE brewprints IS 'Core table: Each record represents one brewing experiment/test with complete documentation';
+COMMENT ON COLUMN brewprints.status IS 'experimenting (default) → final (perfected recipe) → archived';
+COMMENT ON COLUMN brewprints.rating IS 'Rating (1-5 stars) from when this brewprint was tested';
+COMMENT ON COLUMN brewprints.actual_parameters IS 'What was actually used during brewing (vs target parameters)';
+COMMENT ON COLUMN brewprints.actual_metrics IS 'Measured results: TDS, extraction yield, etc.';
+COMMENT ON COLUMN brewprints.brew_date IS 'When this specific experiment was conducted';
+COMMENT ON COLUMN brewprints.parent_id IS 'Links to previous version for experimentation chains';
+
+COMMENT ON COLUMN beans.freshness_level IS 'Auto-calculated 1-5 based on roast_date';
+COMMENT ON COLUMN beans.freshness_status IS 'Auto-calculated: too-fresh → peak → good → declining → stale';
+
+-- =====================================================
 -- SUCCESS MESSAGE
 -- =====================================================
 
@@ -533,8 +517,26 @@ DO
 $$
 
 BEGIN
-RAISE NOTICE 'Brewprints database setup completed successfully!';
-RAISE NOTICE 'Created tables: profiles, beans, grinders, brewers, water_profiles, brewprints, brewing_sessions, folders, folder_brewprints, tags';
-RAISE NOTICE 'Applied RLS policies, triggers, and indexes';
-RAISE NOTICE 'Ready for Brewprints app development!';
+RAISE NOTICE 'Brewprints Coffee Experimentation Database Setup Complete!';
+RAISE NOTICE '';
+RAISE NOTICE 'Created Tables:';
+RAISE NOTICE ' - profiles (user settings)';
+RAISE NOTICE ' - beans (coffee inventory with auto-freshness)';
+RAISE NOTICE ' - grinders (equipment with settings)';
+RAISE NOTICE ' - brewers (brewing equipment)';
+RAISE NOTICE ' - water_profiles (water chemistry)';
+RAISE NOTICE ' - brewprints (core: brewing experiments)';
+RAISE NOTICE ' - folders (organization)';
+RAISE NOTICE ' - folder_brewprints (junction table)';
+RAISE NOTICE ' - tags (content tagging)';
+RAISE NOTICE '';
+RAISE NOTICE 'Features Applied:';
+RAISE NOTICE ' ✓ Row Level Security (RLS) on all tables';
+RAISE NOTICE ' ✓ Auto-updating timestamps';
+RAISE NOTICE ' ✓ Bean freshness auto-calculation';
+RAISE NOTICE ' ✓ Performance indexes';
+RAISE NOTICE ' ✓ User defaults creation on signup';
+RAISE NOTICE '';
+RAISE NOTICE 'Workflow: experimenting → final → archived';
+RAISE NOTICE 'Ready for coffee experimentation! ☕🧪';
 END $$;

@@ -25,7 +25,7 @@ Brewprint is a Coffee Recipe Tracker - a minimalist React Native app for coffee 
 
 Complete PostgreSQL database schema designed for Supabase with Row Level Security (RLS). See `@docs/database-schema.md` for full documentation including:
 
-- **10 Core Tables**: profiles, beans, grinders, brewers, water_profiles, brewprints, brewing_sessions, folders, folder_brewprints, tags
+- **9 Core Tables**: profiles, beans, grinders, brewers, water_profiles, brewprints, folders, folder_brewprints, tags
 - **User Data Isolation**: All data scoped via `user_id` foreign keys with RLS policies
 - **JSONB Flexibility**: Complex brewing parameters, steps, and metrics stored as JSONB
 - **Automated Features**: Triggers for timestamps and bean freshness calculations
