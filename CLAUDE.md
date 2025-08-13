@@ -31,6 +31,35 @@ Complete PostgreSQL database schema designed for Supabase with Row Level Securit
 - **Automated Features**: Triggers for timestamps and bean freshness calculations
 - **Performance Optimized**: Comprehensive indexes for user queries and relationships
 
+### Database Services
+
+**✅ Beans Service Complete** (`/lib/services/beans.ts`):
+- **CRUD Operations**: Create, read, update, delete beans with full TypeScript support
+- **Inventory Management**: Track bean usage and remaining quantities
+- **Freshness Tracking**: Filter by freshness status (peak, good, declining, stale)
+- **Search & Filtering**: Search by name/origin, filter by rating, find low inventory
+- **Error Handling**: Consistent ServiceResponse pattern with success/error states
+- **RLS Integration**: Automatic user-scoped queries with Supabase Row Level Security
+
+```typescript
+import { BeansService } from '@/lib/services';
+
+// Get all user's beans
+const { data: beans, error, success } = await BeansService.getAllBeans();
+
+// Create new bean
+const newBean = await BeansService.createBean({
+  name: 'Ethiopian Yirgacheffe',
+  origin: 'Ethiopia',
+  process: 'washed',
+  roast_level: 'light',
+  // ... other fields
+});
+
+// Update inventory after brewing
+await BeansService.updateInventory(beanId, remainingGrams);
+```
+
 ## Architecture
 
 ### Silo-Based Organization
@@ -252,8 +281,10 @@ import { useThemeColor } from '@/hooks/useThemeColor';
   - Use semantic colors for status: `success`, `warning`, `error`, `info`
   - Use themed components that automatically handle light/dark mode switching
 - **Authentication**: Always use `useAuth()` hook for authentication state, never access Supabase client directly in components
+- **Database Operations**: Always use service classes (`BeansService`, etc.) instead of direct Supabase queries in components
 - **Error Handling**: Centralize toast notifications in parent components, avoid duplicate error messages
 - **Loading States**: Use ThemedButton's built-in loading prop for consistent UX
+- **Service Pattern**: Use consistent ServiceResponse<T> pattern for all database operations with success/error states
 - **Component Styling**: Follow minimalist design principles with consistent 12px padding and border radius
 - **Information Layout**: Prefer horizontal label-value arrangements over vertical stacking for better space efficiency
 - **ThemedView Background**: Use `noBackground` prop when ThemedView is used purely for layout without visual styling
@@ -277,6 +308,9 @@ Currently in **Bean Detail Screen Complete Phase**:
 - ✅ **ThemedBadge with semantic color variants**
 - ✅ **Centralized toast notifications (no duplicates)**
 - ✅ **ThemedView with noBackground prop for layout flexibility**
+- ✅ **Beans database service with complete CRUD operations**
+- ✅ **ServiceResponse pattern for consistent error handling**
+- ✅ **TypeScript types matching database schema**
 - Need to implement silo-based architecture using existing components
 - Core type definitions required for coffee data models
 - Ready to build remaining coffee-specific features (grinder profiles, brewing methods, etc.)

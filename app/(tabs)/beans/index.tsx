@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   listContent: {
-    padding: 10,
-    paddingBottom: 32,
+    // padding: 10,
+    paddingBottom: 100,
   },
   headerContainer: {
     marginBottom: 12,

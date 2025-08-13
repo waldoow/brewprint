@@ -1,9 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { BeansService, type BeanInput } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import { toast } from "sonner-native";
 import { z } from "zod";
 
 // UI Components
@@ -150,7 +151,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
 
   const onSubmit = async (data: BeanFormData) => {
     if (!user?.id) {
-      Alert.alert("Error", "User not authenticated");
+      toast.error("User not authenticated");
       return;
     }
 
@@ -158,15 +159,14 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
 
     try {
       // Convert form data to database format
-      const beanData = {
-        user_id: user.id,
+      const beanData: BeanInput = {
         name: data.name,
         origin: data.origin,
-        farm: data.farm || null,
-        region: data.region || null,
-        altitude: data.altitude ? parseInt(data.altitude) : null,
+        farm: data.farm || undefined,
+        region: data.region || undefined,
+        altitude: data.altitude ? parseInt(data.altitude) : undefined,
         process: data.process,
-        variety: data.variety || null,
+        variety: data.variety || undefined,
         purchase_date: data.purchase_date,
         roast_date: data.roast_date,
         supplier: data.supplier,
@@ -176,26 +176,26 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         roast_level: data.roast_level,
         tasting_notes: data.tasting_notes
           ? formatTastingNotes(data.tasting_notes)
-          : [],
-        official_description: data.official_description || null,
-        my_notes: data.my_notes || null,
-        rating: data.rating ? parseInt(data.rating) : null,
+          : undefined,
+        official_description: data.official_description || undefined,
+        my_notes: data.my_notes || undefined,
+        rating: data.rating ? parseInt(data.rating) : undefined,
       };
 
-      const { error } = await supabase.from("beans").insert(beanData);
+      const { data: newBean, error, success } = await BeansService.createBean(beanData);
 
-      if (error) {
-        console.error("Error inserting bean:", error);
-        Alert.alert("Error", "Failed to add bean. Please try again.");
+      if (!success || error) {
+        console.error("Error creating bean:", error);
+        toast.error(error || "Failed to add bean. Please try again.");
         return;
       }
 
-      Alert.alert("Success", "Bean added successfully!");
+      toast.success("Bean added successfully!");
       reset();
       onSuccess?.();
     } catch (error) {
       console.error("Error adding bean:", error);
-      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
