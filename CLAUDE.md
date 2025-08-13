@@ -66,7 +66,14 @@ The current enhanced template structure will be reorganized into the silo-based 
 ## Design System
 
 ### Visual Identity
-- **Coffee-inspired palette**: Warm caramels, rich browns, cream tones
+- **Coffee-inspired palette**: 5-level roast progression from light to dark
+  - `coffeeLight` (#d4a574) - Light roast visualization
+  - `coffeeLightMedium` (#b8935f) - Light-medium roast
+  - `coffeeMedium` (#8b6d47) - Medium roast
+  - `coffeeMediumDark` (#6b4e37) - Medium-dark roast
+  - `coffeeDark` (#4a3426) - Dark roast
+- **Semantic colors**: Success, warning, error, info for status indicators
+- **Card system**: Translucent backgrounds with secondary variants
 - **Typography**: Manrope (UI), Playfair Display (headings)
 - **Current font**: SpaceMono (will be replaced)
 - **Minimalist interface**: Clean, distraction-free experience
@@ -79,6 +86,9 @@ The current enhanced template structure will be reorganized into the silo-based 
 - **Guided workflows**: Step-by-step processes for complex tasks
 - **Form-first design**: React Hook Form integration for data collection
 - **Haptic feedback**: Enhanced tactile interactions for brewing workflows
+- **Minimalist Design**: Clean, sleek layouts with consistent spacing and typography
+- **Compact Cards**: 12px padding, 12px border radius for uniform card styling
+- **Horizontal Information**: Label-value pairs displayed side by side for better space efficiency
 
 ## Component Library
 
@@ -88,9 +98,10 @@ The component library is organized into logical folders for better maintainabili
 **Core Themed Components**
 - **ThemedView** - Container with automatic theme switching
 - **ThemedText** - Typography with theme support
+- **ThemedScrollView** - Scrollable container with theme-aware styling
 
 **Form Components (React Hook Form Integration)**
-- **ThemedInput** - Text input with validation support
+- **ThemedInput** - Text input with validation support and theme-aware styling
 - **ThemedTextArea** - Multi-line text input for notes and descriptions
 - **ThemedSelect** - Dropdown/picker for equipment and bean selections
 - **ThemedCheckBox** - Checkbox with theme support for preferences
@@ -103,8 +114,11 @@ The component library is organized into logical folders for better maintainabili
   - 4 sizes: default, sm, lg, icon
   - Loading state shows spinner + text (not just spinner)
   - Proper color handling for all variants
-- **ThemedTabs** - Tab navigation for content organization
-- **ThemedBadge** - Status indicators and tags
+- **ThemedTabs** - Tab navigation for content organization with theme support
+- **ThemedBadge** - Status indicators and semantic color badges
+  - Supports 6 variants: default, secondary, destructive, success, warning, outline
+  - 3 sizes: default, sm, lg
+  - Automatic text color optimization for readability
 - **ThemedSeparator** - Visual dividers and section breaks
 
 **Platform Components**
@@ -112,6 +126,18 @@ The component library is organized into logical folders for better maintainabili
 - **TabBarBackground** - Platform-specific tab bar styling (iOS blur effects)
 - **IconSymbol** - Platform-specific icon rendering
 - **Header** - Generic header component with navigation and custom content support
+
+### `/components/beans/` - Coffee Bean Components
+- **StatusCards** - Single horizontal row with roast level (dot + text), freshness badge, and days since roast
+- **DescriptionCard** - Compact card with integrated title and description text, 12px padding
+- **InfoSection** - Horizontal label-value pairs with icons, compact 12px padding layout
+- **InventoryCard** - Compact inventory display with horizontal label-value and borderless progress bar
+- **RatingSection** - Coffee rating with custom circle design (outer ring + inner circle, no color coding)
+- **TastingNotes** - Compact card with small badges for taste descriptors, 12px padding
+- **bean-card** - Individual bean card component for lists with minimalist design
+
+### `/components/screens/` - Screen-Specific Components
+- **home/beans-section.tsx** - Home screen beans section layout
 
 ### `/components/` - Generic Utility Components
 - **ParallaxScrollView** - Enhanced scrolling experience
@@ -125,13 +151,24 @@ The component library is organized into logical folders for better maintainabili
 ### Import Patterns
 ```typescript
 // UI components
-import { ThemedButton, ThemedInput } from '@/components/ui/ThemedButton';
+import { ThemedButton } from '@/components/ui/ThemedButton';
+import { ThemedInput } from '@/components/ui/ThemedInput';
+import { ThemedBadge } from '@/components/ui/ThemedBadge';
 import { ThemedText, ThemedView } from '@/components/ui/ThemedText';
+import { ThemedScrollView } from '@/components/ui/ThemedScrollView';
 import { Header } from '@/components/ui/Header';
+
+// Coffee-specific components
+import { StatusCards } from '@/components/beans/StatusCards';
+import { bean-card } from '@/components/beans/bean-card';
 
 // Utility components
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Collapsible } from '@/components/Collapsible';
+
+// Color system with coffee palette
+import { Colors } from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 ```
 
 ## Authentication System
@@ -190,25 +227,39 @@ import { Collapsible } from '@/components/Collapsible';
 - **Functional Components**: No class components
 - **Separation of Concerns**: UI and business logic separated
 - **Naming Conventions**: camelCase for files, PascalCase for components
-- **Theme Colors**: Always use `@constants/Colors.ts` with `useColorScheme()` hook for theme-aware colors. Never hardcode color values.
+- **Theme Colors**: Always use `@constants/Colors.ts` with `useThemeColor()` hook for theme-aware colors. Never hardcode color values.
+  - Use coffee color palette for roast-level visualization: `coffeeLight`, `coffeeLightMedium`, `coffeeMedium`, `coffeeMediumDark`, `coffeeDark`
+  - Use semantic colors for status: `success`, `warning`, `error`, `info`
+  - Use themed components that automatically handle light/dark mode switching
 - **Authentication**: Always use `useAuth()` hook for authentication state, never access Supabase client directly in components
 - **Error Handling**: Centralize toast notifications in parent components, avoid duplicate error messages
 - **Loading States**: Use ThemedButton's built-in loading prop for consistent UX
+- **Component Styling**: Follow minimalist design principles with consistent 12px padding and border radius
+- **Information Layout**: Prefer horizontal label-value arrangements over vertical stacking for better space efficiency
+- **ThemedView Background**: Use `noBackground` prop when ThemedView is used purely for layout without visual styling
+- **Rating Design**: Use circle-based rating system with outer ring and inner circle, avoid color coding for neutrality
+- **Progress Bars**: Use borderless design with cardBackgroundSecondary for better header integration
+- **Header Enhancement**: Include essential information (status, inventory) in headers to reduce main content redundancy
 
 ### Project Status
-Currently in **Authentication Complete Phase**:
-- ✅ Complete themed component library implemented
+Currently in **Bean Detail Screen Complete Phase**:
+- ✅ **Complete themed component library with coffee-specific styling**
+- ✅ **Coffee color palette integrated (5-level roast progression)**
+- ✅ **Coffee bean components fully implemented with minimalist design**
+- ✅ **Bean detail screen with enhanced header layout (status + inventory)**
+- ✅ **All bean components updated to 12px padding standard**
 - ✅ React Navigation v7 integrated with Expo Router
 - ✅ Form handling with React Hook Form ready
 - ✅ Enhanced UX features (haptics, animations, blur effects) integrated
 - ✅ **Supabase authentication system fully implemented**
 - ✅ **Protected routes and auth context management**
 - ✅ **Enhanced ThemedButton with proper loading states**
+- ✅ **ThemedBadge with semantic color variants**
 - ✅ **Centralized toast notifications (no duplicates)**
+- ✅ **ThemedView with noBackground prop for layout flexibility**
 - Need to implement silo-based architecture using existing components
-- Core type definitions required
-- Theme system needs coffee-inspired color palette
-- Ready to build coffee-specific features
+- Core type definitions required for coffee data models
+- Ready to build remaining coffee-specific features (grinder profiles, brewing methods, etc.)
 
 ### Technology Stack
 

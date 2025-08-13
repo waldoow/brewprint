@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   DarkTheme,
@@ -11,7 +12,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
-import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -30,10 +30,11 @@ export default function RootLayout() {
         <AuthProvider>
           <ThemeProvider
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            key={colorScheme}
           >
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(auth)" />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

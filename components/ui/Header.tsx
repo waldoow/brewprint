@@ -37,11 +37,7 @@ export function Header({
 
   return (
     <ThemedView
-      style={[
-        styles.container,
-        { paddingTop: insets.top + 20, paddingBottom: insets.bottom },
-        style,
-      ]}
+      style={[styles.container, { paddingTop: insets.top + 20 }, style]}
     >
       {/* Back Button Section */}
       {showBackButton && (
