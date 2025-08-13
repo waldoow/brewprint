@@ -4,7 +4,6 @@ import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import React from "react";
 import { StyleSheet } from "react-native";
-import { ThemedSeparator } from "../ui/ThemedSeparator";
 
 interface InventoryCardProps {
   remainingGrams: number;
@@ -30,7 +29,7 @@ export function InventoryCard({
   };
 
   return (
-    <ThemedView noBackground style={styles.inventoryCard}>
+    <ThemedView noBackground>
       <ThemedView noBackground style={styles.inventoryHeader}>
         <ThemedView noBackground style={styles.inventoryInfo}>
           <ThemedText style={styles.inventoryLabel}>Inventaire</ThemedText>
@@ -39,17 +38,14 @@ export function InventoryCard({
           </ThemedText>
         </ThemedView>
         <ThemedText
-          style={[
-            styles.percentageText,
-            { color: getProgressColor() },
-          ]}
+          style={[styles.percentageText, { color: getProgressColor() }]}
         >
           {Math.round(percentageRemaining)}%
         </ThemedText>
       </ThemedView>
 
       <ThemedView noBackground style={styles.progressContainer}>
-        <ThemedView style={styles.progressBar}>
+        <ThemedView noBackground style={styles.progressBar}>
           <ThemedView
             style={[
               styles.progressFill,
@@ -103,10 +99,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   progressBar: {
-    backgroundColor: "rgba(128, 128, 128, 0.2)",
-    borderWidth: 1,
+    backgroundColor: Colors.dark.cardBackgroundSecondary,
     borderRadius: 12,
-    borderColor: Colors.dark.background,
     padding: 2,
   },
   progressFill: {

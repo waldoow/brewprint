@@ -61,18 +61,34 @@ export default function BeanDetailScreen() {
     <>
       <Header
         title={bean.name}
-        subtitle={bean.supplier || "Sans fournisseur"}
+        subtitle={`${bean.origin} • ${bean.supplier || "Sans fournisseur"}`}
         onBackPress={() => router.back()}
         backButtonTitle="Grains"
         customContent={
-          <ThemedView style={styles.headerActions}>
-            <ThemedButton
-              title="Modifier"
-              variant="outline"
-              size="sm"
-              onPress={() => {}}
-            />
-            <ThemedButton title="Nouveau Brew" onPress={() => {}} />
+          <ThemedView noBackground style={styles.headerContent}>
+            {/* Bean Info */}
+            <ThemedView noBackground style={styles.headerInfo}>
+              <StatusCards
+                roastLevel={bean.roast_level}
+                freshnessStatus={bean.freshness_status}
+                roastDate={bean.roast_date}
+              />
+              <InventoryCard
+                remainingGrams={bean.remaining_grams}
+                totalGrams={bean.total_grams}
+              />
+            </ThemedView>
+
+            {/* Action Buttons on Right */}
+            <ThemedView noBackground style={styles.headerActions}>
+              <ThemedButton
+                title="Modifier"
+                variant="outline"
+                size="sm"
+                onPress={() => {}}
+              />
+              <ThemedButton title="Nouveau Brew" size="sm" onPress={() => {}} />
+            </ThemedView>
           </ThemedView>
         }
       />
@@ -83,19 +99,6 @@ export default function BeanDetailScreen() {
         style={{ flex: 1 }}
         contentInsetAdjustmentBehavior="automatic"
       >
-        {/* Status Cards */}
-        <StatusCards
-          roastLevel={bean.roast_level}
-          freshnessStatus={bean.freshness_status}
-          roastDate={bean.roast_date}
-        />
-
-        {/* Inventory Section */}
-        <InventoryCard
-          remainingGrams={bean.remaining_grams}
-          totalGrams={bean.total_grams}
-        />
-
         {/* Origin Information */}
         <InfoSection
           title="Origine"
@@ -170,34 +173,6 @@ export default function BeanDetailScreen() {
         {bean.my_notes && (
           <DescriptionCard title="Mes notes" content={bean.my_notes} />
         )}
-
-        {/* Action Buttons */}
-        <ThemedView style={styles.actionsSection}>
-          <ThemedButton
-            title="Créer un Brew"
-            size="lg"
-            onPress={() => {}}
-            style={styles.primaryAction}
-          />
-          <ThemedView style={styles.secondaryActions}>
-            <ThemedButton
-              title="Modifier"
-              variant="outline"
-              size="default"
-              onPress={() => {}}
-              style={styles.secondaryAction}
-            />
-            <ThemedButton
-              title="Dupliquer"
-              variant="outline"
-              size="default"
-              onPress={() => {}}
-              style={styles.secondaryAction}
-            />
-          </ThemedView>
-        </ThemedView>
-
-        {/* Bottom spacing */}
       </ThemedScrollView>
     </>
   );
@@ -223,9 +198,18 @@ const styles = StyleSheet.create({
   notFoundButton: {
     minWidth: 200,
   },
+  headerContent: {
+    gap: 18,
+  },
+  headerInfo: {
+    marginHorizontal: -4,
+    gap: 20,
+  },
   headerActions: {
     flexDirection: "row",
     gap: 12,
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   actionsSection: {
     gap: 16,
