@@ -93,20 +93,21 @@ export default function BeansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 100,
   },
   listContent: {
-    padding: 20,
+    padding: 10,
     paddingBottom: 32,
   },
   headerContainer: {
     marginBottom: 12,
-    paddingTop: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
     letterSpacing: -0.5,
     marginBottom: 4,
+    paddingTop: 24,
   },
   subtitle: {
     fontSize: 14,
@@ -114,11 +115,11 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: "100%",
+    borderRadius: 12,
   },
   cardOverride: {
     width: "100%",
     marginHorizontal: 0,
-    borderRadius: 12,
   },
   separator: {
     height: 20,
