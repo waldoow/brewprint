@@ -10,8 +10,11 @@ import { Plus } from "lucide-react-native";
 
 export function HomeBeansSection() {
   const handleBeanPress = (bean: (typeof MOCK_BEANS)[0]) => {
-    // Navigation vers le détail du grain
-    router.push(`/(tabs)/beans/${bean.id}`);
+    // Navigation vers le détail du grain - direct route
+    router.push({
+      pathname: "/(tabs)/bean-detail",
+      params: { id: bean.id }
+    });
   };
 
   return (
@@ -19,7 +22,7 @@ export function HomeBeansSection() {
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <ThemedText style={styles.sectionTitle}>Mes Grains</ThemedText>
-        <ThemedText style={styles.seeAll} onPress={() => router.push("/beans")}>
+        <ThemedText style={styles.seeAll} onPress={() => router.push("/(tabs)/beans")}>
           Voir tout →
         </ThemedText>
       </View>

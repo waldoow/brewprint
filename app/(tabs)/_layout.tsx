@@ -35,7 +35,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        animation: "shift",
+        animation: Platform.OS === "ios" ? "shift" : "slide_from_right",
         tabBarStyle: Platform.select({
           ios: {
             // Use a transparent background on iOS to show the blur effect
@@ -83,6 +83,12 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="beans"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="bean-detail"
         options={{
           href: null, // This hides it from the tab bar
         }}
