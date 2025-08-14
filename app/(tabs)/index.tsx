@@ -1,12 +1,14 @@
 import { HomeBeansSection } from "@/components/screens/home/beans-section";
+import { HomeGrinderSection } from "@/components/screens/home/grinder-section";
 import { Header } from "@/components/ui/Header";
 import { ThemedButton } from "@/components/ui/ThemedButton";
-import { BeanForm } from "@/forms";
+import { BeanForm, GrinderForm } from "@/forms";
 import React from "react";
 import { ScrollView, StyleSheet, Modal } from "react-native";
 
 export default function HomeScreen() {
   const [showBeanForm, setShowBeanForm] = React.useState(false);
+  const [showGrinderForm, setShowGrinderForm] = React.useState(false);
 
   const handleAddBeanSuccess = () => {
     setShowBeanForm(false);
@@ -15,6 +17,15 @@ export default function HomeScreen() {
 
   const handleAddBeanCancel = () => {
     setShowBeanForm(false);
+  };
+
+  const handleAddGrinderSuccess = () => {
+    setShowGrinderForm(false);
+    // TODO: Refresh grinder data
+  };
+
+  const handleAddGrinderCancel = () => {
+    setShowGrinderForm(false);
   };
 
   return (
@@ -27,6 +38,7 @@ export default function HomeScreen() {
       />
       <ScrollView style={styles.container}>
         <HomeBeansSection onAddBeanPress={() => setShowBeanForm(true)} />
+        <HomeGrinderSection onAddGrinderPress={() => setShowGrinderForm(true)} />
       </ScrollView>
 
       <Modal
@@ -39,6 +51,17 @@ export default function HomeScreen() {
           onCancel={handleAddBeanCancel}
         />
       </Modal>
+
+      <Modal
+        visible={showGrinderForm}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <GrinderForm
+          onSuccess={handleAddGrinderSuccess}
+          onCancel={handleAddGrinderCancel}
+        />
+      </Modal>
     </>
   );
 }
@@ -47,6 +70,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 20, // Add spacing between header and content
+    gap: 32, // Add spacing between sections
   },
   header: {
     marginBottom: 20, // Add bottom margin to the header
