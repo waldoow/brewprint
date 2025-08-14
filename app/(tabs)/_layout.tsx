@@ -55,6 +55,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="brewprints"
+        options={{
+          title: "Recettes",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="book.pages.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="library"
         options={{
           title: "Library",

@@ -1,5 +1,6 @@
 import { HomeBeansSection } from "@/components/screens/home/beans-section";
 import { HomeGrinderSection } from "@/components/screens/home/grinder-section";
+import { BrewprintsSection } from "@/components/screens/home/brewprints-section";
 import { Header } from "@/components/ui/Header";
 import { ThemedButton } from "@/components/ui/ThemedButton";
 import { BeanForm, GrinderForm } from "@/forms";
@@ -37,6 +38,7 @@ export default function HomeScreen() {
         customContent={<ThemedButton title="New Brew" onPress={() => {}} />}
       />
       <ScrollView style={styles.container}>
+        <BrewprintsSection />
         <HomeBeansSection onAddBeanPress={() => setShowBeanForm(true)} />
         <HomeGrinderSection onAddGrinderPress={() => setShowGrinderForm(true)} />
       </ScrollView>

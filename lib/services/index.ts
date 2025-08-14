@@ -15,3 +15,16 @@ export type {
   GrinderSetting, 
   SettingRange 
 } from './grinders';
+
+export { BrewprintsService } from './brewprints';
+export type { 
+  Brewprint, 
+  BrewprintInput, 
+  BrewprintUpdate,
+  BrewParameters,
+  TargetMetrics,
+  BrewStep,
+  ActualParameters,
+  ActualMetrics,
+  BrewResult
+} from './brewprints';
