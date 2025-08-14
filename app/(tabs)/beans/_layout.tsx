@@ -6,7 +6,6 @@ export default function BeansLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        presentation: "card",
         gestureEnabled: true,
         ...Platform.select({
           ios: {
@@ -17,20 +16,12 @@ export default function BeansLayout() {
           },
         }),
       }}
+      initialRouteName="index"
     >
       <Stack.Screen
-        name="[id]/index"
+        name="index"
         options={{
-          presentation: "card",
-          gestureEnabled: true,
-          ...Platform.select({
-            ios: {
-              animation: "default", // iOS native slide
-            },
-            android: {
-              animation: "slide_from_right",
-            },
-          }),
+          headerShown: false,
         }}
       />
     </Stack>

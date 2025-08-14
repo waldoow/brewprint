@@ -87,6 +87,12 @@ export default function TabLayout() {
           href: null, // This hides it from the tab bar
         }}
       />
+      <Tabs.Screen
+        name="bean-detail"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
     </Tabs>
   );
 }

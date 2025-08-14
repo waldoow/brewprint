@@ -352,15 +352,14 @@ CREATE TRIGGER update_tags_updated_at
     BEFORE UPDATE ON tags
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Function to calculate bean freshness
+-- Function to calculate bean freshness (FIXED VERSION)
 CREATE OR REPLACE FUNCTION calculate_bean_freshness()
-RETURNS TRIGGER AS
-$$
-
+RETURNS TRIGGER AS $$
 DECLARE
-days_old integer;
+    days_old integer;
 BEGIN
-days_old := EXTRACT(EPOCH FROM (CURRENT_DATE - NEW.roast_date)) / 86400;
+    -- Fix: Direct date subtraction returns number of days (no EXTRACT needed)
+    days_old := CURRENT_DATE - NEW.roast_date::date;
 
     CASE
         WHEN days_old < 2 THEN
@@ -381,11 +380,8 @@ days_old := EXTRACT(EPOCH FROM (CURRENT_DATE - NEW.roast_date)) / 86400;
     END CASE;
 
     RETURN NEW;
-
 END;
-
-$$
-language 'plpgsql';
+$$ language 'plpgsql';
 
 -- Apply freshness calculation trigger
 CREATE TRIGGER calculate_bean_freshness_trigger
@@ -477,6 +473,7 @@ language 'plpgsql' SECURITY DEFINER;
 
 -- Trigger to create defaults when user signs up
 DROP TRIGGER IF EXISTS create_user_defaults_trigger ON auth.users;
+CREATE TRIGGER create_user_defaults_trigger
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION create_user_defaults();
 

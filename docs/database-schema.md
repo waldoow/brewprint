@@ -540,7 +540,8 @@ RETURNS TRIGGER AS $$
 DECLARE
     days_old integer;
 BEGIN
-    days_old := EXTRACT(EPOCH FROM (CURRENT_DATE - NEW.roast_date)) / 86400;
+    -- Simple date subtraction returns number of days
+    days_old := CURRENT_DATE - NEW.roast_date::date;
 
     CASE
         WHEN days_old < 2 THEN
@@ -575,12 +576,34 @@ CREATE TRIGGER calculate_bean_freshness_trigger
 
 ### For Claude Code Development
 
-1. **User Context**: Always filter queries by `auth.uid()` or `user_id`
-2. **JSONB Queries**: Use PostgreSQL JSONB operators (`->`, `->>`, `@>`, etc.)
-3. **Validation**: Implement client-side validation matching database constraints
-4. **Real-time**: Use Supabase subscriptions for live updates
-5. **File Storage**: Use Supabase Storage for avatars and photos
-6. **Type Safety**: Generate TypeScript types from Supabase schema
+1. **Service Layer**: Always use service classes (`BeansService`, etc.) instead of direct Supabase queries
+2. **User Context**: Services automatically handle user scoping via RLS (Row Level Security)
+3. **Type Safety**: Use provided TypeScript interfaces (Bean, BeanInput, BeanUpdate)
+4. **Error Handling**: Use ServiceResponse<T> pattern for consistent success/error states
+5. **JSONB Queries**: Services handle PostgreSQL JSONB operators (`->`, `->>`, `@>`, etc.)
+6. **Validation**: Implement client-side validation matching database constraints
+7. **Real-time**: Use Supabase subscriptions for live updates
+8. **File Storage**: Use Supabase Storage for avatars and photos
+
+#### Service Usage Examples
+
+```typescript
+import { BeansService, type Bean, type BeanInput } from '@/lib/services';
+
+// ✅ Correct - Use service layer
+const { data: beans, error, success } = await BeansService.getAllBeans();
+if (success && beans) {
+  setBeans(beans);
+} else {
+  showError(error);
+}
+
+// ✅ Correct - Service handles user scoping automatically
+const freshBeans = await BeansService.getBeansByFreshness('peak');
+
+// ❌ Incorrect - Don't query Supabase directly in components
+const { data } = await supabase.from('beans').select('*');
+```
 
 ### Coffee Experimentation Workflow
 

@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import { Check, ChevronDown } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Modal,
+  ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View,
-  Text,
-  Modal,
-  FlatList,
-  type ViewStyle,
   type TextStyle,
-} from 'react-native';
+  type ViewStyle,
+} from "react-native";
 
-import { Colors } from '@/constants/Colors';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type SelectOption = {
   label: string;
@@ -26,8 +27,8 @@ export type ThemedSelectProps = {
   label?: string;
   error?: string;
   disabled?: boolean;
-  size?: 'default' | 'sm' | 'lg';
-  variant?: 'default' | 'outline' | 'filled';
+  size?: "default" | "sm" | "lg";
+  variant?: "default" | "outline" | "filled";
   lightColor?: string;
   darkColor?: string;
   lightTextColor?: string;
@@ -41,12 +42,12 @@ export function ThemedSelect({
   options,
   value,
   onValueChange,
-  placeholder = 'Select an option',
+  placeholder = "Select an option",
   label,
   error,
   disabled = false,
-  size = 'default',
-  variant = 'default',
+  size = "default",
+  variant = "default",
   lightColor,
   darkColor,
   lightTextColor,
@@ -56,48 +57,101 @@ export function ThemedSelect({
   containerStyle,
 }: ThemedSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+  const selectRef = useRef<View>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
   const textColor = useThemeColor(
     { light: lightTextColor, dark: darkTextColor },
-    'text'
+    "text"
   );
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    'background'
+    "background"
   );
-  const iconColor = useThemeColor({}, 'icon');
+  const iconColor = useThemeColor({}, "icon");
   const borderColor = useThemeColor(
     { light: lightBorderColor, dark: darkBorderColor },
-    'icon'
+    "icon"
   );
 
-  const selectedOption = options.find(option => option.value === value);
+  const selectedOption = options.find((option) => option.value === value);
+
+  useEffect(() => {
+    if (isOpen) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isOpen]);
+
+  const handleOpen = () => {
+    if (disabled) return;
+
+    selectRef.current?.measureInWindow((x, y, width, height) => {
+      setDropdownPosition({
+        top: y + height + 4, // 4px gap between trigger and dropdown
+        left: x,
+        width: width,
+      });
+      setIsOpen(true);
+    });
+  };
 
   const getSelectStyles = (): ViewStyle => {
     const baseStyle = styles.base;
     const sizeStyle = styles[`size_${size}`];
-    
+
     let variantStyle: ViewStyle = {};
-    
+
     switch (variant) {
-      case 'default':
+      case "default":
         variantStyle = {
           backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: iconColor + '40',
+          borderColor: borderColor + "30",
         };
         break;
-      case 'outline':
+      case "outline":
         variantStyle = {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderWidth: 1,
-          borderColor: borderColor + '60',
+          borderColor: borderColor + "40",
         };
         break;
-      case 'filled':
+      case "filled":
         variantStyle = {
-          backgroundColor: iconColor + '10',
-          borderWidth: 0,
+          backgroundColor: iconColor + "08",
+          borderWidth: 1,
+          borderColor: "transparent",
         };
         break;
     }
@@ -106,7 +160,7 @@ export function ThemedSelect({
       ...baseStyle,
       ...sizeStyle,
       ...variantStyle,
-      opacity: disabled ? 0.6 : 1,
+      opacity: disabled ? 0.5 : 1,
     };
   };
 
@@ -117,7 +171,7 @@ export function ThemedSelect({
     return {
       ...baseTextStyle,
       ...sizeTextStyle,
-      color: selectedOption ? textColor : textColor + '60',
+      color: selectedOption ? textColor : textColor + "70",
     };
   };
 
@@ -125,14 +179,13 @@ export function ThemedSelect({
     return {
       ...styles.label,
       color: textColor,
-      opacity: 0.8,
     };
   };
 
   const getErrorStyles = (): TextStyle => {
     return {
       ...styles.error,
-      color: '#dc2626',
+      color: "#ef4444",
     };
   };
 
@@ -141,41 +194,76 @@ export function ThemedSelect({
     setIsOpen(false);
   };
 
-  const renderOption = ({ item }: { item: SelectOption }) => (
-    <TouchableOpacity
-      style={[styles.option, { backgroundColor: backgroundColor }]}
-      onPress={() => handleSelect(item.value)}
-    >
-      <Text style={[styles.optionText, { color: textColor }]}>{item.label}</Text>
-    </TouchableOpacity>
-  );
+  const renderOption = ({
+    item,
+    index,
+  }: {
+    item: SelectOption;
+    index: number;
+  }) => {
+    const isSelected = item.value === value;
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.option,
+          index === 0 && styles.firstOption,
+          index === options.length - 1 && styles.lastOption,
+          isSelected && styles.selectedOption,
+          { backgroundColor: isSelected ? iconColor + "08" : "transparent" },
+        ]}
+        onPress={() => handleSelect(item.value)}
+        activeOpacity={0.7}
+      >
+        <Text
+          style={[
+            styles.optionText,
+            { color: textColor },
+            isSelected && styles.selectedOptionText,
+          ]}
+        >
+          {item.label}
+        </Text>
+        {isSelected && <Check size={16} color={iconColor} strokeWidth={2.5} />}
+      </TouchableOpacity>
+    );
+  };
+
+  const getDropdownHeight = () => {
+    const itemHeight = size === "sm" ? 40 : size === "lg" ? 52 : 44;
+    const maxItems = 5;
+    const calculatedHeight =
+      Math.min(options.length, maxItems) * itemHeight + 8; // 8px for padding
+    return calculatedHeight;
+  };
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && (
-        <Text style={getLabelStyles()}>{label}</Text>
-      )}
-      
+      {label && <Text style={getLabelStyles()}>{label}</Text>}
+
       <TouchableOpacity
-        style={getSelectStyles()}
-        onPress={() => !disabled && setIsOpen(true)}
+        ref={selectRef}
+        style={[getSelectStyles(), isOpen && styles.selectOpen]}
+        onPress={handleOpen}
         disabled={disabled}
         activeOpacity={0.7}
       >
-        <Text style={getTextStyles()}>
+        <Text style={getTextStyles()} numberOfLines={1}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <Text style={[styles.arrow, { color: iconColor }]}>▼</Text>
+        <Animated.View
+          style={[styles.iconContainer, isOpen && styles.iconRotated]}
+        >
+          <ChevronDown size={16} color={iconColor + "90"} strokeWidth={2} />
+        </Animated.View>
       </TouchableOpacity>
 
-      {error && (
-        <Text style={getErrorStyles()}>{error}</Text>
-      )}
+      {error && <Text style={getErrorStyles()}>{error}</Text>}
 
       <Modal
         visible={isOpen}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => setIsOpen(false)}
       >
         <TouchableOpacity
@@ -183,14 +271,31 @@ export function ThemedSelect({
           activeOpacity={1}
           onPress={() => setIsOpen(false)}
         >
-          <View style={[styles.dropdown, { backgroundColor: backgroundColor }]}>
-            <FlatList
-              data={options}
-              renderItem={renderOption}
-              keyExtractor={(item) => item.value}
-              style={styles.optionsList}
-            />
-          </View>
+          <Animated.View
+            style={[
+              styles.dropdown,
+              {
+                backgroundColor: backgroundColor,
+                borderColor: borderColor + "20",
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                maxHeight: getDropdownHeight(),
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+            >
+              {options.map((item, index) => (
+                <View key={item.value}>{renderOption({ item, index })}</View>
+              ))}
+            </ScrollView>
+          </Animated.View>
         </TouchableOpacity>
       </Modal>
     </View>
@@ -201,15 +306,19 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
   },
-  
+
   base: {
     borderRadius: 8,
     paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  
+
+  selectOpen: {
+    // Optional: Add a different style when open
+  },
+
   // Size variants
   size_default: {
     height: 44,
@@ -223,12 +332,11 @@ const styles = StyleSheet.create({
     height: 52,
     paddingVertical: 16,
   },
-  
+
   // Text styles
   text: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   text_default: {
     fontSize: 16,
@@ -239,57 +347,87 @@ const styles = StyleSheet.create({
   text_lg: {
     fontSize: 18,
   },
-  
-  arrow: {
-    fontSize: 12,
+
+  iconContainer: {
     marginLeft: 8,
+    transform: [{ rotate: "0deg" }],
   },
-  
+
+  iconRotated: {
+    transform: [{ rotate: "180deg" }],
+  },
+
   // Label and error styles
   label: {
     fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 6,
+    fontWeight: "500",
+    marginBottom: 8,
   },
-  
+
   error: {
     fontSize: 12,
-    fontWeight: '400',
-    marginTop: 4,
+    fontWeight: "400",
+    marginTop: 6,
   },
-  
+
   // Modal styles
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-  
+
   dropdown: {
-    width: '80%',
-    maxHeight: '50%',
+    position: "absolute",
     borderRadius: 8,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    borderWidth: 1,
+    padding: 4,
+
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+
+    // Shadow for Android
+    elevation: 10,
   },
-  
-  optionsList: {
-    maxHeight: 200,
+
+  scrollView: {
+    flexGrow: 0,
   },
-  
+
   option: {
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minHeight: 44,
   },
-  
+
+  firstOption: {
+    // Optional: Add specific style for first option
+  },
+
+  lastOption: {
+    // Optional: Add specific style for last option
+  },
+
+  selectedOption: {
+    // Background color is set inline
+  },
+
   optionText: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: "400",
+    flex: 1,
+  },
+
+  selectedOptionText: {
+    fontWeight: "500",
   },
 });

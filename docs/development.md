@@ -93,6 +93,13 @@ components/
 ├── ui/              # Base UI components (Button, Input, Modal)  
 └── [feature]/       # Feature-specific components (RecipeCard)
 
+lib/
+├── supabase.ts      # Supabase client configuration
+└── services/        # Database service layer
+    ├── index.ts     # Service exports
+    ├── beans.ts     # Beans CRUD operations
+    └── [entity].ts  # Other entity services
+
 hooks/
 ├── useThemeColor.ts # Theme integration
 ├── useTimer.ts      # Timer functionality
@@ -116,10 +123,54 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // 3. Local imports (use @/ alias)
 import { ThemedText } from '@/components/ui/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { BeansService, type Bean } from '@/lib/services';
 import { Recipe } from '@/types/recipe';
 ```
 
 ## Code Quality
+
+### Database Operations
+Always use service classes instead of direct Supabase queries:
+
+```typescript
+// ✅ Good - Use service layer
+import { BeansService, type BeanInput } from '@/lib/services';
+
+const createBean = async (beanData: BeanInput) => {
+  const { data, error, success } = await BeansService.createBean(beanData);
+  if (success && data) {
+    setBeans(prev => [data, ...prev]);
+  } else {
+    showError(error);
+  }
+};
+
+// ❌ Bad - Direct Supabase queries in components
+import { supabase } from '@/lib/supabase';
+
+const { data } = await supabase.from('beans').insert(beanData);
+```
+
+### Error Handling Pattern
+Use consistent ServiceResponse pattern:
+
+```typescript
+interface ServiceResponse<T> {
+  data: T | null;
+  error: string | null;
+  success: boolean;
+}
+
+// Handle responses consistently
+const { data: beans, error, success } = await BeansService.getAllBeans();
+if (success && beans) {
+  // Handle success
+  setBeans(beans);
+} else {
+  // Handle error
+  toast.error(error || 'Failed to load beans');
+}
+```
 
 ### ESLint Configuration
 The project uses ESLint with TypeScript rules:
