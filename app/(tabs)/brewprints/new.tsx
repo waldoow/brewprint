@@ -11,7 +11,7 @@ export default function NewBrewprintScreen() {
 
   const handleSuccess = (brewprint: any) => {
     toast.success("Recette créée avec succès!");
-    router.push(`/brewprints/${brewprint.id}`);
+    router.push(`/(tabs)/brewprints/${brewprint.id}`);
   };
 
   const handleCancel = () => {
@@ -19,11 +19,12 @@ export default function NewBrewprintScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView noBackground={false} style={styles.container}>
       <Header
         title="Nouvelle Recette"
-        showBack={true}
-        onBack={handleCancel}
+        showBackButton={true}
+        onBackPress={handleCancel}
+        backButtonTitle="Recipes"
       />
       
       <BrewprintForm

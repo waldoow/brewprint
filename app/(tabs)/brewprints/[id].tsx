@@ -131,7 +131,7 @@ export default function BrewprintDetailScreen() {
       
       if (result.success && result.data) {
         toast.success("Nouvelle itération créée!");
-        router.push(`/brewprints/${result.data.id}`);
+        router.push(`/(tabs)/brewprints/${result.data.id}`);
       } else {
         Alert.alert("Erreur", "Impossible de créer l'itération");
       }
@@ -172,8 +172,8 @@ Créé avec Brewprint ☕
 
   if (isLoading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Chargement..." showBack={true} />
+      <ThemedView noBackground={false} style={styles.container}>
+        <Header title="Chargement..." showBackButton={true} onBackPress={() => router.back()} />
         <ThemedView style={styles.loadingContainer}>
           <ThemedText>Chargement de la recette...</ThemedText>
         </ThemedView>
@@ -183,8 +183,8 @@ Créé avec Brewprint ☕
 
   if (!brewprint) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Erreur" showBack={true} />
+      <ThemedView noBackground={false} style={styles.container}>
+        <Header title="Erreur" showBackButton={true} onBackPress={() => router.back()} />
         <ThemedView style={styles.errorContainer}>
           <ThemedText>Recette introuvable</ThemedText>
         </ThemedView>
@@ -243,8 +243,10 @@ Créé avec Brewprint ☕
       <Header
         title={brewprint.name}
         subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version}`}
-        showBack={true}
-        rightContent={
+        showBackButton={true}
+        onBackPress={() => router.back()}
+        backButtonTitle="Recipes"
+        customContent={
           <ThemedButton
             size="sm"
             variant="ghost"

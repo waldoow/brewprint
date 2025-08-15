@@ -9,7 +9,6 @@ import {
   type TextStyle,
 } from 'react-native';
 
-import { Colors } from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ThemedTextAreaProps = TextInputProps & {
@@ -49,12 +48,11 @@ export const ThemedTextArea = forwardRef<TextInput, ThemedTextAreaProps>(({
   );
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    'background'
+    'inputBackground'
   );
-  const iconColor = useThemeColor({}, 'icon');
   const borderColor = useThemeColor(
     { light: lightBorderColor, dark: darkBorderColor },
-    'icon'
+    'border'
   );
 
   const getTextAreaStyles = (): ViewStyle => {
@@ -67,20 +65,21 @@ export const ThemedTextArea = forwardRef<TextInput, ThemedTextAreaProps>(({
         variantStyle = {
           backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: iconColor + '40',
+          borderColor: borderColor,
         };
         break;
       case 'outline':
         variantStyle = {
-          backgroundColor: 'transparent',
+          backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: borderColor + '60',
+          borderColor: borderColor,
         };
         break;
       case 'filled':
         variantStyle = {
-          backgroundColor: iconColor + '10',
-          borderWidth: 0,
+          backgroundColor: backgroundColor,
+          borderWidth: 1,
+          borderColor: borderColor,
         };
         break;
     }
@@ -104,7 +103,6 @@ export const ThemedTextArea = forwardRef<TextInput, ThemedTextAreaProps>(({
     return {
       ...styles.label,
       color: textColor,
-      opacity: 0.8,
     };
   };
 
@@ -123,7 +121,7 @@ export const ThemedTextArea = forwardRef<TextInput, ThemedTextAreaProps>(({
       <TextInput
         ref={ref}
         style={[getTextAreaStyles(), getTextStyles(), style]}
-        placeholderTextColor={textColor + '60'}
+        placeholderTextColor={textColor + '70'}
         multiline
         textAlignVertical="top"
         {...rest}

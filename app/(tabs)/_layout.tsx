@@ -31,18 +31,20 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "dark"].primary,
+        tabBarInactiveTintColor: Colors[colorScheme ?? "dark"].textSecondary,
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? "dark"].surface,
+          borderTopColor: Colors[colorScheme ?? "dark"].border,
+          borderTopWidth: 1,
+          paddingTop: 8,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          height: Platform.OS === 'ios' ? 84 : 60,
+        },
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         animation: "shift",
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
       }}
     >
       <Tabs.Screen
@@ -57,25 +59,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="brewprints"
         options={{
-          title: "Recettes",
+          title: "Brewprints",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="book.pages.fill" color={color} />
+            <IconSymbol size={24} name="cup.and.saucer" color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="library"
         options={{
-          title: "Library",
+          title: "Inventory",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="books.vertical.fill" color={color} />
+            <IconSymbol size={24} name="books.vertical" color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="folders"
         options={{
-          title: "Folders",
+          title: "Organization",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="folder.fill" color={color} />
           ),
@@ -98,6 +100,18 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="bean-detail"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="brewers"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="brewer-detail"
         options={{
           href: null, // This hides it from the tab bar
         }}

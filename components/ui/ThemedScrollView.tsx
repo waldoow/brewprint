@@ -1,7 +1,7 @@
 import { ScrollView, type ScrollViewProps } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colorPalette } from "@/constants/Colors";
+import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedScrollViewProps = ScrollViewProps & {
@@ -34,8 +34,8 @@ export function ThemedScrollView({
 
   const backgroundColor = useThemeColor(
     {
-      light: lightColor || colorPalette.lightBackgroundSecondary,
-      dark: darkColor || colorPalette.darkBackgroundSecondary,
+      light: lightColor || Colors.light.background,
+      dark: darkColor || Colors.dark.background,
     },
     "background"
   );

@@ -80,7 +80,7 @@ export default function SignIn({
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView noBackground={false} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}

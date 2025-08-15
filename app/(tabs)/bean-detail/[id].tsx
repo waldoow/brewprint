@@ -41,7 +41,7 @@ export default function BeanDetailScreen() {
           onBackPress={() => router.back()}
           backButtonTitle="Grains"
         />
-        <ThemedView style={styles.container}>
+        <ThemedView noBackground={false} style={styles.container}>
           <ThemedView style={styles.notFoundContainer}>
             <ThemedText style={styles.notFoundText}>
               Aucun grain trouvé avec cet identifiant.

@@ -1,14 +1,14 @@
+import { BrewprintCard } from "@/components/brewprints/brewprint-card";
 import { Header } from "@/components/ui/Header";
+import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
+import { ThemedTabs } from "@/components/ui/ThemedTabs";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedTabs } from "@/components/ui/ThemedTabs";
-import { BrewprintCard } from "@/components/brewprints/brewprint-card";
 import { BrewprintsService, type Brewprint } from "@/lib/services";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { StyleSheet, RefreshControl, Alert } from "react-native";
+import { Alert, RefreshControl, StyleSheet } from "react-native";
 
 export default function BrewprintsScreen() {
   const router = useRouter();
@@ -23,10 +23,10 @@ export default function BrewprintsScreen() {
       if (result.success && result.data) {
         setBrewprints(result.data);
       } else {
-        Alert.alert("Erreur", "Impossible de charger les recettes");
+        Alert.alert("Error", "Failed to load brewing recipes");
       }
     } catch (error) {
-      Alert.alert("Erreur", "Une erreur s'est produite lors du chargement");
+      Alert.alert("Error", "An error occurred while loading recipes");
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -47,21 +47,23 @@ export default function BrewprintsScreen() {
   const getFilteredBrewprints = (): Brewprint[] => {
     switch (activeTab) {
       case "experimenting":
-        return brewprints.filter(b => b.status === "experimenting");
+        return brewprints.filter((b) => b.status === "experimenting");
       case "final":
-        return brewprints.filter(b => b.status === "final");
+        return brewprints.filter((b) => b.status === "final");
       case "archived":
-        return brewprints.filter(b => b.status === "archived");
+        return brewprints.filter((b) => b.status === "archived");
       default:
         return brewprints;
     }
   };
 
   const getTabCounts = () => {
-    const experimenting = brewprints.filter(b => b.status === "experimenting").length;
-    const final = brewprints.filter(b => b.status === "final").length;
-    const archived = brewprints.filter(b => b.status === "archived").length;
-    
+    const experimenting = brewprints.filter(
+      (b) => b.status === "experimenting"
+    ).length;
+    const final = brewprints.filter((b) => b.status === "final").length;
+    const archived = brewprints.filter((b) => b.status === "archived").length;
+
     return { experimenting, final, archived };
   };
 
@@ -69,41 +71,41 @@ export default function BrewprintsScreen() {
   const counts = getTabCounts();
 
   const tabOptions = [
-    { value: "all", label: `Toutes (${brewprints.length})` },
-    { value: "experimenting", label: `Tests (${counts.experimenting})` },
-    { value: "final", label: `Finales (${counts.final})` },
-    { value: "archived", label: `Archivées (${counts.archived})` },
+    { value: "all", label: `All (${brewprints.length})` },
+    { value: "experimenting", label: `Testing (${counts.experimenting})` },
+    { value: "final", label: `Finalized (${counts.final})` },
+    { value: "archived", label: `Archived (${counts.archived})` },
   ];
 
   const handleBrewprintPress = (brewprint: Brewprint) => {
-    router.push(`/brewprints/${brewprint.id}`);
+    router.push(`/(tabs)/brewprints/${brewprint.id}`);
   };
 
   const handleNewBrewprint = () => {
-    router.push("/brewprints/new");
+    router.push("/(tabs)/brewprints/new");
   };
 
   const getEmptyMessage = () => {
     switch (activeTab) {
       case "experimenting":
         return {
-          title: "Aucun test en cours",
-          description: "Créez votre première recette expérimentale"
+          title: "No Experimental Recipes",
+          description: "Create your first experimental brewing recipe to begin testing variables",
         };
       case "final":
         return {
-          title: "Aucune recette finalisée",
-          description: "Testez vos recettes et marquez les meilleures comme finales"
+          title: "No Finalized Recipes",
+          description: "Test your experimental recipes and promote the best ones to finalized status",
         };
       case "archived":
         return {
-          title: "Aucune recette archivée",
-          description: "Les anciennes recettes apparaîtront ici"
+          title: "No Archived Recipes",
+          description: "Outdated or discontinued recipes will appear here for reference",
         };
       default:
         return {
-          title: "Aucune recette",
-          description: "Commencez par créer votre première recette de café"
+          title: "No Brewing Recipes",
+          description: "Import or create your first brewing recipe to start optimizing extraction parameters",
         };
     }
   };
@@ -111,38 +113,41 @@ export default function BrewprintsScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
-        <Header
-          title="Mes Recettes"
-          showBack={false}
-        />
+        <Header title="Brewing Recipes" showBack={false} />
         <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Chargement...</ThemedText>
+          <ThemedText>Loading recipes...</ThemedText>
         </ThemedView>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView noBackground={false} style={styles.container}>
       <Header
-        title="Mes Recettes"
-        showBack={false}
-        rightContent={
-          <ThemedButton
-            size="sm"
-            onPress={handleNewBrewprint}
-          >
-            Nouvelle
-          </ThemedButton>
-        }
+        title="Brewing Recipes"
+        subtitle={`${filteredBrewprints.length} recipe${filteredBrewprints.length === 1 ? '' : 's'} • ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`}
+        showBackButton={false}
+        showMenuButton={true}
+        showProfileAvatar={true}
+        showSearchButton={true}
+        onMenuPress={() => console.log('Menu pressed')}
+        onProfilePress={() => console.log('Profile pressed')}
+        onSearchPress={() => console.log('Search pressed')}
+        showTopSpacing={true}
       />
 
-      <ThemedView style={styles.tabsContainer}>
-        <ThemedTabs
-          options={tabOptions}
-          value={activeTab}
-          onValueChange={setActiveTab}
-        />
+      <ThemedView style={styles.actionContainer}>
+        <ThemedView style={styles.tabsContainer}>
+          <ThemedTabs
+            items={tabOptions}
+            defaultValue={activeTab}
+            onValueChange={setActiveTab}
+          />
+        </ThemedView>
+        
+        <ThemedButton size="sm" onPress={handleNewBrewprint} style={styles.newButton}>
+          + New Recipe
+        </ThemedButton>
       </ThemedView>
 
       <ThemedScrollView
@@ -165,7 +170,7 @@ export default function BrewprintsScreen() {
                   onPress={handleNewBrewprint}
                   style={styles.emptyButton}
                 >
-                  Créer ma première recette
+                  Create First Recipe
                 </ThemedButton>
               )}
             </ThemedView>
@@ -190,9 +195,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  tabsContainer: {
+  actionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
+    gap: 12,
+  },
+  tabsContainer: {
+    flex: 1,
+  },
+  newButton: {
+    minWidth: 100,
   },
   scrollView: {
     flex: 1,

@@ -22,10 +22,7 @@ export default function BeansScreen() {
 
   const handleBeanPress = (bean: Bean) => {
     // Navigate to bean detail screen
-    router.push({
-      pathname: "/(tabs)/bean-detail",
-      params: { id: bean.id },
-    });
+    router.push(`/(tabs)/bean-detail/${bean.id}`);
   };
 
   const renderBeanCard = ({ item }: { item: Bean }) => (
@@ -58,8 +55,8 @@ export default function BeansScreen() {
               } attention requise`
             : `${MOCK_BEANS.length} café${MOCK_BEANS.length > 1 ? "s" : ""}`
         }
-        onBackPress={() => router.back()}
-        backButtonTitle="Accueil"
+        onBackPress={() => router.push('/(tabs)')}
+        backButtonTitle="Home"
         customContent={
           <ThemedView noBackground style={styles.headerActions}>
             <ThemedButton
