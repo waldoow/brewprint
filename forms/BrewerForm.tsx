@@ -277,93 +277,107 @@ export function BrewerForm({
         style={styles.scrollView}
       >
         <ThemedView style={styles.form}>
-          {/* Basic Information */}
-          <ThemedCollapsible title="Basic Information">
+          {/* Core Fields - Always Visible */}
+          <ThemedView style={styles.section}>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <ThemedInput
+                  label="Brewer Name *"
+                  placeholder="e.g., My V60, Kitchen Chemex"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.name?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="type"
+              render={({ field: { onChange, value } }) => (
+                <ThemedSelect
+                  label="Brewer Type *"
+                  value={value}
+                  onValueChange={onChange}
+                  options={brewerTypeOptions}
+                  error={errors.type?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="brand"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <ThemedInput
+                  label="Brand"
+                  placeholder="e.g., Hario, Chemex, AeroPress"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.brand?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="model"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <ThemedInput
+                  label="Model"
+                  placeholder="e.g., V60-02, Classic, Original"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.model?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="size"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <ThemedInput
+                  label="Size"
+                  placeholder="e.g., 02, 6-cup, 350ml"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.size?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="condition"
+              render={({ field: { onChange, value } }) => (
+                <ThemedSelect
+                  label="Condition *"
+                  value={value}
+                  onValueChange={onChange}
+                  options={conditionOptions}
+                  error={errors.condition?.message}
+                  style={styles.input}
+                />
+              )}
+            />
+          </ThemedView>
+
+          {/* Advanced Settings - Single Collapsible */}
+          <ThemedCollapsible title="Advanced Settings">
             <ThemedView style={styles.section}>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
-                    label="Brewer Name *"
-                    placeholder="e.g., My V60, Kitchen Chemex"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.name?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="type"
-                render={({ field: { onChange, value } }) => (
-                  <ThemedSelect
-                    label="Brewer Type *"
-                    value={value}
-                    onValueChange={onChange}
-                    options={brewerTypeOptions}
-                    error={errors.type?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="brand"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
-                    label="Brand"
-                    placeholder="e.g., Hario, Chemex, AeroPress"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.brand?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="model"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
-                    label="Model"
-                    placeholder="e.g., V60-02, Classic, Original"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.model?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="size"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
-                    label="Size"
-                    placeholder="e.g., 02, 6-cup, 350ml"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.size?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-            </ThemedView>
-          </ThemedCollapsible>
-
-          {/* Physical Characteristics */}
-          <ThemedCollapsible title="Physical Characteristics">
-            <ThemedView style={styles.section}>
+              {/* Physical Characteristics */}
               <Controller
                 control={control}
                 name="material"
@@ -411,12 +425,8 @@ export function BrewerForm({
                   />
                 )}
               />
-            </ThemedView>
-          </ThemedCollapsible>
 
-          {/* Optimal Brewing Parameters */}
-          <ThemedCollapsible title="Optimal Brewing Parameters">
-            <ThemedView style={styles.section}>
+              {/* Optimal Brewing Parameters */}
               <ThemedView style={styles.rangeContainer}>
                 <Controller
                   control={control}
@@ -556,12 +566,8 @@ export function BrewerForm({
                   )}
                 />
               </ThemedView>
-            </ThemedView>
-          </ThemedCollapsible>
 
-          {/* Purchase & Maintenance */}
-          <ThemedCollapsible title="Purchase & Maintenance">
-            <ThemedView style={styles.section}>
+              {/* Purchase & Maintenance */}
               <Controller
                 control={control}
                 name="purchase_date"
@@ -642,27 +648,8 @@ export function BrewerForm({
                   />
                 )}
               />
-            </ThemedView>
-          </ThemedCollapsible>
 
-          {/* Status & Location */}
-          <ThemedCollapsible title="Status & Location">
-            <ThemedView style={styles.section}>
-              <Controller
-                control={control}
-                name="condition"
-                render={({ field: { onChange, value } }) => (
-                  <ThemedSelect
-                    label="Condition *"
-                    value={value}
-                    onValueChange={onChange}
-                    options={conditionOptions}
-                    error={errors.condition?.message}
-                    style={styles.input}
-                  />
-                )}
-              />
-
+              {/* Location */}
               <Controller
                 control={control}
                 name="location"
@@ -678,12 +665,8 @@ export function BrewerForm({
                   />
                 )}
               />
-            </ThemedView>
-          </ThemedCollapsible>
 
-          {/* Notes & Tips */}
-          <ThemedCollapsible title="Notes & Brewing Tips">
-            <ThemedView style={styles.section}>
+              {/* Notes & Tips */}
               <Controller
                 control={control}
                 name="notes"

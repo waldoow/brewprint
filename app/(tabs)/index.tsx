@@ -101,6 +101,21 @@ export default function HomeScreen() {
     };
   }, [beans, brewprints, stats]);
 
+  // Mock brewprint for display when no real brewprints exist
+  const mockBrewprint = {
+    id: 'mock-1',
+    name: 'Morning V60',
+    brewer_type: 'v60',
+    status: 'experimenting',
+    coffee_dose: 22,
+    water_temp: 92,
+    total_time: 210, // 3:30 in seconds
+    description: 'A bright and balanced morning brew with Ethiopian Yirgacheffe. Notes of citrus and floral undertones.',
+  };
+
+  // Use real brewprints or fallback to mock data
+  const displayBrewprints = brewprints.length > 0 ? brewprints : [mockBrewprint];
+
   // Recent beans for quick access
   const recentBeans = useMemo(() => {
     return beans
@@ -232,6 +247,97 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
+        </View>
+
+        {/* Recent Brewprint */}
+        <View style={styles.section}>
+          <View style={styles.cardHeader}>
+            <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
+              Latest Brewprint
+            </ThemedText>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/brewprints')}>
+              <ThemedText style={[styles.cardAction, { color: colors.primary }]}>
+                View All →
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity
+            style={[styles.brewprintCard, { 
+              backgroundColor: colors.primary + '20',
+              borderColor: colors.primary,
+            }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              // Only navigate to real brewprints, not mock data
+              if (brewprints.length > 0) {
+                router.push(`/(tabs)/brewprints/${displayBrewprints[0].id}`);
+              } else {
+                router.push('/(tabs)/brewprints/new');
+              }
+            }}
+          >
+            <View style={styles.brewprintHeader}>
+              <View style={styles.brewprintMain}>
+                <ThemedText type="defaultSemiBold" style={[styles.brewprintName, { color: colors.text }]}>
+                  {displayBrewprints[0].name}
+                </ThemedText>
+                <ThemedText style={[styles.brewprintSubtitle, { color: colors.textSecondary }]}>
+                  {displayBrewprints[0].brewer_type ? displayBrewprints[0].brewer_type.charAt(0).toUpperCase() + displayBrewprints[0].brewer_type.slice(1).replace('-', ' ') : 'Unknown Method'}
+                </ThemedText>
+              </View>
+              <View style={styles.brewprintStatus}>
+                <ThemedText style={[
+                  styles.statusBadge, 
+                  { 
+                    color: displayBrewprints[0].status === 'perfected' ? colors.statusGreen : 
+                           displayBrewprints[0].status === 'experimenting' ? colors.primary : colors.textSecondary,
+                    backgroundColor: displayBrewprints[0].status === 'perfected' ? colors.statusGreen + '20' : 
+                                   displayBrewprints[0].status === 'experimenting' ? colors.primary + '20' : colors.textSecondary + '20'
+                  }
+                ]}>
+                  {displayBrewprints[0].status ? displayBrewprints[0].status.toUpperCase() : 'DRAFT'}
+                </ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.brewprintDetails}>
+              <View style={styles.brewprintDetailRow}>
+                <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                  Coffee Dose
+                </ThemedText>
+                <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                  {displayBrewprints[0].coffee_dose || 'Unknown'}g
+                </ThemedText>
+              </View>
+              
+              <View style={styles.brewprintDetailRow}>
+                <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                  Water Temp
+                </ThemedText>
+                <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                  {displayBrewprints[0].water_temp || 'Unknown'}°C
+                </ThemedText>
+              </View>
+              
+              <View style={styles.brewprintDetailRow}>
+                <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                  Brew Time
+                </ThemedText>
+                <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                  {displayBrewprints[0].total_time ? `${Math.floor(displayBrewprints[0].total_time / 60)}:${(displayBrewprints[0].total_time % 60).toString().padStart(2, '0')}` : 'Unknown'}
+                </ThemedText>
+              </View>
+              
+              {displayBrewprints[0].description && (
+                <View style={styles.brewprintDescription}>
+                  <ThemedText style={[styles.brewprintDescriptionText, { color: colors.textSecondary }]} numberOfLines={2}>
+                    {displayBrewprints[0].description}
+                  </ThemedText>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Inventory Status */}
@@ -495,6 +601,75 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   
+  // Brewprint card styles
+  brewprintCard: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  brewprintHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  brewprintMain: {
+    flex: 1,
+  },
+  brewprintName: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  brewprintSubtitle: {
+    fontSize: 13,
+  },
+  brewprintStatus: {
+    alignItems: 'flex-end',
+  },
+  statusBadge: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  brewprintDetails: {
+    gap: 6,
+  },
+  brewprintDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brewprintDetailLabel: {
+    fontSize: 12,
+    flex: 1,
+  },
+  brewprintDetailValue: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'right',
+    flex: 1,
+    fontVariant: ['tabular-nums'],
+  },
+  brewprintDescription: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  brewprintDescriptionText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+
   // Advanced bean card styles
   beansSection: {
     gap: 12,

@@ -18,7 +18,7 @@ export const Colors = {
     warning: "#f59e0b", 
     error: "#ef4444",
 
-    border: "#4a4a4e", // Lighter border for better visibility
+    border: "#2d2d30", // Darker border to match dark theme
     divider: "#3a3a3d", // Dark divider
 
     // Navigation colors
@@ -32,7 +32,7 @@ export const Colors = {
     // Additional colors for scheduler design
     cardBackground: "#1f1f23", // Card background
     cardSecondary: "#2a2a2e", // Secondary card background
-    inputBackground: "#3a3a3e", // Form input background for better contrast
+    inputBackground: "#1a1a1c", // Darker form input background
     progressTrack: "#333338", // Progress bar track
     progressActive: "#ffffff", // Active progress
     statusGreen: "#22c55e", // Status indicator green
@@ -55,7 +55,7 @@ export const Colors = {
     warning: "#f59e0b",
     error: "#ef4444",
 
-    border: "#4a4a4e", // Lighter border for better visibility
+    border: "#2d2d30", // Darker border to match dark theme
     divider: "#3a3a3d", // Dark divider
 
     // Navigation colors
@@ -69,7 +69,7 @@ export const Colors = {
     // Additional colors for scheduler design
     cardBackground: "#1f1f23", // Card background
     cardSecondary: "#2a2a2e", // Secondary card background
-    inputBackground: "#3a3a3e", // Form input background for better contrast
+    inputBackground: "#1a1a1c", // Darker form input background
     progressTrack: "#333338", // Progress bar track
     progressActive: "#ffffff", // Active progress
     statusGreen: "#22c55e", // Status indicator green

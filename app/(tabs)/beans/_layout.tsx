@@ -24,6 +24,18 @@ export default function BeansLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="new"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="edit/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

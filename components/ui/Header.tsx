@@ -59,12 +59,13 @@ export function Header({
     return [
       showTopSpacing ? styles.container : styles.containerNoSpacing,
       { paddingTop: safePadding },
-      style
+      style,
     ];
   };
 
   // Show scheduler-style header if menu or profile buttons are enabled
-  const isSchedulerStyle = showMenuButton || showProfileAvatar || showSearchButton;
+  const isSchedulerStyle =
+    showMenuButton || showProfileAvatar || showSearchButton;
 
   return (
     <ThemedView style={getContainerStyles()}>
@@ -72,36 +73,14 @@ export function Header({
       {isSchedulerStyle && (
         <View style={styles.schedulerHeader}>
           <View style={styles.leftSection}>
-            {showMenuButton && (
-              <TouchableOpacity onPress={onMenuPress} style={styles.iconButton}>
-                <IconSymbol name="line.horizontal.3" size={24} color={textColor} />
-              </TouchableOpacity>
-            )}
             <View>
               <ThemedText style={styles.schedulerTitle}>{title}</ThemedText>
               {subtitle && (
-                <ThemedText style={styles.schedulerSubtitle}>{subtitle}</ThemedText>
+                <ThemedText style={styles.schedulerSubtitle}>
+                  {subtitle}
+                </ThemedText>
               )}
             </View>
-          </View>
-          
-          <View style={styles.rightSection}>
-            {showSearchButton && (
-              <TouchableOpacity onPress={onSearchPress} style={styles.iconButton}>
-                <IconSymbol name="magnifyingglass" size={20} color={textColor} />
-              </TouchableOpacity>
-            )}
-            {showProfileAvatar && (
-              <TouchableOpacity onPress={onProfilePress} style={styles.profileButton}>
-                {profileImageUri ? (
-                  <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
-                ) : (
-                  <View style={styles.profilePlaceholder}>
-                    <IconSymbol name="person.fill" size={20} color={textColor} />
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
           </View>
         </View>
       )}
@@ -170,33 +149,33 @@ const styles = StyleSheet.create({
   },
   // Scheduler-style header
   schedulerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingBottom: 8,
   },
   leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   iconButton: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 22,
   },
   profileButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   profileImage: {
     width: 44,
@@ -208,12 +187,12 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: Colors.dark.cardBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   schedulerTitle: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: -0.5,
   },
   schedulerSubtitle: {
