@@ -130,9 +130,9 @@ export default function LibraryScreen() {
   const handleAddItem = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (activeTab === 'beans') {
-      router.push('/(tabs)/beans/new');
+      router.push('/beans/new');
     } else {
-      router.push('/(tabs)/brewers/new');
+      router.push('/brewers/new');
     }
   };
 

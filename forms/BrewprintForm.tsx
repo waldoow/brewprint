@@ -596,7 +596,7 @@ export function BrewprintForm({
             loading={isSubmitting}
             style={styles.actionButton}
           >
-            Créer la recette
+            {initialData ? 'Dupliquer la recette' : 'Créer la recette'}
           </ThemedButton>
         </ThemedView>
       </ThemedView>

@@ -116,7 +116,7 @@ export default function NotificationsScreen() {
         {/* Info Banner */}
         <View style={styles.infoBanner}>
           <ThemedText type="caption" style={[styles.infoText, { color: colors.textSecondary }]}>
-            💡 Notification features are coming soon. Configure your preferences here and we'll enable them when ready.
+            💡 Notification features are coming soon. Configure your preferences here and we&apos;ll enable them when ready.
           </ThemedText>
         </View>
 
@@ -135,7 +135,7 @@ export default function NotificationsScreen() {
                 Brewing Reminders
               </ThemedText>
               <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Get reminded when it's time to start your next brew
+                Get reminded when it&apos;s time to start your next brew
               </ThemedText>
             </View>
             <Switch

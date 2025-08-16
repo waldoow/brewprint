@@ -131,13 +131,45 @@ export default function BrewprintDetailScreen() {
       
       if (result.success && result.data) {
         toast.success("Nouvelle itération créée!");
-        router.push(`/(tabs)/brewprints/${result.data.id}`);
+        router.push(`/brewprints/${result.data.id}`);
       } else {
         Alert.alert("Erreur", "Impossible de créer l'itération");
       }
     } catch (error) {
       Alert.alert("Erreur", "Une erreur s'est produite");
     }
+  };
+
+  const handleDuplicate = async () => {
+    if (!brewprint) return;
+
+    try {
+      // Navigate to the new brewprint form with this brewprint as a template
+      router.push({
+        pathname: "/brewprints/new",
+        params: { 
+          template: JSON.stringify({
+            name: `${brewprint.name} (Copy)`,
+            description: brewprint.description,
+            method: brewprint.method,
+            difficulty: brewprint.difficulty,
+            parameters: brewprint.parameters,
+            steps: brewprint.steps,
+            beans_id: brewprint.beans_id,
+            grinder_id: brewprint.grinder_id,
+            brewer_id: brewprint.brewer_id,
+            water_profile_id: brewprint.water_profile_id,
+          })
+        }
+      });
+    } catch (error) {
+      Alert.alert("Erreur", "Impossible de dupliquer la recette");
+    }
+  };
+
+  const handleStartBrewing = () => {
+    if (!brewprint) return;
+    router.push(`/brewing/${brewprint.id}`);
   };
 
   const handleShare = async () => {
@@ -195,6 +227,30 @@ Créé avec Brewprint ☕
   const getActionButtons = () => {
     const buttons = [];
 
+    // Start Brewing button (primary action)
+    buttons.push(
+      <ThemedButton
+        key="brew"
+        variant="default"
+        onPress={handleStartBrewing}
+        style={[styles.actionButton, styles.primaryActionButton]}
+      >
+        ☕ Start Brewing
+      </ThemedButton>
+    );
+
+    // Duplicate button
+    buttons.push(
+      <ThemedButton
+        key="duplicate"
+        variant="outline"
+        onPress={handleDuplicate}
+        style={styles.actionButton}
+      >
+        📄 Duplicate Recipe
+      </ThemedButton>
+    );
+
     // Create iteration button
     buttons.push(
       <ThemedButton
@@ -203,7 +259,7 @@ Créé avec Brewprint ☕
         onPress={handleCreateIteration}
         style={styles.actionButton}
       >
-        Nouvelle itération
+        🧪 New Iteration
       </ThemedButton>
     );
 
@@ -212,11 +268,11 @@ Créé avec Brewprint ☕
       buttons.push(
         <ThemedButton
           key="final"
-          variant="default"
+          variant="secondary"
           onPress={handleMarkAsFinal}
           style={styles.actionButton}
         >
-          Marquer finale
+          ✅ Mark Final
         </ThemedButton>
       );
     }
@@ -230,7 +286,7 @@ Créé avec Brewprint ☕
           onPress={handleArchive}
           style={styles.actionButton}
         >
-          Archiver
+          📦 Archive
         </ThemedButton>
       );
     }
@@ -363,6 +419,9 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     minWidth: "45%",
+  },
+  primaryActionButton: {
+    minWidth: "100%",
   },
   dangerZone: {
     backgroundColor: "rgba(255, 0, 0, 0.05)",

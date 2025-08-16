@@ -331,7 +331,7 @@ export default function DataPrivacyScreen() {
                   No Analytics Tracking
                 </ThemedText>
                 <ThemedText type="caption" style={[styles.privacyDescription, { color: colors.textSecondary }]}>
-                  We don't track your usage or collect personal data for analytics purposes
+                  We don&apos;t track your usage or collect personal data for analytics purposes
                 </ThemedText>
               </View>
             </View>

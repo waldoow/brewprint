@@ -57,15 +57,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="brewprints"
-        options={{
-          title: "Brewprints",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="cup.and.saucer" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="library"
         options={{
           title: "Inventory",
@@ -90,30 +81,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="gearshape.fill" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="beans"
-        options={{
-          href: null, // This hides it from the tab bar
-        }}
-      />
-      <Tabs.Screen
-        name="bean-detail"
-        options={{
-          href: null, // This hides it from the tab bar
-        }}
-      />
-      <Tabs.Screen
-        name="brewers"
-        options={{
-          href: null, // This hides it from the tab bar
-        }}
-      />
-      <Tabs.Screen
-        name="brewer-detail"
-        options={{
-          href: null, // This hides it from the tab bar
         }}
       />
     </Tabs>

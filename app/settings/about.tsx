@@ -147,7 +147,7 @@ export default function AboutScreen() {
         {/* Features */}
         <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
           <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            What's Included
+            What&apos;s Included
           </ThemedText>
 
           <View style={styles.featureList}>

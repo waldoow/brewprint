@@ -78,11 +78,11 @@ export default function BrewprintsScreen() {
   ];
 
   const handleBrewprintPress = (brewprint: Brewprint) => {
-    router.push(`/(tabs)/brewprints/${brewprint.id}`);
+    router.push(`/brewprints/${brewprint.id}`);
   };
 
   const handleNewBrewprint = () => {
-    router.push("/(tabs)/brewprints/new");
+    router.push("/brewprints/new");
   };
 
   const getEmptyMessage = () => {

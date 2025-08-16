@@ -98,7 +98,7 @@ export default function BrewerDetailScreen() {
 
   const handleEdit = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(tabs)/brewers/edit/${id}`);
+    router.push(`/brewers/edit/${id}`);
   };
 
   const handleToggleStatus = async () => {

@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
-import { router } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
@@ -32,7 +31,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error("Error getting session:", error);
+      }
+      console.log("Initial session:", session?.user?.email || "No session");
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -42,18 +45,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.email);
+      console.log("Auth state changed:", event, session?.user?.email || "No session");
 
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-
-      // Handle navigation based on auth state
-      if (event === "SIGNED_IN") {
-        router.replace("/(tabs)");
-      } else if (event === "SIGNED_OUT") {
-        router.replace("/(auth)");
-      }
     });
 
     return () => subscription.unsubscribe();

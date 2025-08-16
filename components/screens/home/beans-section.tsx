@@ -28,7 +28,7 @@ export function HomeBeansSection({ onAddBeanPress }: HomeBeansSectionProps) {
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <ThemedText style={styles.sectionTitle}>Mes Grains</ThemedText>
-        <ThemedText style={styles.seeAll} onPress={() => router.push("/(tabs)/beans")}>
+        <ThemedText style={styles.seeAll} onPress={() => router.push("/beans")}>
           Voir tout →
         </ThemedText>
       </View>
