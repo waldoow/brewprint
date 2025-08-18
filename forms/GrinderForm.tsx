@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { GrindersService, type GrinderInput, type GrinderSetting, type SettingRange } from "@/lib/services/grinders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -17,6 +17,14 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 
 // Grinder form validation schema
 const grinderFormSchema = z.object({
@@ -74,13 +82,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   const { user } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch,
-  } = useForm<GrinderFormData>({
+  const form = useForm<GrinderFormData>({
     resolver: zodResolver(grinderFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -145,7 +147,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
       }
 
       toast.success("Grinder added successfully!");
-      reset();
+      form.reset();
       onSuccess?.();
     } catch (error) {
       console.error("Error adding grinder:", error);
@@ -156,7 +158,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   };
 
   const handleCancel = () => {
-    reset();
+    form.reset();
     onCancel?.();
   };
 
@@ -186,7 +188,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             noBackground={true}
           >
             <Controller
-              control={control}
+              control={form.control}
               name="name"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -200,7 +202,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="brand"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -214,7 +216,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="model"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -228,7 +230,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="type"
               render={({ field: { onChange, value } }) => (
                 <ThemedSelect
@@ -242,7 +244,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="is_default"
               render={({ field: { onChange, value } }) => (
                 <ThemedCheckBox
@@ -265,7 +267,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             noBackground={true}
           >
             <Controller
-              control={control}
+              control={form.control}
               name="burr_type"
               render={({ field: { onChange, value } }) => (
                 <ThemedSelect
@@ -280,7 +282,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="burr_material"
               render={({ field: { onChange, value } }) => (
                 <ThemedSelect
@@ -295,7 +297,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="microns_per_step"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -321,7 +323,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             noBackground={true}
           >
             <Controller
-              control={control}
+              control={form.control}
               name="default_setting"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -337,7 +339,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
 
             <ThemedView style={styles.settingRangeRow} noBackground>
               <Controller
-                control={control}
+                control={form.control}
                 name="setting_range_min"
                 render={({ field: { onChange, value } }) => (
                   <ThemedInput
@@ -353,7 +355,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               />
 
               <Controller
-                control={control}
+                control={form.control}
                 name="setting_range_max"
                 render={({ field: { onChange, value } }) => (
                   <ThemedInput
@@ -370,7 +372,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             </ThemedView>
 
             <Controller
-              control={control}
+              control={form.control}
               name="setting_range_increment"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -396,7 +398,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             noBackground={true}
           >
             <Controller
-              control={control}
+              control={form.control}
               name="last_cleaned"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -410,7 +412,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             />
 
             <Controller
-              control={control}
+              control={form.control}
               name="cleaning_frequency"
               render={({ field: { onChange, value } }) => (
                 <ThemedInput
@@ -436,7 +438,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             noBackground={true}
           >
             <Controller
-              control={control}
+              control={form.control}
               name="notes"
               render={({ field: { onChange, value } }) => (
                 <ThemedTextArea
@@ -481,21 +483,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   form: {
-    padding: 16,
-    gap: 16,
+    padding: 8, // Reduced from 16 to 8
+    gap: 8, // Reduced from 16 to 8
   },
   settingRangeRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 6, // Reduced from 12 to 6
   },
   settingRangeInput: {
     flex: 1,
   },
   actions: {
     flexDirection: "column",
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
+    gap: 6, // Reduced from 12 to 6
+    marginTop: 12, // Reduced from 24 to 12
+    marginBottom: 16, // Reduced from 32 to 16
   },
   cancelButton: {
     flex: 1,

@@ -383,21 +383,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: 24, // Increased padding for professional layout
+    paddingBottom: 120, // Increased bottom padding
   },
   
-  // Advanced recipe card
+  // Professional Coffee Recipe Card
   recipeCard: {
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    marginBottom: 16,
+    padding: 24, // Increased padding for spacious feel
+    borderRadius: 12, // More rounded for modern look
+    borderLeftWidth: 3, // Slightly thinner accent border
+    marginBottom: 20, // Increased margin
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle overall border
   },
   recipeHeader: {
     flexDirection: 'row',
@@ -470,17 +472,19 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   
-  // Live monitoring section
+  // Professional Live Monitoring Section
   monitoringSection: {
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    marginBottom: 16,
+    padding: 24, // Increased padding
+    borderRadius: 12, // More rounded
+    borderLeftWidth: 3, // Slightly thinner accent border
+    marginBottom: 20, // Increased margin
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle overall border
   },
   monitoringHeader: {
     flexDirection: 'row',
@@ -523,16 +527,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Professional action panel
+  // Professional Coffee Action Panel
   actionPanel: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    padding: 24, // Increased padding
+    borderRadius: 12, // More rounded
+    marginBottom: 20, // Increased margin
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle overall border
   },
   actionHeader: {
     flexDirection: 'row',

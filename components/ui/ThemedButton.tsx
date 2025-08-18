@@ -172,52 +172,66 @@ export function ThemedButton({
 }
 
 const styles = StyleSheet.create({
+  // Professional Button Base Style
   base: {
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    borderRadius: 6, // Slightly more refined
     flexDirection: "row",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
 
-  // Size variants
+  // Refined Size Variants for Professional Coffee Interface
   size_default: {
-    height: 44,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    height: 40, // Slightly smaller for more refined look
+    paddingHorizontal: 20,
+    paddingVertical: 0,
+    minWidth: 80,
   },
   size_sm: {
-    height: 36,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    height: 32,
+    paddingHorizontal: 16,
+    paddingVertical: 0,
+    minWidth: 64,
   },
   size_lg: {
-    height: 52,
+    height: 48,
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 0,
+    minWidth: 120,
   },
   size_icon: {
-    height: 44,
-    width: 44,
+    height: 40,
+    width: 40,
     paddingHorizontal: 0,
     paddingVertical: 0,
+    borderRadius: 8,
   },
 
-  // Text styles
+  // Refined Text Styles for Professional Typography
   text: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "500", // Slightly lighter for better readability
     textAlign: "center",
+    letterSpacing: 0.2, // Better spacing for professional look
   },
   text_default: {
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 20,
   },
   text_sm: {
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 18,
   },
   text_lg: {
-    fontSize: 18,
+    fontSize: 16,
+    lineHeight: 22,
   },
   text_icon: {
     fontSize: 16,
+    lineHeight: 20,
   },
 });

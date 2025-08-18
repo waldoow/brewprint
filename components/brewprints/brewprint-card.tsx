@@ -228,34 +228,40 @@ export function BrewprintCard({
 }
 
 const styles = StyleSheet.create({
-  // Advanced brewprint card styles
+  // Professional Brewprint Card for Advanced Coffee Users
   advancedBrewprintCard: {
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    marginBottom: 12,
+    padding: 20, // Increased padding for spacious professional feel
+    borderRadius: 12, // More rounded for modern look
+    borderLeftWidth: 3, // Slightly thinner accent border
+    marginBottom: 16, // Increased margin for better separation
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle overall border
   },
+  // Professional Coffee Recipe Header
   recipeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 16, // Increased spacing
   },
   recipeMain: {
     flex: 1,
   },
   recipeName: {
-    fontSize: 16,
-    marginBottom: 2,
+    fontSize: 17, // Larger for better readability
+    marginBottom: 3,
+    fontWeight: '600',
+    letterSpacing: -0.1,
   },
   recipeMethod: {
-    fontSize: 12,
+    fontSize: 13, // Slightly larger
     fontWeight: '500',
+    letterSpacing: 0.2,
   },
   recipeStatus: {
     alignItems: 'flex-end',
@@ -263,62 +269,65 @@ const styles = StyleSheet.create({
   statusLabel: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    letterSpacing: 0.8,
+    marginBottom: 3,
   },
   recipeDate: {
     fontSize: 11,
     fontWeight: '500',
     fontVariant: ['tabular-nums'],
+    letterSpacing: 0.1,
   },
   
-  // Parameters section
+  // Professional Parameters Grid
   parametersGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 12,
+    gap: 16, // Increased gap
+    marginBottom: 16, // Increased spacing
   },
   parameterItem: {
     flex: 1,
-    minWidth: '20%',
+    minWidth: '22%', // Slightly wider
   },
   parameterLabel: {
     fontSize: 10,
     fontWeight: '600',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
-    marginBottom: 2,
+    marginBottom: 4, // Increased spacing
   },
   parameterValue: {
-    fontSize: 13,
+    fontSize: 14, // Larger for better readability
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+    lineHeight: 18,
   },
   
-  // Metrics section
+  // Advanced Metrics for Coffee Professionals
   metricsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    paddingTop: 8,
+    gap: 14, // Increased gap
+    paddingTop: 12, // Increased padding
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(255, 255, 255, 0.08)', // More subtle border
   },
   metricItem: {
     flex: 1,
-    minWidth: '15%',
+    minWidth: '16%', // Slightly wider
   },
   metricLabel: {
     fontSize: 9,
     fontWeight: '600',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
-    marginBottom: 2,
+    marginBottom: 3, // Increased spacing
   },
   metricValue: {
-    fontSize: 11,
+    fontSize: 12, // Slightly larger
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+    lineHeight: 16,
   },
 });

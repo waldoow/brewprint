@@ -127,116 +127,122 @@ export function Header({
 }
 
 const styles = StyleSheet.create({
+  // Professional Coffee App Header Styles
+  
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 20,
-    borderRadius: 10,
-    display: "flex",
+    paddingHorizontal: 24, // Increased for better spacing
+    paddingTop: 32, // Reduced for cleaner look
+    paddingBottom: 16, // Reduced bottom padding
     flexDirection: "column",
-    justifyContent: "space-between",
-    gap: 16,
+    gap: 12, // Reduced gap for tighter layout
   },
   containerNoSpacing: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 0,
-    paddingBottom: 20,
-    borderRadius: 10,
-    display: "flex",
+    paddingBottom: 16,
     flexDirection: "column",
-    justifyContent: "space-between",
-    gap: 16,
+    gap: 12,
   },
-  // Scheduler-style header
+  
+  // Coffee Professional Scheduler Header
   schedulerHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 8,
+    alignItems: "flex-start", // Changed to flex-start for better alignment
+    paddingBottom: 4, // Reduced padding
   },
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 16, // Increased gap for better spacing
+    flex: 1,
   },
   rightSection: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8, // Reduced gap for icons
   },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 40, // Slightly smaller
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 22,
+    borderRadius: 8, // More square for professional look
+    backgroundColor: "rgba(255, 255, 255, 0.05)", // Subtle background
   },
   profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 8, // Matching icon buttons
     overflow: "hidden",
   },
   profileImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
   },
   profilePlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 8,
     backgroundColor: Colors.dark.cardBackground,
     alignItems: "center",
     justifyContent: "center",
   },
+  
+  // Professional Typography for Coffee App
   schedulerTitle: {
-    fontSize: 24,
+    fontSize: 26, // Larger for impact
     fontWeight: "600",
-    letterSpacing: -0.5,
+    letterSpacing: -0.8, // Tighter letter spacing
+    lineHeight: 30,
   },
   schedulerSubtitle: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginTop: 2,
+    fontSize: 13,
+    opacity: 0.6, // More subtle
+    marginTop: 1,
+    letterSpacing: 0.1,
   },
-  // Original styles
+  
+  // Refined Original Header Styles
   titleSection: {
-    display: "flex",
     flexDirection: "column",
-    gap: 4,
+    gap: 2, // Tighter gap
   },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 4,
-    gap: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 0,
+    gap: 12, // Increased gap
   },
   arrowCircle: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.light.icon + "20",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.08)", // More subtle background
+    borderRadius: 8, // Square corners for consistency
+    width: 36, // Smaller
+    height: 36,
   },
   backArrow: {
-    fontSize: 24,
-    fontWeight: "300",
+    fontSize: 20, // Smaller
+    fontWeight: "400",
   },
   backTitle: {
-    fontSize: 16,
-    opacity: 0.7,
+    fontSize: 15,
+    opacity: 0.6, // More subtle
+    fontWeight: "400",
   },
   title: {
-    fontSize: 32,
-    fontWeight: "700",
-    letterSpacing: -0.5,
-    marginBottom: 2,
+    fontSize: 28, // Slightly smaller for cleaner look
+    fontWeight: "600", // Lighter weight
+    letterSpacing: -0.6,
+    lineHeight: 32,
   },
   subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
+    fontSize: 15,
+    opacity: 0.6, // More subtle
     fontWeight: "400",
+    letterSpacing: 0.1,
   },
 });

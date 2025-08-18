@@ -24,17 +24,17 @@ export default function NewBrewprintScreen() {
 
   const handleSuccess = (brewprint: any) => {
     const message = initialData
-      ? "Recette dupliquée avec succès!"
-      : "Recette créée avec succès!";
+      ? "Recipe duplicated successfully!"
+      : "Recipe created successfully!";
     toast.success(message);
-    router.replace(`/brewprints/${brewprint.id}`);
+    router.push(`/brewprints/${brewprint.id}`);
   };
 
   const handleCancel = () => {
     router.back();
   };
 
-  const title = initialData ? "Dupliquer Recette" : "Nouvelle Recette";
+  const title = initialData ? "Duplicate Recipe" : "New Recipe";
 
   return (
     <ThemedView noBackground={false} style={styles.container}>

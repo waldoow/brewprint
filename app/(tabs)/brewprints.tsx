@@ -5,13 +5,17 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { ThemedTabs } from "@/components/ui/ThemedTabs";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { BrewprintsService, type Brewprint } from "@/lib/services";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { Alert, RefreshControl, StyleSheet } from "react-native";
 
-export default function BrewprintsScreen() {
+export default function BrewprintsTab() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "dark"];
   const [brewprints, setBrewprints] = useState<Brewprint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -82,7 +86,7 @@ export default function BrewprintsScreen() {
   };
 
   const handleNewBrewprint = () => {
-    router.push("/brewprints/new");
+    router.push("/(tabs)/new-brewprint");
   };
 
   const getEmptyMessage = () => {
@@ -103,13 +107,13 @@ export default function BrewprintsScreen() {
         return {
           title: "No Archived Recipes",
           description:
-            "Outdated or discontinued recipes will appear here for reference",
+            "Archive recipes that you no longer use but want to keep for reference",
         };
       default:
         return {
           title: "No Brewing Recipes",
           description:
-            "Import or create your first brewing recipe to start optimizing extraction parameters",
+            "Create your first brewing recipe to start perfecting your coffee",
         };
     }
   };
@@ -117,7 +121,7 @@ export default function BrewprintsScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
-        <Header title="Brewing Recipes" showBack={false} />
+        <Header title="Brewing Recipes" showBackButton={false} />
         <ThemedView style={styles.loadingContainer}>
           <ThemedText>Loading recipes...</ThemedText>
         </ThemedView>
@@ -139,23 +143,23 @@ export default function BrewprintsScreen() {
         onMenuPress={() => console.log("Menu pressed")}
         onProfilePress={() => console.log("Profile pressed")}
         onSearchPress={() => console.log("Search pressed")}
-        showTopSpacing={true}
       />
 
       <ThemedView style={styles.actionContainer}>
-        <ThemedView style={styles.tabsContainer}>
-          <ThemedTabs
-            items={tabOptions}
-            defaultValue={activeTab}
-            onValueChange={setActiveTab}
-          />
-        </ThemedView>
-
         <ThemedButton
-          size="sm"
-          onPress={handleNewBrewprint}
-          style={styles.newButton}
           title="New Recipe"
+          size="default"
+          variant="secondary"
+          onPress={handleNewBrewprint}
+          style={{ width: "100%" }}
+        />
+      </ThemedView>
+
+      <ThemedView style={styles.tabsContainer}>
+        <ThemedTabs
+          items={tabOptions}
+          defaultValue={activeTab}
+          onValueChange={setActiveTab}
         />
       </ThemedView>
 
@@ -165,36 +169,32 @@ export default function BrewprintsScreen() {
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
         }
       >
-        <ThemedView style={styles.content}>
-          {filteredBrewprints.length === 0 ? (
-            <ThemedView style={styles.emptyContainer}>
-              <ThemedText style={styles.emptyTitle}>
-                {getEmptyMessage().title}
-              </ThemedText>
-              <ThemedText style={styles.emptyDescription}>
-                {getEmptyMessage().description}
-              </ThemedText>
-              {activeTab === "all" && (
-                <ThemedButton
-                  onPress={handleNewBrewprint}
-                  style={styles.emptyButton}
-                >
-                  Create First Recipe
-                </ThemedButton>
-              )}
-            </ThemedView>
-          ) : (
-            <ThemedView noBackground style={styles.brewprintsList}>
-              {filteredBrewprints.map((brewprint) => (
-                <BrewprintCard
-                  key={brewprint.id}
-                  brewprint={brewprint}
-                  onPress={() => handleBrewprintPress(brewprint)}
-                />
-              ))}
-            </ThemedView>
-          )}
-        </ThemedView>
+        {filteredBrewprints.length === 0 ? (
+          <ThemedView style={styles.emptyContainer}>
+            <ThemedText type="subtitle" style={styles.emptyTitle}>
+              {getEmptyMessage().title}
+            </ThemedText>
+            <ThemedText style={styles.emptyDescription}>
+              {getEmptyMessage().description}
+            </ThemedText>
+            <ThemedButton
+              onPress={handleNewBrewprint}
+              style={styles.emptyButton}
+            >
+              Create Your First Recipe
+            </ThemedButton>
+          </ThemedView>
+        ) : (
+          <ThemedView style={styles.grid}>
+            {filteredBrewprints.map((brewprint) => (
+              <BrewprintCard
+                key={brewprint.id}
+                brewprint={brewprint}
+                onPress={() => handleBrewprintPress(brewprint)}
+              />
+            ))}
+          </ThemedView>
+        )}
       </ThemedScrollView>
     </ThemedView>
   );
@@ -204,30 +204,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  actionContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24, // Increased for consistency
-    paddingVertical: 12, // Increased for better spacing
-    gap: 16, // Increased gap
-  },
-  tabsContainer: {
-    flex: 1,
-  },
-  newButton: {
-    minWidth: 100,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 24, // Increased for professional spacing
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  actionContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    gap: 12,
+    marginBottom: 16,
+    justifyContent: "flex-end",
+  },
+  tabsContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  newButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+    minWidth: 120,
+  },
+  newButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  scrollView: {
+    flex: 1,
+  },
+  grid: {
+    padding: 16,
+    gap: 16,
   },
   emptyContainer: {
     flex: 1,
@@ -237,22 +248,15 @@ const styles = StyleSheet.create({
     paddingVertical: 64,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
     textAlign: "center",
     marginBottom: 8,
   },
   emptyDescription: {
-    fontSize: 14,
     textAlign: "center",
     opacity: 0.7,
-    lineHeight: 20,
     marginBottom: 24,
   },
   emptyButton: {
     minWidth: 200,
-  },
-  brewprintsList: {
-    gap: 16, // Increased gap for better separation
   },
 });

@@ -6,13 +6,21 @@ import { ThemedInput } from "@/components/ui/ThemedInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { supabase } from "@/lib/supabase";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -36,7 +44,7 @@ export default function ResultsScreen() {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
 
-  const { control, handleSubmit, watch } = useForm<ResultsForm>({
+  const form = useForm<ResultsForm>({
     defaultValues: {
       rating: 0,
       notes: "",
@@ -95,12 +103,17 @@ export default function ResultsScreen() {
               Rate your brew
             </ThemedText>
 
-            <Controller
-              control={control}
+            <FormField
+              control={form.control}
               name="rating"
               rules={{ required: true, min: 1 }}
-              render={({ field: { onChange, value } }) => (
-                <RatingInput value={value} onChange={onChange} size="large" />
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <RatingInput value={field.value} onChange={field.onChange} size="large" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
@@ -120,17 +133,23 @@ export default function ResultsScreen() {
               Tasting notes
             </ThemedText>
 
-            <Controller
-              control={control}
+            <FormField
+              control={form.control}
               name="notes"
-              render={({ field: { onChange, value } }) => (
-                <ThemedTextArea
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Describe the taste, aroma, body, and any adjustments for next time..."
-                  numberOfLines={6}
-                  style={styles.textArea}
-                />
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ThemedTextArea
+                      value={field.value}
+                      onChangeText={field.onChange}
+                      onBlur={field.onBlur}
+                      placeholder="Describe the taste, aroma, body, and any adjustments for next time..."
+                      numberOfLines={6}
+                      style={styles.textArea}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
           </View>
@@ -146,19 +165,25 @@ export default function ResultsScreen() {
                 <ThemedText type="default" style={styles.measurementLabel}>
                   TDS %
                 </ThemedText>
-                <Controller
-                  control={control}
+                <FormField
+                  control={form.control}
                   name="tds"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      value={value?.toString()}
-                      onChangeText={(text) =>
-                        onChange(parseFloat(text) || undefined)
-                      }
-                      keyboardType="decimal-pad"
-                      placeholder="1.35"
-                      style={styles.measurementInput}
-                    />
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          value={field.value?.toString()}
+                          onChangeText={(text) =>
+                            field.onChange(parseFloat(text) || undefined)
+                          }
+                          onBlur={field.onBlur}
+                          keyboardType="decimal-pad"
+                          placeholder="1.35"
+                          style={styles.measurementInput}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </View>
@@ -167,19 +192,25 @@ export default function ResultsScreen() {
                 <ThemedText type="default" style={styles.measurementLabel}>
                   Extraction %
                 </ThemedText>
-                <Controller
-                  control={control}
+                <FormField
+                  control={form.control}
                   name="extraction"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      value={value?.toString()}
-                      onChangeText={(text) =>
-                        onChange(parseFloat(text) || undefined)
-                      }
-                      keyboardType="decimal-pad"
-                      placeholder="20.5"
-                      style={styles.measurementInput}
-                    />
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          value={field.value?.toString()}
+                          onChangeText={(text) =>
+                            field.onChange(parseFloat(text) || undefined)
+                          }
+                          onBlur={field.onBlur}
+                          keyboardType="decimal-pad"
+                          placeholder="20.5"
+                          style={styles.measurementInput}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
                 />
               </View>
@@ -190,7 +221,7 @@ export default function ResultsScreen() {
           <View style={styles.actions}>
             <ThemedButton
               title="Save & Finish"
-              onPress={handleSubmit(onSubmit)}
+              onPress={form.handleSubmit(onSubmit)}
               loading={saving}
               disabled={rating === 0}
               variant="default"
@@ -216,11 +247,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 50, // Reduced from 100 to 50
   },
   section: {
-    margin: 16,
-    padding: 20,
+    margin: 8, // Reduced from 16 to 8
+    padding: 10, // Reduced from 20 to 10
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -230,11 +261,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontWeight: "600",
-    marginBottom: 16,
+    marginBottom: 8, // Reduced from 16 to 8
   },
   ratingText: {
     textAlign: "center",
-    marginTop: 12,
+    marginTop: 6, // Reduced from 12 to 6
     opacity: 0.6,
   },
   textArea: {
@@ -242,20 +273,20 @@ const styles = StyleSheet.create({
   },
   measurementsRow: {
     flexDirection: "row",
-    gap: 16,
+    gap: 8, // Reduced from 16 to 8
   },
   measurementItem: {
     flex: 1,
   },
   measurementLabel: {
     opacity: 0.6,
-    marginBottom: 8,
+    marginBottom: 4, // Reduced from 8 to 4
   },
   measurementInput: {
     textAlign: "center",
   },
   actions: {
-    padding: 16,
-    gap: 12,
+    padding: 8, // Reduced from 16 to 8
+    gap: 6, // Reduced from 12 to 6
   },
 });

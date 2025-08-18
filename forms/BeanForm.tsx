@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { BeansService, type BeanInput } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -16,6 +16,15 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 
 // Bean form validation schema
 const beanFormSchema = z.object({
@@ -111,12 +120,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<BeanFormData>({
+  const form = useForm<BeanFormData>({
     resolver: zodResolver(beanFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -191,7 +195,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
       }
 
       toast.success("Bean added successfully!");
-      reset();
+      form.reset();
       onSuccess?.();
     } catch (error) {
       console.error("Error adding bean:", error);
@@ -202,7 +206,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
   };
 
   const handleCancel = () => {
-    reset();
+    form.reset();
     onCancel?.();
   };
 
@@ -220,73 +224,92 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         paddingHorizontal={0}
         style={styles.scrollView}
       >
-        <ThemedView style={styles.form} noBackground>
-          {/* Basic Information Section - Required Fields Only */}
-          <ThemedCollapsible
-            title="Basic Information"
-            subtitle="Essential coffee details"
-            defaultOpen={true}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Bean Name *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.name?.message}
-                  placeholder="Ethiopian Yirgacheffe"
-                />
-              )}
-            />
+        <Form {...form}>
+          <ThemedView style={styles.form} noBackground>
+            {/* Basic Information Section - Required Fields Only */}
+            <ThemedCollapsible
+              title="Basic Information"
+              subtitle="Essential coffee details"
+              defaultOpen={true}
+              variant="ghost"
+              showBorder={false}
+              noPadding={true}
+              noBackground={true}
+            >
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bean Name *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Ethiopian Yirgacheffe"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="origin"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Origin *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.origin?.message}
-                  placeholder="Ethiopia"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="origin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Origin *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Ethiopia"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="process"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Process *"
-                  options={processOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.process?.message}
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="process"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Process *</FormLabel>
+                    <FormControl>
+                      <ThemedSelect
+                        options={processOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="roast_level"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Roast Level *"
-                  options={roastLevelOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.roast_level?.message}
-                />
-              )}
-            />
-          </ThemedCollapsible>
+              <FormField
+                control={form.control}
+                name="roast_level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Roast Level *</FormLabel>
+                    <FormControl>
+                      <ThemedSelect
+                        options={roastLevelOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </ThemedCollapsible>
 
           {/* Advanced Parameters Section - All Optional Fields */}
           <ThemedCollapsible
@@ -298,119 +321,158 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
             noPadding={true}
             noBackground={true}
           >
-            <Controller
-              control={control}
-              name="farm"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Farm"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.farm?.message}
-                  placeholder="Chelchele Washing Station"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="farm"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Farm</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Chelchele Washing Station"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="region"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Region"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.region?.message}
-                  placeholder="Yirgacheffe"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="region"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Region</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Yirgacheffe"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="altitude"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Altitude (meters)"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.altitude?.message}
-                  placeholder="1800"
-                  type="number"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="altitude"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Altitude (meters)</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="1800"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="variety"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Variety"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.variety?.message}
-                  placeholder="Heirloom"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="variety"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Variety</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Heirloom"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="tasting_notes"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Tasting Notes"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.tasting_notes?.message}
-                  placeholder="fruity, bright, citrus"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="tasting_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tasting Notes</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="fruity, bright, citrus"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="official_description"
-              render={({ field: { onChange, value } }) => (
-                <ThemedTextArea
-                  label="Official Description"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.official_description?.message}
-                  placeholder="Roaster's official tasting notes and description..."
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="official_description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Official Description</FormLabel>
+                    <FormControl>
+                      <ThemedTextArea
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Roaster's official tasting notes and description..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="my_notes"
-              render={({ field: { onChange, value } }) => (
-                <ThemedTextArea
-                  label="My Notes"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.my_notes?.message}
-                  placeholder="Your personal notes about this bean..."
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="my_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>My Notes</FormLabel>
+                    <FormControl>
+                      <ThemedTextArea
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Your personal notes about this bean..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="rating"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Rating"
-                  options={ratingOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.rating?.message}
-                  placeholder="Rate this bean"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="rating"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rating</FormLabel>
+                    <FormControl>
+                      <ThemedSelect
+                        options={ratingOptions}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Rate this bean"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
           </ThemedCollapsible>
 
           {/* Purchase & Inventory Section - Required Fields */}
@@ -423,112 +485,143 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
             noPadding={true}
             noBackground={true}
           >
-            <Controller
-              control={control}
-              name="purchase_date"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Purchase Date *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.purchase_date?.message}
-                  placeholder="YYYY-MM-DD"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="purchase_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Purchase Date *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="YYYY-MM-DD"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="roast_date"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Roast Date *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.roast_date?.message}
-                  placeholder="YYYY-MM-DD"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="roast_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Roast Date *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="YYYY-MM-DD"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="supplier"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Supplier *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.supplier?.message}
-                  placeholder="Blue Bottle Coffee"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="supplier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Supplier *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Blue Bottle Coffee"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="cost"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Cost ($) *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.cost?.message}
-                  placeholder="24.95"
-                  type="number"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost ($) *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="24.95"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="total_grams"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Total Grams *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.total_grams?.message}
-                  placeholder="340"
-                  type="number"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="total_grams"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Grams *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="340"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <Controller
-              control={control}
-              name="remaining_grams"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Remaining Grams *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.remaining_grams?.message}
-                  placeholder="340"
-                  type="number"
-                />
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="remaining_grams"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Remaining Grams *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="340"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
           </ThemedCollapsible>
 
           {/* Form Actions */}
           <ThemedView style={styles.actions} noBackground>
-            <ThemedButton
-              title="Add Bean"
-              onPress={handleSubmit(onSubmit)}
-              style={styles.submitButton}
-              loading={isLoading}
-              disabled={isLoading}
-            />
-            <ThemedButton
-              title="Cancel"
-              variant="outline"
-              onPress={handleCancel}
-              style={styles.cancelButton}
-              disabled={isLoading}
-            />
+              <ThemedButton
+                title="Add Bean"
+                onPress={form.handleSubmit(onSubmit)}
+                style={styles.submitButton}
+                loading={isLoading}
+                disabled={isLoading}
+              />
+              <ThemedButton
+                title="Cancel"
+                variant="outline"
+                onPress={handleCancel}
+                style={styles.cancelButton}
+                disabled={isLoading}
+              />
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
+        </Form>
       </ThemedScrollView>
     </ThemedView>
   );
@@ -543,13 +636,13 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 16,
-    gap: 16,
+    gap: 8, // Reduced from 16 to 8
   },
   actions: {
     flexDirection: "column",
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
+    gap: 6, // Reduced from 12 to 6
+    marginTop: 12, // Reduced from 24 to 12
+    marginBottom: 16, // Reduced from 32 to 16
   },
   cancelButton: {
     flex: 1,

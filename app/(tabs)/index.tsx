@@ -246,7 +246,7 @@ export default function HomeScreen() {
         {/* Analytics Overview */}
         <View style={styles.section}>
           <View style={[styles.analyticsCard, { backgroundColor: colors.cardBackground }]}>
-            <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
+            <ThemedText type="heading" style={[styles.cardTitle, { color: colors.textPrimary }]}>
               Brewing Analytics
             </ThemedText>
             
@@ -587,6 +587,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Professional Coffee App Layout
   container: {
     flex: 1,
   },
@@ -594,64 +595,73 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    paddingHorizontal: 20, // Increased for better spacing
+    marginBottom: 20, // Increased for better separation
   },
   
-  // Card styles
+  // Refined Card System for Professional Coffee Interface
   analyticsCard: {
-    padding: 20,
-    borderRadius: 8,
+    padding: 24, // Increased padding for spacious feel
+    borderRadius: 12, // More rounded for modern look
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle border
   },
   inventoryCard: {
-    padding: 20,
-    borderRadius: 8,
+    padding: 24,
+    borderRadius: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
+  // Professional Card System Layout
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20, // Increased spacing
   },
   cardTitle: {
     fontWeight: '500',
-    fontSize: 16,
+    fontSize: 17, // Slightly larger
+    letterSpacing: -0.1,
   },
   cardAction: {
     fontSize: 14,
     fontWeight: '500',
+    letterSpacing: 0.1,
   },
   
-  // Analytics styles
+  // Professional Analytics Grid
   analyticsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
+    gap: 20, // Increased gap
   },
   analyticsItem: {
     flex: 1,
-    minWidth: '40%',
+    minWidth: '42%', // Slightly wider
   },
   analyticsLabel: {
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: 11,
+    marginBottom: 6, // Increased spacing
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    fontWeight: '500',
   },
   analyticsValue: {
-    fontSize: 20,
+    fontSize: 22, // Larger for better readability
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+    lineHeight: 26,
   },
   
   // Inventory styles
@@ -672,19 +682,19 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   
-  // Brewprint card styles
+  // Professional Brewprint Card for Coffee Professionals  
   brewprintCard: {
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
     overflow: 'hidden',
   },
   brewprintContent: {
-    padding: 12,
+    padding: 20, // Increased padding for spacious feel
   },
   brewprintHeader: {
     flexDirection: 'row',
@@ -743,13 +753,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
   },
+  // Professional Action System for Coffee Workflow
   brewprintActions: {
     flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    gap: 12, // Increased gap for better spacing
+    paddingHorizontal: 20, // Matching content padding
+    paddingVertical: 16, // Increased padding
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    borderTopColor: 'rgba(255, 255, 255, 0.08)', // More subtle border
+    backgroundColor: 'rgba(255, 255, 255, 0.02)', // Subtle background difference
   },
   brewprintActionButton: {
     flex: 1,

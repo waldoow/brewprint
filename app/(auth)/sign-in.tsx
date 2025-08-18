@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +15,14 @@ import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedInput } from "@/components/ui/ThemedInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 
 // Zod schema for sign-in validation
 const signInSchema = z.object({
@@ -43,12 +51,7 @@ export default function SignIn({
 }: SignInProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<SignInFormData>({
+  const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
@@ -62,14 +65,14 @@ export default function SignIn({
 
       if (onSignIn) {
         await onSignIn(data);
-        reset();
+        form.reset();
       } else {
         // Mock sign-in for demo
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast.success("Welcome back!", {
           description: "You have successfully signed in.",
         });
-        reset();
+        form.reset();
       }
     } catch (error) {
       // Let the parent component handle the error toast
@@ -102,73 +105,81 @@ export default function SignIn({
               </ThemedView>
 
               {/* Form */}
-              <ThemedView style={styles.form}>
-                {/* Email Input */}
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.email?.message}
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+              <Form {...form}>
+                <ThemedView style={styles.form}>
+                  {/* Email Input */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            type="email"
+                            placeholder="Enter your email"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Password Input */}
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.password?.message}
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+                  {/* Password Input */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            type="password"
+                            placeholder="Enter your password"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Forgot Password */}
-                <ThemedButton
-                  variant="link"
-                  title="Forgot your password?"
-                  onPress={onForgotPassword}
-                  style={styles.forgotPassword}
-                />
-
-                {/* Sign In Button */}
-                <ThemedButton
-                  title={isLoading ? "Signing In..." : "Sign In"}
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={isLoading}
-                  loading={isLoading}
-                  style={styles.signInButton}
-                />
-
-                {/* Sign Up Link */}
-                <ThemedView style={styles.signUpContainer}>
-                  <ThemedText style={styles.signUpText}>
-                    Don&apos;t have an account?{" "}
-                  </ThemedText>
+                  {/* Forgot Password */}
                   <ThemedButton
                     variant="link"
-                    title="Sign Up"
-                    onPress={onNavigateToSignUp}
+                    title="Forgot your password?"
+                    onPress={onForgotPassword}
+                    style={styles.forgotPassword}
+                  />
+
+                  {/* Sign In Button */}
+                  <ThemedButton
+                    title={isLoading ? "Signing In..." : "Sign In"}
+                    onPress={form.handleSubmit(onSubmit)}
+                    disabled={isLoading}
+                    loading={isLoading}
+                    style={styles.signInButton}
                   />
                 </ThemedView>
+              </Form>
+
+              {/* Sign Up Link */}
+              <ThemedView style={styles.signUpContainer}>
+                <ThemedText style={styles.signUpText}>
+                  Don&apos;t have an account?{" "}
+                </ThemedText>
+                <ThemedButton
+                  variant="link"
+                  title="Sign Up"
+                  onPress={onNavigateToSignUp}
+                />
               </ThemedView>
             </ThemedView>
           </ScrollView>

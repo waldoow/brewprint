@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react-native";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,7 +9,6 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -18,6 +17,14 @@ import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedInput } from "@/components/ui/ThemedInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -44,13 +51,7 @@ export default function ForgotPassword({
   const [emailSent, setEmailSent] = useState(false);
   const colorScheme = useColorScheme();
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    getValues,
-  } = useForm<ForgotPasswordFormData>({
+  const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
@@ -81,7 +82,7 @@ export default function ForgotPassword({
   };
 
   const handleResendEmail = async () => {
-    const email = getValues("email");
+    const email = form.getValues("email");
     if (email) {
       await onSubmit({ email });
     }
@@ -112,40 +113,44 @@ export default function ForgotPassword({
               </ThemedView>
 
               {/* Form */}
-              <ThemedView style={styles.form}>
-                {!emailSent ? (
-                  <>
-                    {/* Email Input */}
-                    <Controller
-                      control={control}
-                      name="email"
-                      render={({ field: { onChange, onBlur, value } }) => (
-                        <ThemedInput
-                          label="Email"
-                          type="email"
-                          placeholder="Enter your email"
-                          value={value}
-                          onChangeText={onChange}
-                          onBlur={onBlur}
-                          error={errors.email?.message}
-                          editable={!isLoading}
-                          containerStyle={styles.inputContainer}
-                        />
-                      )}
-                    />
+              <Form {...form}>
+                <ThemedView style={styles.form}>
+                  {!emailSent ? (
+                    <>
+                      {/* Email Input */}
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <ThemedInput
+                                type="email"
+                                placeholder="Enter your email"
+                                value={field.value}
+                                onChangeText={field.onChange}
+                                onBlur={field.onBlur}
+                                editable={!isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    {/* Reset Password Button */}
-                    <ThemedButton
-                      title={
-                        isLoading ? "Sending..." : "Send Reset Instructions"
-                      }
-                      onPress={handleSubmit(onSubmit)}
-                      disabled={isLoading}
-                      loading={isLoading}
-                      style={styles.resetButton}
-                    />
-                  </>
-                ) : (
+                      {/* Reset Password Button */}
+                      <ThemedButton
+                        title={
+                          isLoading ? "Sending..." : "Send Reset Instructions"
+                        }
+                        onPress={form.handleSubmit(onSubmit)}
+                        disabled={isLoading}
+                        loading={isLoading}
+                        style={styles.resetButton}
+                      />
+                    </>
+                  ) : (
                   <ThemedView style={styles.emailSentContainer}>
                     {/* Success Message */}
                     <ThemedView style={styles.successMessage}>
@@ -166,10 +171,10 @@ export default function ForgotPassword({
                       style={styles.resendButton}
                     />
                   </ThemedView>
-                )}
+                  )}
 
-                {/* Back to Sign In Link */}
-                <ThemedView style={styles.backToSignInContainer}>
+                  {/* Back to Sign In Link */}
+                  <ThemedView style={styles.backToSignInContainer}>
                   <TouchableOpacity
                     onPress={onNavigateToSignIn}
                     disabled={isLoading}
@@ -182,9 +187,10 @@ export default function ForgotPassword({
                     <ThemedText type="link" style={styles.backToSignInText}>
                       Back to Sign In
                     </ThemedText>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
+                  </ThemedView>
                 </ThemedView>
-              </ThemedView>
+              </Form>
             </ThemedView>
           </ScrollView>
         </KeyboardAvoidingView>

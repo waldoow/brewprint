@@ -385,8 +385,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: 24, // Increased padding for professional layout
+    paddingBottom: 40, // Increased bottom padding
   },
   loadingContainer: {
     flex: 1,
@@ -399,10 +399,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   descriptionCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    backgroundColor: "rgba(255, 255, 255, 0.03)", // Slightly more visible
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
+    padding: 20, // Increased padding
+    marginBottom: 20, // Increased margin
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle border
   },
   descriptionText: {
     fontSize: 14,
@@ -412,9 +414,9 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    marginTop: 8,
-    marginBottom: 24,
+    gap: 16, // Increased gap for better spacing
+    marginTop: 12, // Increased margin
+    marginBottom: 32, // Increased bottom margin
   },
   actionButton: {
     flex: 1,
@@ -424,11 +426,11 @@ const styles = StyleSheet.create({
     minWidth: "100%",
   },
   dangerZone: {
-    backgroundColor: "rgba(255, 0, 0, 0.05)",
+    backgroundColor: "rgba(220, 20, 60, 0.06)", // Using crimson with better opacity
     borderRadius: 12,
-    padding: 16,
+    padding: 20, // Increased padding
     borderWidth: 1,
-    borderColor: "rgba(255, 0, 0, 0.2)",
+    borderColor: "rgba(220, 20, 60, 0.15)", // More subtle border with crimson
   },
   dangerZoneTitle: {
     fontSize: 14,

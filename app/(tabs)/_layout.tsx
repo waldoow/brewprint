@@ -31,15 +31,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "dark"].primary,
-        tabBarInactiveTintColor: Colors[colorScheme ?? "dark"].textSecondary,
+        tabBarActiveTintColor: Colors[colorScheme ?? "dark"].accent, // Using purple accent color
+        tabBarInactiveTintColor: Colors[colorScheme ?? "dark"].textTertiary, // More subtle inactive color
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "dark"].surface,
-          borderTopColor: Colors[colorScheme ?? "dark"].border,
+          borderTopColor: Colors[colorScheme ?? "dark"].borderSubtle, // More subtle border
           borderTopWidth: 1,
-          paddingTop: 8,
-          paddingBottom: Platform.OS === "ios" ? 20 : 8,
-          height: Platform.OS === "ios" ? 84 : 60,
+          paddingTop: 12, // Increased top padding
+          paddingBottom: Platform.OS === "ios" ? 24 : 12, // Increased bottom padding
+          height: Platform.OS === "ios" ? 88 : 64, // Increased height for better proportions
+        },
+        tabBarLabelStyle: {
+          fontSize: 11, // Slightly smaller for professional look
+          fontWeight: "500",
+          letterSpacing: 0.2,
+          marginTop: 2, // Added margin for better spacing
         },
         headerShown: false,
         tabBarButton: HapticTab,
@@ -53,6 +59,15 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="brewprints"
+        options={{
+          title: "Brewprints",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="cup.and.saucer.fill" color={color} />
           ),
         }}
       />
@@ -81,6 +96,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="gearshape.fill" color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="new-brewprint"
+        options={{
+          href: null, // This hides the tab from the tab bar
         }}
       />
     </Tabs>
