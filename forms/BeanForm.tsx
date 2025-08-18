@@ -16,6 +16,7 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedDatePicker } from "@/components/ui/ThemedDatePicker";
 import {
   Form,
   FormControl,
@@ -53,8 +54,8 @@ const beanFormSchema = z.object({
   variety: z.string().optional(),
 
   // Purchase & Inventory
-  purchase_date: z.string().min(1, "Purchase date is required"),
-  roast_date: z.string().min(1, "Roast date is required"),
+  purchase_date: z.date({ required_error: "Purchase date is required" }),
+  roast_date: z.date({ required_error: "Roast date is required" }),
   supplier: z.string().min(1, "Supplier is required"),
   cost: z.string().min(1, "Cost is required"),
   total_grams: z.string().min(1, "Total grams is required"),
@@ -130,10 +131,8 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
       altitude: initialData?.altitude || "",
       process: initialData?.process || "washed",
       variety: initialData?.variety || "",
-      purchase_date:
-        initialData?.purchase_date || new Date().toISOString().split("T")[0],
-      roast_date:
-        initialData?.roast_date || new Date().toISOString().split("T")[0],
+      purchase_date: initialData?.purchase_date ? new Date(initialData.purchase_date) : new Date(),
+      roast_date: initialData?.roast_date ? new Date(initialData.roast_date) : new Date(),
       supplier: initialData?.supplier || "",
       cost: initialData?.cost || "",
       total_grams: initialData?.total_grams || "",
@@ -171,8 +170,8 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         altitude: data.altitude ? parseInt(data.altitude) : undefined,
         process: data.process,
         variety: data.variety || undefined,
-        purchase_date: data.purchase_date,
-        roast_date: data.roast_date,
+        purchase_date: data.purchase_date ? data.purchase_date.toISOString().split('T')[0] : undefined,
+        roast_date: data.roast_date ? data.roast_date.toISOString().split('T')[0] : undefined,
         supplier: data.supplier,
         cost: parseFloat(data.cost),
         total_grams: parseInt(data.total_grams),
@@ -492,11 +491,12 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
                   <FormItem>
                     <FormLabel>Purchase Date *</FormLabel>
                     <FormControl>
-                      <ThemedInput
+                      <ThemedDatePicker
                         value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="YYYY-MM-DD"
+                        onDateChange={field.onChange}
+                        placeholder="Select purchase date"
+                        error={form.formState.errors.purchase_date?.message}
+                        maximumDate={new Date()}
                       />
                     </FormControl>
                     <FormMessage />
@@ -511,11 +511,12 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
                   <FormItem>
                     <FormLabel>Roast Date *</FormLabel>
                     <FormControl>
-                      <ThemedInput
+                      <ThemedDatePicker
                         value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="YYYY-MM-DD"
+                        onDateChange={field.onChange}
+                        placeholder="Select roast date"
+                        error={form.formState.errors.roast_date?.message}
+                        maximumDate={new Date()}
                       />
                     </FormControl>
                     <FormMessage />

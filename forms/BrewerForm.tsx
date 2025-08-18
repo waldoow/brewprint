@@ -15,6 +15,7 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import { ThemedDatePicker } from "@/components/ui/ThemedDatePicker";
 import {
   Form,
   FormControl,
@@ -68,12 +69,12 @@ const brewerFormSchema = z.object({
   optimal_grind_max: z.string().optional(),
 
   // Purchase & Care
-  purchase_date: z.string().optional(),
+  purchase_date: z.date().optional(),
   purchase_price: z.string().optional(),
   maintenance_schedule: z
     .enum(["daily", "weekly", "monthly", "quarterly", "annually"])
     .optional(),
-  last_maintenance: z.string().optional(),
+  last_maintenance: z.date().optional(),
   maintenance_notes: z.string().optional(),
 
   // Status
@@ -172,10 +173,10 @@ export function BrewerForm({
       optimal_temp_max: initialData?.optimal_temp_max || "",
       optimal_grind_min: initialData?.optimal_grind_min || "",
       optimal_grind_max: initialData?.optimal_grind_max || "",
-      purchase_date: initialData?.purchase_date || "",
+      purchase_date: initialData?.purchase_date ? new Date(initialData.purchase_date) : undefined,
       purchase_price: initialData?.purchase_price || "",
       maintenance_schedule: initialData?.maintenance_schedule || "weekly",
-      last_maintenance: initialData?.last_maintenance || "",
+      last_maintenance: initialData?.last_maintenance ? new Date(initialData.last_maintenance) : undefined,
       maintenance_notes: initialData?.maintenance_notes || "",
       condition: initialData?.condition || "excellent",
       location: initialData?.location || "",
@@ -229,12 +230,12 @@ export function BrewerForm({
                 parseFloat(data.optimal_grind_max),
               ]
             : undefined,
-        purchase_date: data.purchase_date || undefined,
+        purchase_date: data.purchase_date ? data.purchase_date.toISOString().split('T')[0] : undefined,
         purchase_price: data.purchase_price
           ? parseFloat(data.purchase_price)
           : undefined,
         maintenance_schedule: data.maintenance_schedule || undefined,
-        last_maintenance: data.last_maintenance || undefined,
+        last_maintenance: data.last_maintenance ? data.last_maintenance.toISOString().split('T')[0] : undefined,
         maintenance_notes: data.maintenance_notes || undefined,
         condition: data.condition,
         location: data.location || undefined,
@@ -579,15 +580,15 @@ export function BrewerForm({
               <Controller
                 control={control}
                 name="purchase_date"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
+                render={({ field: { onChange, value } }) => (
+                  <ThemedDatePicker
                     label="Purchase Date"
-                    placeholder="YYYY-MM-DD"
+                    placeholder="Select purchase date"
                     value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
+                    onDateChange={onChange}
                     error={errors.purchase_date?.message}
                     style={styles.input}
+                    maximumDate={new Date()}
                   />
                 )}
               />
@@ -627,15 +628,15 @@ export function BrewerForm({
               <Controller
                 control={control}
                 name="last_maintenance"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <ThemedInput
+                render={({ field: { onChange, value } }) => (
+                  <ThemedDatePicker
                     label="Last Maintenance"
-                    placeholder="YYYY-MM-DD"
+                    placeholder="Select last maintenance date"
                     value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
+                    onDateChange={onChange}
                     error={errors.last_maintenance?.message}
                     style={styles.input}
+                    maximumDate={new Date()}
                   />
                 )}
               />
