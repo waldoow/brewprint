@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { BeansService, type BeanInput } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";

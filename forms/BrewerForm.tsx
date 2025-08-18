@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { BrewersService, type BrewerInput } from "@/lib/services/brewers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -146,7 +146,14 @@ export function BrewerForm({
 }: BrewerFormProps) {
   const { user } = useAuth();
 
-  const form = useForm<BrewerFormData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+    reset,
+  } = useForm<BrewerFormData>({
     resolver: zodResolver(brewerFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -256,7 +263,7 @@ export function BrewerForm({
             : "Brewer created successfully!"
         );
         onSuccess(result.data);
-        form.reset();
+        reset();
       } else {
         toast.error(result.error || "Failed to save brewer");
       }
@@ -267,7 +274,7 @@ export function BrewerForm({
   };
 
   const handleCancel = () => {
-    form.reset();
+    reset();
     onCancel();
   };
 
@@ -281,7 +288,7 @@ export function BrewerForm({
           {/* Core Fields - Always Visible */}
           <ThemedView style={styles.section}>
             <Controller
-              control={form.control}
+              control={control}
               name="name"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ThemedInput
@@ -297,7 +304,7 @@ export function BrewerForm({
             />
 
             <Controller
-              control={form.control}
+              control={control}
               name="type"
               render={({ field: { onChange, value } }) => (
                 <ThemedSelect
@@ -312,7 +319,7 @@ export function BrewerForm({
             />
 
             <Controller
-              control={form.control}
+              control={control}
               name="brand"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ThemedInput
@@ -328,7 +335,7 @@ export function BrewerForm({
             />
 
             <Controller
-              control={form.control}
+              control={control}
               name="model"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ThemedInput
@@ -344,7 +351,7 @@ export function BrewerForm({
             />
 
             <Controller
-              control={form.control}
+              control={control}
               name="size"
               render={({ field: { onChange, onBlur, value } }) => (
                 <ThemedInput
@@ -360,7 +367,7 @@ export function BrewerForm({
             />
 
             <Controller
-              control={form.control}
+              control={control}
               name="condition"
               render={({ field: { onChange, value } }) => (
                 <ThemedSelect
@@ -380,7 +387,7 @@ export function BrewerForm({
             <ThemedView style={styles.section}>
               {/* Physical Characteristics */}
               <Controller
-                control={form.control}
+                control={control}
                 name="material"
                 render={({ field: { onChange, value } }) => (
                   <ThemedSelect
@@ -395,7 +402,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="filter_type"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -411,7 +418,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="capacity_ml"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -430,7 +437,7 @@ export function BrewerForm({
               {/* Optimal Brewing Parameters */}
               <ThemedView style={styles.rangeContainer}>
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_dose_min"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -446,7 +453,7 @@ export function BrewerForm({
                   )}
                 />
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_dose_max"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -465,7 +472,7 @@ export function BrewerForm({
 
               <ThemedView style={styles.rangeContainer}>
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_ratio_min"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -481,7 +488,7 @@ export function BrewerForm({
                   )}
                 />
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_ratio_max"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -500,7 +507,7 @@ export function BrewerForm({
 
               <ThemedView style={styles.rangeContainer}>
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_temp_min"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -516,7 +523,7 @@ export function BrewerForm({
                   )}
                 />
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_temp_max"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -535,7 +542,7 @@ export function BrewerForm({
 
               <ThemedView style={styles.rangeContainer}>
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_grind_min"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -551,7 +558,7 @@ export function BrewerForm({
                   )}
                 />
                 <Controller
-                  control={form.control}
+                  control={control}
                   name="optimal_grind_max"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <ThemedInput
@@ -570,7 +577,7 @@ export function BrewerForm({
 
               {/* Purchase & Maintenance */}
               <Controller
-                control={form.control}
+                control={control}
                 name="purchase_date"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -586,7 +593,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="purchase_price"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -603,7 +610,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="maintenance_schedule"
                 render={({ field: { onChange, value } }) => (
                   <ThemedSelect
@@ -618,7 +625,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="last_maintenance"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -634,7 +641,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="maintenance_notes"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedTextArea
@@ -652,7 +659,7 @@ export function BrewerForm({
 
               {/* Location */}
               <Controller
-                control={form.control}
+                control={control}
                 name="location"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedInput
@@ -669,7 +676,7 @@ export function BrewerForm({
 
               {/* Notes & Tips */}
               <Controller
-                control={form.control}
+                control={control}
                 name="notes"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedTextArea
@@ -686,7 +693,7 @@ export function BrewerForm({
               />
 
               <Controller
-                control={form.control}
+                control={control}
                 name="brewing_tips"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <ThemedTextArea
@@ -715,7 +722,7 @@ export function BrewerForm({
             <ThemedButton
               title={isEditing ? "Update Brewer" : "Create Brewer"}
               onPress={handleSubmit(handleFormSubmit)}
-              loading={form.formState.isSubmitting}
+              loading={isSubmitting}
               style={styles.submitButton}
             />
           </ThemedView>

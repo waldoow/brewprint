@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   formLabel: {
     fontSize: 14,
     fontWeight: '500',
-    marginBottom: 3, // Reduced from 6 to 3
+    marginBottom: 8, // Increased from 6 to 8 for even better spacing
     lineHeight: 20,
   },
   formDescription: {

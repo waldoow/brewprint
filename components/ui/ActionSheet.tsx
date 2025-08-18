@@ -2,7 +2,7 @@
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { BlurView } from "expo-blur";
-import { Haptics } from "expo-haptics";
+import * as Haptics from "expo-haptics";
 import React from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "./ThemedText";
@@ -52,7 +52,11 @@ export function ActionSheet({
           <Pressable
             key={action.id}
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              try {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              } catch (error) {
+                // Haptics not available, continue without feedback
+              }
               action.onPress();
               onClose();
             }}

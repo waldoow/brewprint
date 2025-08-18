@@ -5,10 +5,12 @@ import { ThemedText } from '@/components/ui/ThemedText';
 import { ThemedView } from '@/components/ui/ThemedView';
 import { ThemedButton } from '@/components/ui/ThemedButton';
 import { ThemedTabs } from '@/components/ui/ThemedTabs';
+import { ActionSheet } from '@/components/ui/ActionSheet';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BeansService, type Bean } from '@/lib/services/beans';
 import { BrewersService, type Brewer } from '@/lib/services/brewers';
+import { GrindersService, type Grinder } from '@/lib/services/grinders';
 import { router } from 'expo-router';
 import { useState, useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
@@ -21,9 +23,11 @@ export default function LibraryScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [beans, setBeans] = useState<Bean[]>([]);
   const [brewers, setBrewers] = useState<Brewer[]>([]);
-  const [activeTab, setActiveTab] = useState<'beans' | 'brewers'>('beans');
+  const [grinders, setGrinders] = useState<Grinder[]>([]);
+  const [activeTab, setActiveTab] = useState<'beans' | 'brewers' | 'grinders'>('beans');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [showActionSheet, setShowActionSheet] = useState(false);
 
   useEffect(() => {
     loadInventoryData();
@@ -32,9 +36,10 @@ export default function LibraryScreen() {
   const loadInventoryData = async () => {
     try {
       setLoading(true);
-      const [beansResult, brewersResult] = await Promise.all([
+      const [beansResult, brewersResult, grindersResult] = await Promise.all([
         BeansService.getAllBeans(),
-        BrewersService.getAllBrewers()
+        BrewersService.getAllBrewers(),
+        GrindersService.getAllGrinders()
       ]);
       
       if (beansResult.success && beansResult.data) {
@@ -48,8 +53,14 @@ export default function LibraryScreen() {
       } else {
         console.error('Failed to load brewers:', brewersResult.error);
       }
+
+      if (grindersResult.success && grindersResult.data) {
+        setGrinders(grindersResult.data);
+      } else {
+        console.error('Failed to load grinders:', grindersResult.error);
+      }
       
-      if (!beansResult.success && !brewersResult.success) {
+      if (!beansResult.success && !brewersResult.success && !grindersResult.success) {
         toast.error('Failed to load inventory');
       }
     } catch (error) {
@@ -115,9 +126,33 @@ export default function LibraryScreen() {
       }
       return a.name.localeCompare(b.name);
     });
+
+    const filteredGrinders = grinders.filter(grinder => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase().trim();
+      return (
+        grinder.name.toLowerCase().includes(query) ||
+        grinder.brand?.toLowerCase().includes(query) ||
+        grinder.model?.toLowerCase().includes(query) ||
+        grinder.type.toLowerCase().includes(query) ||
+        grinder.notes?.toLowerCase().includes(query)
+      );
+    }).sort((a, b) => {
+      // Sort by active status first, then by condition, then by name
+      if (a.is_active !== b.is_active) {
+        return a.is_active ? -1 : 1;
+      }
+      const conditionOrder = { excellent: 0, good: 1, fair: 2, 'needs-replacement': 3 };
+      const aOrder = conditionOrder[a.condition];
+      const bOrder = conditionOrder[b.condition];
+      if (aOrder !== bOrder) {
+        return aOrder - bOrder;
+      }
+      return a.name.localeCompare(b.name);
+    });
     
-    return { beans: filteredBeans, brewers: filteredBrewers };
-  }, [beans, brewers, searchQuery]);
+    return { beans: filteredBeans, brewers: filteredBrewers, grinders: filteredGrinders };
+  }, [beans, brewers, grinders, searchQuery]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -128,25 +163,80 @@ export default function LibraryScreen() {
   };
 
   const handleAddItem = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      // Haptics not available, continue without feedback
+    }
     if (activeTab === 'beans') {
       router.push('/beans/new');
-    } else {
+    } else if (activeTab === 'brewers') {
       router.push('/brewers/new');
+    } else {
+      router.push('/grinders/new');
     }
   };
 
   const handleBeanPress = (beanId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      // Haptics not available, continue without feedback
+    }
     router.push(`/(tabs)/bean-detail/${beanId}`);
   };
   
   const handleBrewerPress = (brewerId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      // Haptics not available, continue without feedback
+    }
     router.push(`/(tabs)/brewer-detail/${brewerId}`);
   };
 
-  const currentData = activeTab === 'beans' ? filteredData.beans : filteredData.brewers;
+  const handleGrinderPress = (grinderId: string) => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      // Haptics not available, continue without feedback
+    }
+    router.push(`/(tabs)/grinder-detail/${grinderId}`);
+  };
+
+  const handleCreateMenuPress = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      // Haptics not available, continue without feedback
+    }
+    setShowActionSheet(true);
+  };
+
+  const createActions = [
+    {
+      id: 'beans',
+      title: 'Add New Bean',
+      icon: 'bean',
+      onPress: () => router.push('/beans/new')
+    },
+    {
+      id: 'brewers',
+      title: 'Add New Brewer',
+      icon: 'brewer',
+      onPress: () => router.push('/brewers/new')
+    },
+    {
+      id: 'grinders',
+      title: 'Add New Grinder',
+      icon: 'grinder',
+      onPress: () => router.push('/grinders/new')
+    }
+  ];
+
+  const currentData = activeTab === 'beans' ? filteredData.beans : 
+                     activeTab === 'brewers' ? filteredData.brewers : 
+                     filteredData.grinders;
 
   return (
     <ThemedView noBackground={false} style={styles.container}>
@@ -162,8 +252,8 @@ export default function LibraryScreen() {
         onSearchPress={() => console.log('Search pressed')}
         showTopSpacing={true}
         rightAction={{
-          icon: 'plus',
-          onPress: handleAddItem
+          icon: 'ellipsis-horizontal',
+          onPress: handleCreateMenuPress
         }}
       />
 
@@ -178,15 +268,16 @@ export default function LibraryScreen() {
           />
         }
       >
-        {/* Tabs for Beans and Brewers */}
+        {/* Tabs for Beans, Brewers, and Grinders */}
         <ThemedView style={styles.tabsContainer}>
           <ThemedTabs
             items={[
               { value: 'beans', label: `Beans (${filteredData.beans.length})` },
-              { value: 'brewers', label: `Brewers (${filteredData.brewers.length})` }
+              { value: 'brewers', label: `Brewers (${filteredData.brewers.length})` },
+              { value: 'grinders', label: `Grinders (${filteredData.grinders.length})` }
             ]}
             defaultValue={activeTab}
-            onValueChange={(value) => setActiveTab(value as 'beans' | 'brewers')}
+            onValueChange={(value) => setActiveTab(value as 'beans' | 'brewers' | 'grinders')}
           />
         </ThemedView>
         
@@ -211,7 +302,9 @@ export default function LibraryScreen() {
               <ThemedText type="subtitle" style={[styles.emptyTitle, { color: colors.text }]}>
                 {activeTab === 'beans' 
                   ? (beans.length === 0 ? 'No beans' : 'No matching beans')
-                  : (brewers.length === 0 ? 'No brewers' : 'No matching brewers')
+                  : activeTab === 'brewers' 
+                  ? (brewers.length === 0 ? 'No brewers' : 'No matching brewers')
+                  : (grinders.length === 0 ? 'No grinders' : 'No matching grinders')
                 }
               </ThemedText>
               <ThemedText style={[styles.emptyDescription, { color: colors.textSecondary }]}>
@@ -220,15 +313,22 @@ export default function LibraryScreen() {
                       ? 'Add your first coffee beans to begin tracking freshness and optimization'
                       : 'Refine search criteria: name, roaster, origin, variety, or process method'
                     )
-                  : (brewers.length === 0
+                  : activeTab === 'brewers'
+                  ? (brewers.length === 0
                       ? 'Add your first brewing equipment to begin tracking brewing parameters'
+                      : 'Refine search criteria: name, brand, model, type, or notes'
+                    )
+                  : (grinders.length === 0
+                      ? 'Add your first grinder to begin tracking grind settings and maintenance'
                       : 'Refine search criteria: name, brand, model, type, or notes'
                     )
                 }
               </ThemedText>
-              {((activeTab === 'beans' && beans.length === 0) || (activeTab === 'brewers' && brewers.length === 0)) && (
+              {((activeTab === 'beans' && beans.length === 0) || 
+                (activeTab === 'brewers' && brewers.length === 0) ||
+                (activeTab === 'grinders' && grinders.length === 0)) && (
                 <ThemedButton
-                  title={`Add First ${activeTab === 'beans' ? 'Bean' : 'Brewer'}`}
+                  title={`Add First ${activeTab === 'beans' ? 'Bean' : activeTab === 'brewers' ? 'Brewer' : 'Grinder'}`}
                   onPress={handleAddItem}
                   variant="default"
                   size="default"
@@ -295,7 +395,7 @@ export default function LibraryScreen() {
                     </TouchableOpacity>
                   );
                 })
-              ) : (
+              ) : activeTab === 'brewers' ? (
                 // Render brewers
                 (filteredData.brewers as Brewer[]).map((brewer) => {
                   const statusColor = brewer.is_active ? colors.statusGreen : colors.textSecondary;
@@ -345,11 +445,68 @@ export default function LibraryScreen() {
                     </TouchableOpacity>
                   );
                 })
+              ) : (
+                // Render grinders
+                (filteredData.grinders as Grinder[]).map((grinder) => {
+                  const statusColor = grinder.is_active ? colors.statusGreen : colors.textSecondary;
+                  const conditionColor = grinder.condition === 'excellent' ? colors.statusGreen :
+                    grinder.condition === 'good' ? colors.statusGreen :
+                    grinder.condition === 'fair' ? colors.statusYellow :
+                    colors.statusRed;
+
+                  return (
+                    <TouchableOpacity
+                      key={grinder.id}
+                      style={[styles.itemCard, { 
+                        backgroundColor: colors.cardBackground,
+                        borderLeftColor: statusColor,
+                      }]}
+                      onPress={() => handleGrinderPress(grinder.id)}
+                    >
+                      <View style={styles.itemHeader}>
+                        <View style={styles.itemMain}>
+                          <ThemedText type="defaultSemiBold" style={[styles.itemName, { color: colors.text }]}>
+                            {grinder.name}
+                          </ThemedText>
+                          <ThemedText style={[styles.itemSubtitle, { color: colors.textSecondary }]}>
+                            {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()}
+                          </ThemedText>
+                        </View>
+                        <View style={styles.itemStatus}>
+                          <ThemedText style={[styles.statusText, { color: statusColor }]}>
+                            {grinder.is_active ? 'ACTIVE' : 'INACTIVE'}
+                          </ThemedText>
+                          <ThemedText style={[styles.conditionText, { color: conditionColor }]}>
+                            {grinder.condition.toUpperCase()}
+                          </ThemedText>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.itemDetails}>
+                        <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
+                          {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')} • {grinder.size || 'Standard Size'}
+                        </ThemedText>
+                        {grinder.burr_size && (
+                          <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
+                            {grinder.burr_size}mm burr size
+                          </ThemedText>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })
               )}
             </View>
           )}
         </ThemedView>
       </ScrollView>
+
+      <ActionSheet
+        visible={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        title="Add New Item"
+        actions={createActions}
+      />
     </ThemedView>
   );
 }

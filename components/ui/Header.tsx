@@ -31,6 +31,11 @@ export interface HeaderProps {
   onProfilePress?: () => void;
   onSearchPress?: () => void;
   profileImageUri?: string;
+  // Right action button
+  rightAction?: {
+    icon: string;
+    onPress: () => void;
+  };
 }
 
 export function Header({
@@ -49,6 +54,7 @@ export function Header({
   onProfilePress,
   onSearchPress,
   profileImageUri,
+  rightAction,
 }: HeaderProps) {
   const textColor = useThemeColor({}, "text");
   const iconColor = useThemeColor({}, "icon");
@@ -81,6 +87,22 @@ export function Header({
                 </ThemedText>
               )}
             </View>
+          </View>
+          
+          <View style={styles.rightSection}>
+            {rightAction && (
+              <TouchableOpacity
+                onPress={rightAction.onPress}
+                style={styles.actionButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <IconSymbol
+                  name={rightAction.icon as any}
+                  size={24}
+                  color={iconColor}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       )}
@@ -161,6 +183,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8, // Reduced gap for icons
+  },
+  actionButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
   iconButton: {
     width: 40, // Slightly smaller
