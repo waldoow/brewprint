@@ -6,12 +6,12 @@ import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
-// import { useBrewprint } from "@/hooks/useBrewprint";
+import { useBrewprint } from "@/hooks/useBrewprint";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useTimer } from "@/hooks/useTimer";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -23,39 +23,14 @@ import { toast } from "sonner-native";
 
 type BrewingStep = "preparation" | "blooming" | "pouring" | "finished";
 
-// Move test data outside component to prevent recreation
-const TEST_BREWPRINT = {
-  name: "Test Brewprint",
-  method: "V60",
-  beans: { name: "Test Beans", roaster: "Test Roaster" },
-  parameters: {
-    waterTemp: 90,
-    grindSize: 1,
-    coffeeAmount: 10,
-    waterAmount: 100,
-    ratio: 16,
-    totalTime: 120,
-  },
-};
-
 export default function BrewingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "dark"];
 
-  // const { brewprint, loading } = useBrewprint(id);
-
-  // Use useMemo to ensure stable reference for test data
-  const brewprint = useMemo(() => TEST_BREWPRINT, []);
-  const loading = false;
+  const { brewprint, loading, error } = useBrewprint(id);
 
   const [currentStep, setCurrentStep] = useState<BrewingStep>("preparation");
-  const [actualParameters, setActualParameters] = useState({
-    waterTemp: 0,
-    grindSize: 0,
-    coffeeAmount: 0,
-    waterAmount: 0,
-  });
 
   const {
     time,
@@ -70,13 +45,6 @@ export default function BrewingScreen() {
 
   useEffect(() => {
     if (brewprint) {
-      setActualParameters({
-        waterTemp: brewprint.parameters.waterTemp,
-        grindSize: brewprint.parameters.grindSize,
-        coffeeAmount: brewprint.parameters.coffeeAmount,
-        waterAmount: brewprint.parameters.waterAmount,
-      });
-
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -90,7 +58,7 @@ export default function BrewingScreen() {
         }),
       ]).start();
     }
-  }, [brewprint, fadeAnim, slideAnim]); // Added animation refs to dependencies
+  }, [brewprint]);
 
   const handleStartBrewing = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -119,14 +87,25 @@ export default function BrewingScreen() {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
+        <ThemedText style={[styles.loadingText, { color: colors.textSecondary }]}>
+          Loading brewprint...
+        </ThemedText>
       </ThemedView>
     );
   }
 
-  if (!brewprint) {
+  if (error || !brewprint) {
     return (
       <ThemedView style={styles.errorContainer}>
-        <ThemedText>Brewprint not found</ThemedText>
+        <ThemedText style={[styles.errorText, { color: colors.error }]}>
+          {error || 'Brewprint not found'}
+        </ThemedText>
+        <ThemedButton
+          title="Go Back"
+          onPress={() => router.back()}
+          variant="outline"
+          style={styles.backButton}
+        />
       </ThemedView>
     );
   }
@@ -136,7 +115,7 @@ export default function BrewingScreen() {
       <Header
         title="BREWING SESSION"
         subtitle={`${brewprint.name} • ${brewprint.method} extraction protocol`}
-        onBack={() => router.back()}
+        onBackPress={() => router.back()}
         rightAction={{
           icon: "info",
           onPress: () => console.log("Show brewing tips"),
@@ -154,98 +133,25 @@ export default function BrewingScreen() {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          {/* Recipe Specifications Card */}
-          <View
-            style={[
-              styles.recipeCard,
-              {
-                backgroundColor: colors.cardBackground,
-                borderLeftColor: colors.primary,
-              },
-            ]}
-          >
-            <View style={styles.recipeHeader}>
-              <ThemedText style={[styles.recipeTitle, { color: colors.text }]}>
-                RECIPE SPECIFICATIONS
+          {/* Simple Recipe Info */}
+          <View style={[styles.infoCard, { backgroundColor: colors.cardBackground }]}>
+            <ThemedText style={[styles.recipeName, { color: colors.text }]}>
+              {brewprint.name}
+            </ThemedText>
+            <ThemedText style={[styles.recipeMethod, { color: colors.textSecondary }]}>
+              {brewprint.method} • {brewprint.beans.name}
+            </ThemedText>
+            
+            <View style={styles.quickParams}>
+              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+                {brewprint.parameters.coffeeAmount}g coffee
               </ThemedText>
-              <ThemedText
-                style={[styles.recipeStatus, { color: colors.primary }]}
-              >
-                {brewprint.method.toUpperCase()}
+              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+                {brewprint.parameters.waterAmount}ml water
               </ThemedText>
-            </View>
-
-            <View style={styles.recipeSpecs}>
-              <View style={styles.specificationRow}>
-                <ThemedText
-                  style={[styles.specLabel, { color: colors.textSecondary }]}
-                >
-                  COFFEE BEANS
-                </ThemedText>
-                <ThemedText style={[styles.specValue, { color: colors.text }]}>
-                  {brewprint.beans.name}
-                </ThemedText>
-              </View>
-
-              <View style={styles.specificationRow}>
-                <ThemedText
-                  style={[styles.specLabel, { color: colors.textSecondary }]}
-                >
-                  ROASTER
-                </ThemedText>
-                <ThemedText style={[styles.specValue, { color: colors.text }]}>
-                  {brewprint.beans.roaster}
-                </ThemedText>
-              </View>
-            </View>
-
-            <View style={styles.parametersGrid}>
-              <View style={styles.parameterRow}>
-                <ThemedText
-                  style={[styles.paramLabel, { color: colors.textSecondary }]}
-                >
-                  RATIO
-                </ThemedText>
-                <ThemedText style={[styles.paramValue, { color: colors.text }]}>
-                  1:{brewprint.parameters.ratio}
-                </ThemedText>
-              </View>
-
-              <View style={styles.parameterRow}>
-                <ThemedText
-                  style={[styles.paramLabel, { color: colors.textSecondary }]}
-                >
-                  TARGET TIME
-                </ThemedText>
-                <ThemedText style={[styles.paramValue, { color: colors.text }]}>
-                  {Math.floor(brewprint.parameters.totalTime / 60)}:
-                  {(brewprint.parameters.totalTime % 60)
-                    .toString()
-                    .padStart(2, "0")}
-                </ThemedText>
-              </View>
-
-              <View style={styles.parameterRow}>
-                <ThemedText
-                  style={[styles.paramLabel, { color: colors.textSecondary }]}
-                >
-                  WATER TEMP
-                </ThemedText>
-                <ThemedText style={[styles.paramValue, { color: colors.text }]}>
-                  {brewprint.parameters.waterTemp}°C
-                </ThemedText>
-              </View>
-
-              <View style={styles.parameterRow}>
-                <ThemedText
-                  style={[styles.paramLabel, { color: colors.textSecondary }]}
-                >
-                  GRIND SIZE
-                </ThemedText>
-                <ThemedText style={[styles.paramValue, { color: colors.text }]}>
-                  {brewprint.parameters.grindSize}
-                </ThemedText>
-              </View>
+              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+                {brewprint.parameters.waterTemp}°C
+              </ThemedText>
             </View>
           </View>
 
@@ -263,182 +169,36 @@ export default function BrewingScreen() {
             />
           )}
 
-          {/* Live Monitoring Section */}
-          <View
-            style={[
-              styles.monitoringSection,
-              {
-                backgroundColor: colors.cardBackground,
-                borderLeftColor: colors.statusGreen,
-              },
-            ]}
-          >
-            <View style={styles.monitoringHeader}>
-              <ThemedText
-                style={[styles.monitoringTitle, { color: colors.text }]}
-              >
-                LIVE MONITORING
-              </ThemedText>
-              <ThemedText
-                style={[styles.monitoringStatus, { color: colors.statusGreen }]}
-              >
-                ACTIVE
-              </ThemedText>
-            </View>
-
-            <View style={styles.monitoringGrid}>
-              <View style={styles.monitoringRow}>
-                <ThemedText
-                  style={[
-                    styles.monitoringLabel,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  WATER TEMP
-                </ThemedText>
-                <ThemedText
-                  style={[styles.monitoringValue, { color: colors.text }]}
-                >
-                  {actualParameters.waterTemp}°C
-                </ThemedText>
-              </View>
-
-              <View style={styles.monitoringRow}>
-                <ThemedText
-                  style={[
-                    styles.monitoringLabel,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  GRIND SETTING
-                </ThemedText>
-                <ThemedText
-                  style={[styles.monitoringValue, { color: colors.text }]}
-                >
-                  {actualParameters.grindSize}
-                </ThemedText>
-              </View>
-
-              <View style={styles.monitoringRow}>
-                <ThemedText
-                  style={[
-                    styles.monitoringLabel,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  COFFEE DOSE
-                </ThemedText>
-                <ThemedText
-                  style={[styles.monitoringValue, { color: colors.text }]}
-                >
-                  {actualParameters.coffeeAmount}g
-                </ThemedText>
-              </View>
-
-              <View style={styles.monitoringRow}>
-                <ThemedText
-                  style={[
-                    styles.monitoringLabel,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  WATER VOLUME
-                </ThemedText>
-                <ThemedText
-                  style={[styles.monitoringValue, { color: colors.text }]}
-                >
-                  {actualParameters.waterAmount}ml
-                </ThemedText>
-              </View>
-            </View>
-          </View>
-
-          {/* Professional Action Panel */}
+          {/* Simple Action Panel */}
           {currentStep === "preparation" ? (
-            <View
-              style={[
-                styles.actionPanel,
-                { backgroundColor: colors.cardBackground },
-              ]}
-            >
-              <View style={styles.actionHeader}>
-                <ThemedText
-                  style={[styles.actionTitle, { color: colors.text }]}
-                >
-                  BREWING PROTOCOL
-                </ThemedText>
-                <ThemedText
-                  style={[styles.actionStatus, { color: colors.textSecondary }]}
-                >
-                  READY
-                </ThemedText>
-              </View>
-
-              <View style={styles.actionGrid}>
-                <ThemedButton
-                  onPress={handleStartBrewing}
-                  variant="default"
-                  size="default"
-                  style={styles.primaryAction}
-                >
-                  INITIATE EXTRACTION
-                </ThemedButton>
-
-                <View style={styles.actionInstructions}>
-                  <ThemedText
-                    style={[
-                      styles.instructionText,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    Verify equipment calibration • Water temperature • Grind
-                    consistency
-                  </ThemedText>
-                </View>
-              </View>
+            <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
+              <ThemedButton
+                title="Start Brewing"
+                onPress={handleStartBrewing}
+                variant="default"
+                size="lg"
+                style={styles.primaryAction}
+              />
             </View>
           ) : currentStep === "finished" ? (
-            <View
-              style={[
-                styles.actionPanel,
-                { backgroundColor: colors.cardBackground },
-              ]}
-            >
-              <View style={styles.actionHeader}>
-                <ThemedText
-                  style={[styles.actionTitle, { color: colors.text }]}
-                >
-                  SESSION COMPLETE
-                </ThemedText>
-                <ThemedText
-                  style={[styles.actionStatus, { color: colors.statusGreen }]}
-                >
-                  ANALYSIS READY
-                </ThemedText>
-              </View>
-
-              <View style={styles.actionGrid}>
-                <ThemedButton
-                  onPress={() => router.push(`/brewing/${id}/results`)}
-                  variant="default"
-                  size="default"
-                  style={styles.primaryAction}
-                >
-                  ANALYZE RESULTS
-                </ThemedButton>
-
-                <ThemedButton
-                  onPress={() => {
-                    setCurrentStep("preparation");
-                    resetTimer();
-                  }}
-                  variant="secondary"
-                  size="default"
-                  style={styles.secondaryAction}
-                >
-                  REPEAT PROTOCOL
-                </ThemedButton>
-              </View>
+            <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
+              <ThemedButton
+                title="View Results"
+                onPress={() => router.push(`/brewing/${id}/results`)}
+                variant="default"
+                size="lg"
+                style={styles.primaryAction}
+              />
+              <ThemedButton
+                title="Brew Again"
+                onPress={() => {
+                  setCurrentStep("preparation");
+                  resetTimer();
+                }}
+                variant="outline"
+                size="lg"
+                style={styles.secondaryAction}
+              />
             </View>
           ) : null}
         </Animated.View>
@@ -455,189 +215,58 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 16,
+    padding: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: "center",
+  },
+  backButton: {
+    paddingHorizontal: 24,
   },
   scrollContent: {
-    padding: 24,
-    paddingBottom: 120,
+    padding: 16,
+    paddingBottom: 100,
   },
 
-  // Professional Coffee Recipe Card
-  recipeCard: {
-    padding: 24,
-    borderRadius: 12,
-    borderLeftWidth: 3,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
+  // Minimalist Cards
+  infoCard: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  recipeHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  recipeTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  recipeStatus: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  recipeSpecs: {
-    gap: 8,
-    marginBottom: 12,
-  },
-  specificationsGrid: {
-    gap: 8,
-  },
-  specificationRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  specLabel: {
-    fontSize: 11,
+  recipeName: {
+    fontSize: 18,
     fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    flex: 1,
+    marginBottom: 4,
   },
-  specValue: {
+  recipeMethod: {
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  quickParams: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  param: {
     fontSize: 12,
-    fontWeight: "500",
-    textAlign: "right",
-    flex: 1,
   },
 
-  // Parameters grid
-  parametersGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
-  },
-  parameterRow: {
-    flex: 1,
-    minWidth: "45%",
-    alignItems: "center",
-  },
-  paramLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  paramValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-
-  // Professional Live Monitoring Section
-  monitoringSection: {
-    padding: 24,
-    borderRadius: 12,
-    borderLeftWidth: 3,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
-  monitoringHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  monitoringTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  monitoringStatus: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  monitoringGrid: {
-    gap: 8,
-  },
-  monitoringRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  monitoringLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    flex: 1,
-  },
-  monitoringValue: {
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-    textAlign: "right",
-    flex: 1,
-  },
-
-  // Professional Coffee Action Panel
+  // Simple Action Panel
   actionPanel: {
-    padding: 24,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
-  actionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  actionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  actionStatus: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  actionGrid: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
     gap: 12,
   },
   primaryAction: {
@@ -645,15 +274,5 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     alignSelf: "stretch",
-  },
-  actionInstructions: {
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
-  },
-  instructionText: {
-    fontSize: 11,
-    lineHeight: 14,
-    textAlign: "center",
   },
 });
