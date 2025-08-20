@@ -31,18 +31,26 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "dark"].accent, // Using purple accent color
+        tabBarInactiveTintColor: Colors[colorScheme ?? "dark"].textTertiary, // More subtle inactive color
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? "dark"].surface,
+          borderTopColor: Colors[colorScheme ?? "dark"].borderSubtle, // More subtle border
+          borderTopWidth: 1,
+          paddingTop: 12, // Increased top padding
+          paddingBottom: Platform.OS === "ios" ? 24 : 12, // Increased bottom padding
+          height: Platform.OS === "ios" ? 88 : 64, // Increased height for better proportions
+        },
+        tabBarLabelStyle: {
+          fontSize: 11, // Slightly smaller for professional look
+          fontWeight: "500",
+          letterSpacing: 0.2,
+          marginTop: 2, // Added margin for better spacing
+        },
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         animation: "shift",
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
       }}
     >
       <Tabs.Screen
@@ -57,25 +65,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="brewprints"
         options={{
-          title: "Recettes",
+          title: "Brewprints",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="book.pages.fill" color={color} />
+            <IconSymbol size={24} name="cup.and.saucer.fill" color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="library"
         options={{
-          title: "Library",
+          title: "Inventory",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={24} name="books.vertical.fill" color={color} />
+            <IconSymbol size={24} name="books.vertical" color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="folders"
         options={{
-          title: "Folders",
+          title: "Organization",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="folder.fill" color={color} />
           ),
@@ -88,18 +96,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="gearshape.fill" color={color} />
           ),
-        }}
-      />
-      <Tabs.Screen
-        name="beans"
-        options={{
-          href: null, // This hides it from the tab bar
-        }}
-      />
-      <Tabs.Screen
-        name="bean-detail"
-        options={{
-          href: null, // This hides it from the tab bar
         }}
       />
     </Tabs>

@@ -1,285 +1,333 @@
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
+// components/brewprints/BrewprintCard.tsx
 import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
 import { Colors } from "@/constants/Colors";
-import type { Brewprint } from "@/lib/services/brewprints";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import * as Haptics from "expo-haptics";
 import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { TouchableOpacity, StyleSheet, View } from "react-native";
 
-interface BrewprintCardProps {
-  brewprint: Brewprint;
-  onPress: () => void;
+function getStatusColor(
+  status: "experimenting" | "final" | "archived",
+  colors: any
+) {
+  switch (status) {
+    case "experimenting":
+      return colors.statusYellow;
+    case "final":
+      return colors.statusGreen;
+    case "archived":
+      return colors.textSecondary;
+    default:
+      return colors.textSecondary;
+  }
 }
 
-export function BrewprintCard({ brewprint, onPress }: BrewprintCardProps) {
-  const getMethodDisplay = (method: string): string => {
-    const methods: Record<string, string> = {
-      'v60': 'V60',
-      'chemex': 'Chemex',
-      'french-press': 'French Press',
-      'aeropress': 'AeroPress',
-      'espresso': 'Espresso',
-      'cold-brew': 'Cold Brew',
-      'siphon': 'Siphon',
-      'percolator': 'Percolator',
-      'turkish': 'Turkish',
-      'moka': 'Moka Pot',
-    };
-    return methods[method] || method;
+function getStatusLabel(status: "experimenting" | "final" | "archived") {
+  switch (status) {
+    case "experimenting":
+      return "EXPERIMENTAL";
+    case "final":
+      return "FINALIZED";
+    case "archived":
+      return "ARCHIVED";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+interface BrewprintCardProps {
+  brewprint: {
+    id: string;
+    name: string;
+    method: string;
+    beans: string;
+    rating?: number;
+    date: string;
+    status: "experimenting" | "final" | "archived";
+    // Additional advanced properties
+    coffee_weight?: number;
+    water_weight?: number;
+    grind_size?: string;
+    water_temp?: number;
+    brew_time?: number;
+    yield_weight?: number;
+    extraction_yield?: number;
+    tds?: number;
+  };
+  onPress: () => void;
+  isSelected?: boolean;
+}
+
+export function BrewprintCard({
+  brewprint,
+  onPress,
+}: BrewprintCardProps) {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "dark"];
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
   };
 
-  const getDifficultyBadge = (difficulty: number) => {
-    const variants = {
-      1: "secondary" as const,
-      2: "default" as const,
-      3: "warning" as const,
-    };
-    
-    const labels = {
-      1: "Facile",
-      2: "Intermédiaire", 
-      3: "Avancé",
-    };
+  // Calculate derived metrics
+  const ratio = brewprint.coffee_weight && brewprint.water_weight ? 
+    (brewprint.water_weight / brewprint.coffee_weight).toFixed(1) : null;
+  
+  const extractionTime = brewprint.brew_time ? 
+    `${Math.floor(brewprint.brew_time / 60)}:${(brewprint.brew_time % 60).toString().padStart(2, '0')}` : null;
 
-    return (
-      <ThemedBadge variant={variants[difficulty as keyof typeof variants]} size="sm">
-        {labels[difficulty as keyof typeof labels]}
-      </ThemedBadge>
-    );
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      experimenting: "warning" as const,
-      final: "success" as const,
-      archived: "secondary" as const,
-    };
-    
-    const labels = {
-      experimenting: "Test",
-      final: "Final",
-      archived: "Archivé",
-    };
-
-    return (
-      <ThemedBadge 
-        variant={variants[status as keyof typeof variants] || "default"} 
-        size="sm"
-      >
-        {labels[status as keyof typeof labels] || status}
-      </ThemedBadge>
-    );
-  };
-
-  const getRatingStars = (rating?: number) => {
-    if (!rating) return null;
-    
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <ThemedText key={i} style={[
-          styles.star,
-          i <= rating ? styles.starFilled : styles.starEmpty
-        ]}>
-          ★
-        </ThemedText>
-      );
-    }
-    return (
-      <ThemedView noBackground style={styles.ratingContainer}>
-        {stars}
-      </ThemedView>
-    );
-  };
-
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short',
-    });
-  };
-
-  const calculateRatio = (): string => {
-    const { coffee_grams, water_grams } = brewprint.parameters;
-    const ratioValue = water_grams / coffee_grams;
-    return `1:${ratioValue.toFixed(1)}`;
-  };
+  const efficiency = brewprint.yield_weight && brewprint.water_weight ?
+    ((brewprint.yield_weight / brewprint.water_weight) * 100).toFixed(1) : null;
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <ThemedView style={styles.card}>
-        {/* Header with status and badges */}
-        <ThemedView noBackground style={styles.header}>
-          <ThemedView noBackground style={styles.badgesContainer}>
-            {getStatusBadge(brewprint.status)}
-            {getDifficultyBadge(brewprint.difficulty)}
-          </ThemedView>
-          {brewprint.rating && getRatingStars(brewprint.rating)}
-        </ThemedView>
+    <TouchableOpacity
+      onPress={handlePress}
+      style={[styles.advancedBrewprintCard, { 
+        backgroundColor: colors.cardBackground,
+        borderLeftColor: getStatusColor(brewprint.status, colors),
+      }]}
+    >
+      {/* Header with recipe name and status */}
+      <View style={styles.recipeHeader}>
+        <View style={styles.recipeMain}>
+          <ThemedText type="defaultSemiBold" style={[styles.recipeName, { color: colors.text }]}>
+            {brewprint.name}
+          </ThemedText>
+          <ThemedText style={[styles.recipeMethod, { color: colors.textSecondary }]}>
+            {brewprint.method.toUpperCase()} • {brewprint.beans}
+          </ThemedText>
+        </View>
+        <View style={styles.recipeStatus}>
+          <ThemedText style={[styles.statusLabel, { color: getStatusColor(brewprint.status, colors) }]}>
+            {getStatusLabel(brewprint.status)}
+          </ThemedText>
+          <ThemedText style={[styles.recipeDate, { color: colors.text }]}>
+            {new Date(brewprint.date).toLocaleDateString()}
+          </ThemedText>
+        </View>
+      </View>
 
-        {/* Main content */}
-        <ThemedView noBackground style={styles.content}>
-          <ThemedText style={styles.brewprintName}>{brewprint.name}</ThemedText>
-          
-          <ThemedView noBackground style={styles.methodContainer}>
-            <ThemedText style={styles.method}>
-              {getMethodDisplay(brewprint.method)}
+      {/* Brewing parameters grid */}
+      <View style={styles.parametersGrid}>
+        {brewprint.coffee_weight && (
+          <View style={styles.parameterItem}>
+            <ThemedText style={[styles.parameterLabel, { color: colors.textSecondary }]}>
+              COFFEE
             </ThemedText>
-            <ThemedText style={styles.version}>
-              {brewprint.version}
+            <ThemedText style={[styles.parameterValue, { color: colors.text }]}>
+              {brewprint.coffee_weight}g
             </ThemedText>
-          </ThemedView>
-
-          {brewprint.description && (
-            <ThemedText style={styles.description} numberOfLines={2}>
-              {brewprint.description}
-            </ThemedText>
-          )}
-        </ThemedView>
-
-        {/* Parameters summary */}
-        <ThemedView noBackground style={styles.parametersRow}>
-          <ThemedView noBackground style={styles.parameter}>
-            <ThemedText style={styles.parameterValue}>
-              {brewprint.parameters.coffee_grams}g
-            </ThemedText>
-            <ThemedText style={styles.parameterLabel}>café</ThemedText>
-          </ThemedView>
-
-          <ThemedView noBackground style={styles.parameter}>
-            <ThemedText style={styles.parameterValue}>
-              {brewprint.parameters.water_grams}g
-            </ThemedText>
-            <ThemedText style={styles.parameterLabel}>eau</ThemedText>
-          </ThemedView>
-
-          <ThemedView noBackground style={styles.parameter}>
-            <ThemedText style={styles.parameterValue}>
-              {calculateRatio()}
-            </ThemedText>
-            <ThemedText style={styles.parameterLabel}>ratio</ThemedText>
-          </ThemedView>
-
-          <ThemedView noBackground style={styles.parameter}>
-            <ThemedText style={styles.parameterValue}>
-              {brewprint.parameters.water_temp}°C
-            </ThemedText>
-            <ThemedText style={styles.parameterLabel}>temp</ThemedText>
-          </ThemedView>
-        </ThemedView>
-
-        {/* Footer with date */}
-        {(brewprint.brew_date || brewprint.created_at) && (
-          <ThemedView noBackground style={styles.footer}>
-            <ThemedText style={styles.dateText}>
-              {brewprint.brew_date 
-                ? `Testé le ${formatDate(brewprint.brew_date)}`
-                : `Créé le ${formatDate(brewprint.created_at)}`
-              }
-            </ThemedText>
-          </ThemedView>
+          </View>
         )}
-      </ThemedView>
+        
+        {brewprint.water_weight && (
+          <View style={styles.parameterItem}>
+            <ThemedText style={[styles.parameterLabel, { color: colors.textSecondary }]}>
+              WATER
+            </ThemedText>
+            <ThemedText style={[styles.parameterValue, { color: colors.text }]}>
+              {brewprint.water_weight}g
+            </ThemedText>
+          </View>
+        )}
+
+        {ratio && (
+          <View style={styles.parameterItem}>
+            <ThemedText style={[styles.parameterLabel, { color: colors.textSecondary }]}>
+              RATIO
+            </ThemedText>
+            <ThemedText style={[styles.parameterValue, { color: colors.text }]}>
+              1:{ratio}
+            </ThemedText>
+          </View>
+        )}
+
+        {brewprint.grind_size && (
+          <View style={styles.parameterItem}>
+            <ThemedText style={[styles.parameterLabel, { color: colors.textSecondary }]}>
+              GRIND
+            </ThemedText>
+            <ThemedText style={[styles.parameterValue, { color: colors.text }]}>
+              {brewprint.grind_size}
+            </ThemedText>
+          </View>
+        )}
+      </View>
+
+      {/* Advanced metrics row */}
+      <View style={styles.metricsRow}>
+        {brewprint.water_temp && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              TEMP
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {brewprint.water_temp}°C
+            </ThemedText>
+          </View>
+        )}
+
+        {extractionTime && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              TIME
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {extractionTime}
+            </ThemedText>
+          </View>
+        )}
+
+        {brewprint.tds && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              TDS
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {brewprint.tds.toFixed(2)}%
+            </ThemedText>
+          </View>
+        )}
+
+        {brewprint.extraction_yield && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              EY
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {brewprint.extraction_yield.toFixed(1)}%
+            </ThemedText>
+          </View>
+        )}
+
+        {efficiency && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              EFFICIENCY
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {efficiency}%
+            </ThemedText>
+          </View>
+        )}
+
+        {brewprint.rating && (
+          <View style={styles.metricItem}>
+            <ThemedText style={[styles.metricLabel, { color: colors.textSecondary }]}>
+              RATING
+            </ThemedText>
+            <ThemedText style={[styles.metricValue, { color: colors.text }]}>
+              {brewprint.rating.toFixed(1)}/10
+            </ThemedText>
+          </View>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: Colors.dark.cardBackground,
-    borderRadius: 12,
+  // Professional Brewprint Card for Advanced Coffee Users
+  advancedBrewprintCard: {
+    padding: 20, // Increased padding for spacious professional feel
+    borderRadius: 12, // More rounded for modern look
+    borderLeftWidth: 3, // Slightly thinner accent border
+    marginBottom: 16, // Increased margin for better separation
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: Colors.dark.cardBackgroundSecondary,
-    padding: 12,
-    marginBottom: 12,
+    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle overall border
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
+  // Professional Coffee Recipe Header
+  recipeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16, // Increased spacing
   },
-  badgesContainer: {
-    flexDirection: "row",
-    gap: 6,
-    flexWrap: "wrap",
+  recipeMain: {
+    flex: 1,
   },
-  content: {
-    marginBottom: 12,
-    gap: 4,
+  recipeName: {
+    fontSize: 17, // Larger for better readability
+    marginBottom: 3,
+    fontWeight: '600',
+    letterSpacing: -0.1,
   },
-  brewprintName: {
-    fontSize: 16,
-    fontWeight: "600",
-    lineHeight: 22,
+  recipeMethod: {
+    fontSize: 13, // Slightly larger
+    fontWeight: '500',
+    letterSpacing: 0.2,
   },
-  methodContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  recipeStatus: {
+    alignItems: 'flex-end',
   },
-  method: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: Colors.dark.info,
+  statusLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 3,
   },
-  version: {
-    fontSize: 12,
-    fontWeight: "500",
-    opacity: 0.6,
-    backgroundColor: Colors.dark.cardBackgroundSecondary,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+  recipeDate: {
+    fontSize: 11,
+    fontWeight: '500',
+    fontVariant: ['tabular-nums'],
+    letterSpacing: 0.1,
   },
-  description: {
-    fontSize: 13,
-    opacity: 0.8,
-    lineHeight: 18,
+  
+  // Professional Parameters Grid
+  parametersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16, // Increased gap
+    marginBottom: 16, // Increased spacing
   },
-  parametersRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  parameter: {
-    alignItems: "center",
-    gap: 2,
-  },
-  parameterValue: {
-    fontSize: 14,
-    fontWeight: "600",
+  parameterItem: {
+    flex: 1,
+    minWidth: '22%', // Slightly wider
   },
   parameterLabel: {
     fontSize: 10,
-    fontWeight: "500",
-    opacity: 0.6,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 4, // Increased spacing
   },
-  footer: {
+  parameterValue: {
+    fontSize: 14, // Larger for better readability
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    lineHeight: 18,
+  },
+  
+  // Advanced Metrics for Coffee Professionals
+  metricsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14, // Increased gap
+    paddingTop: 12, // Increased padding
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.cardBackgroundSecondary,
-    paddingTop: 8,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)', // More subtle border
   },
-  dateText: {
-    fontSize: 11,
-    opacity: 0.6,
-    fontWeight: "500",
+  metricItem: {
+    flex: 1,
+    minWidth: '16%', // Slightly wider
   },
-  ratingContainer: {
-    flexDirection: "row",
-    gap: 1,
+  metricLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginBottom: 3, // Increased spacing
   },
-  star: {
-    fontSize: 12,
-  },
-  starFilled: {
-    color: Colors.dark.success,
-  },
-  starEmpty: {
-    color: Colors.dark.cardBackgroundSecondary,
+  metricValue: {
+    fontSize: 12, // Slightly larger
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    lineHeight: 16,
   },
 });

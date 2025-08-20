@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 
-import { Colors } from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ThemedInputProps = TextInputProps & {
@@ -51,18 +50,31 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
   );
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    'background'
+    'inputBackground'
   );
   const iconColor = useThemeColor({}, 'icon');
   const borderColor = useThemeColor(
     { light: lightBorderColor, dark: darkBorderColor },
-    'icon'
+    'border'
   );
 
   const [showPassword, setShowPassword] = useState(false);
 
   const getInputProps = () => {
     const baseProps = { ...rest };
+    
+    // Handle numeric input validation
+    const handleNumericChange = (text: string) => {
+      // Only allow numbers and decimal point
+      const numericValue = text.replace(/[^0-9.]/g, '');
+      // Prevent multiple decimal points
+      const parts = numericValue.split('.');
+      const validValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericValue;
+      
+      if (rest.onChangeText) {
+        rest.onChangeText(validValue);
+      }
+    };
     
     switch (type) {
       case 'email':
@@ -84,6 +96,7 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
           ...baseProps,
           keyboardType: 'numeric' as const,
           autoComplete: 'off' as const,
+          onChangeText: handleNumericChange,
         };
       case 'text':
       default:
@@ -102,20 +115,21 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
         variantStyle = {
           backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: iconColor + '40',
+          borderColor: borderColor,
         };
         break;
       case 'outline':
         variantStyle = {
-          backgroundColor: 'transparent',
+          backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: borderColor + '60',
+          borderColor: borderColor,
         };
         break;
       case 'filled':
         variantStyle = {
-          backgroundColor: iconColor + '10',
-          borderWidth: 0,
+          backgroundColor: backgroundColor,
+          borderWidth: 1,
+          borderColor: borderColor,
         };
         break;
     }
@@ -142,7 +156,6 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
     return {
       ...styles.label,
       color: textColor,
-      opacity: 0.8,
     };
   };
 
@@ -162,7 +175,7 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
         <TextInput
           ref={ref}
           style={[getInputStyles(), getTextStyles(), style, type === 'password' && styles.passwordInput]}
-          placeholderTextColor={textColor + '60'}
+          placeholderTextColor={textColor + '70'}
           {...getInputProps()}
         />
         {type === 'password' && (
@@ -198,15 +211,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
+  // Advanced minimal base style
   base: {
-    borderRadius: 8,
+    borderRadius: 8, // 8px border radius for minimal design
     paddingHorizontal: 12,
     fontFamily: 'System',
     flex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   
   passwordInput: {
-    paddingRight: 40, // Make room for password toggle
+    paddingRight: 40,
   },
   
   passwordToggle: {
@@ -215,21 +234,21 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   
-  // Size variants
+  // Professional size variants
   size_default: {
     height: 44,
     paddingVertical: 12,
   },
   size_sm: {
-    height: 36,
-    paddingVertical: 8,
+    height: 32,
+    paddingVertical: 6,
   },
   size_lg: {
-    height: 52,
-    paddingVertical: 16,
+    height: 48,
+    paddingVertical: 14,
   },
   
-  // Text styles
+  // Technical typography
   text: {
     fontSize: 16,
     fontWeight: '400',
@@ -238,17 +257,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   text_sm: {
-    fontSize: 14,
+    fontSize: 12,
   },
   text_lg: {
-    fontSize: 18,
+    fontSize: 16,
   },
   
-  // Label and error styles
+  // Professional labels and errors
   label: {
     fontSize: 14,
     fontWeight: '500',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   error: {
     fontSize: 12,

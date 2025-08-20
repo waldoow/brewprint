@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
 
-export default function BeansLayout() {
+export default function BrewersLayout() {
   return (
     <Stack
       screenOptions={{
@@ -16,10 +16,16 @@ export default function BeansLayout() {
           },
         }),
       }}
-      initialRouteName="index"
+      initialRouteName="new"
     >
       <Stack.Screen
-        name="index"
+        name="new"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="edit/[id]"
         options={{
           headerShown: false,
         }}

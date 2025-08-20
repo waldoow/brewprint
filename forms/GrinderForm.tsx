@@ -2,7 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { GrindersService, type GrinderInput, type GrinderSetting, type SettingRange } from "@/lib/services/grinders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
@@ -17,6 +17,14 @@ import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
 import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 
 // Grinder form validation schema
 const grinderFormSchema = z.object({
@@ -77,9 +85,10 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   const {
     control,
     handleSubmit,
-    formState: { errors },
-    reset,
+    formState: { errors, isSubmitting },
+    setValue,
     watch,
+    reset,
   } = useForm<GrinderFormData>({
     resolver: zodResolver(grinderFormSchema),
     defaultValues: {
@@ -481,21 +490,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   form: {
-    padding: 16,
-    gap: 16,
+    padding: 8, // Reduced from 16 to 8
+    gap: 8, // Reduced from 16 to 8
   },
   settingRangeRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 6, // Reduced from 12 to 6
   },
   settingRangeInput: {
     flex: 1,
   },
   actions: {
     flexDirection: "column",
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
+    gap: 6, // Reduced from 12 to 6
+    marginTop: 12, // Reduced from 24 to 12
+    marginBottom: 16, // Reduced from 32 to 16
   },
   cancelButton: {
     flex: 1,

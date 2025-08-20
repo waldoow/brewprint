@@ -72,12 +72,12 @@ export function ThemedSelect({
   );
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "inputBackground"
   );
   const iconColor = useThemeColor({}, "icon");
   const borderColor = useThemeColor(
     { light: lightBorderColor, dark: darkBorderColor },
-    "icon"
+    "border"
   );
 
   const selectedOption = options.find((option) => option.value === value);
@@ -137,21 +137,21 @@ export function ThemedSelect({
         variantStyle = {
           backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: borderColor + "30",
+          borderColor: borderColor,
         };
         break;
       case "outline":
         variantStyle = {
-          backgroundColor: "transparent",
+          backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: borderColor + "40",
+          borderColor: borderColor,
         };
         break;
       case "filled":
         variantStyle = {
-          backgroundColor: iconColor + "08",
+          backgroundColor: backgroundColor,
           borderWidth: 1,
-          borderColor: "transparent",
+          borderColor: borderColor,
         };
         break;
     }
@@ -210,7 +210,7 @@ export function ThemedSelect({
           index === 0 && styles.firstOption,
           index === options.length - 1 && styles.lastOption,
           isSelected && styles.selectedOption,
-          { backgroundColor: isSelected ? iconColor + "08" : "transparent" },
+          { backgroundColor: isSelected ? iconColor + "15" : "transparent" },
         ]}
         onPress={() => handleSelect(item.value)}
         activeOpacity={0.7}
@@ -254,7 +254,7 @@ export function ThemedSelect({
         <Animated.View
           style={[styles.iconContainer, isOpen && styles.iconRotated]}
         >
-          <ChevronDown size={16} color={iconColor + "90"} strokeWidth={2} />
+          <ChevronDown size={16} color={iconColor} strokeWidth={2} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -276,7 +276,7 @@ export function ThemedSelect({
               styles.dropdown,
               {
                 backgroundColor: backgroundColor,
-                borderColor: borderColor + "20",
+                borderColor: borderColor,
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,
                 width: dropdownPosition.width,

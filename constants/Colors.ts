@@ -1,97 +1,189 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-// Base color palette
-const colorPalette = {
-  // Primary colors
-  primary: "#0a7ea4",
-  white: "#ffffff",
-  black: "#000000",
-
-  // Light theme colors
-  lightText: "#11181C",
-  lightBackground: "#ffffff",
-  lightBackgroundSecondary: "#f8f9fa",
-  lightIcon: "#687076",
-
-  // Dark theme colors
-  darkText: "#ECEDEE",
-  darkBackground: "#151718",
-  darkBackgroundSecondary: "#0a0a0a",
-  darkIcon: "#9BA1A6",
-
-  // Semantic colors
-  success: "#22c55e",
-  warning: "#f59e0b",
-  error: "#ef4444",
-  info: "#3b82f6",
-
-  // Coffee-specific colors
-  coffeeLight: "#d4a574",
-  coffeeLightMedium: "#b8935f",
-  coffeeMedium: "#8b6d47",
-  coffeeMediumDark: "#6b4e37",
-  coffeeDark: "#4a3426",
-
-  // Card and surface colors
-  cardBackground: "rgba(128, 128, 128, 0.1)",
-  cardBackgroundSecondary: "rgba(128, 128, 128, 0.05)",
-};
-
-// Theme-specific variables
-const tintColorLight = colorPalette.primary;
-const tintColorDark = colorPalette.white;
-
+// constants/Colors.ts - Refined Professional Purple Theme
 export const Colors = {
   light: {
-    text: colorPalette.lightText,
-    background: colorPalette.lightBackground,
-    backgroundSecondary: colorPalette.lightBackgroundSecondary,
-    tint: tintColorLight,
-    icon: colorPalette.lightIcon,
-    tabIconDefault: colorPalette.lightIcon,
-    tabIconSelected: tintColorLight,
-    // Semantic colors
-    success: colorPalette.success,
-    warning: colorPalette.warning,
-    error: colorPalette.error,
-    info: colorPalette.info,
-    // Coffee colors
-    coffeeLight: colorPalette.coffeeLight,
-    coffeeLightMedium: colorPalette.coffeeLightMedium,
-    coffeeMedium: colorPalette.coffeeMedium,
-    coffeeMediumDark: colorPalette.coffeeMediumDark,
-    coffeeDark: colorPalette.coffeeDark,
-    // Card colors
-    cardBackground: colorPalette.cardBackground,
-    cardBackgroundSecondary: colorPalette.cardBackgroundSecondary,
+    // Professional Purple Primary Palette
+    primary: "#6d28d9", // Rich purple primary
+    primaryLight: "#8b5cf6", // Lighter purple
+    primaryDark: "#5b21b6", // Dark purple
+    primaryAccent: "#a855f7", // Purple accent
+    
+    // Professional Dark Background System
+    background: "#0A0A0B", // Deep black (slightly warmer)
+    surface: "#141416", // Card surface (warmer undertone)
+    surfaceElevated: "#1C1C1F", // Elevated surfaces
+    surfaceHighlight: "#242427", // Interactive surfaces
+    
+    // Sophisticated Typography Scale
+    text: "#FEFEFE", // Pure white for headers
+    textPrimary: "#F5F5F5", // Primary text (slightly softer)
+    textSecondary: "#B8B8B8", // Secondary text (higher contrast)
+    textTertiary: "#8A8A8E", // Tertiary text
+    textQuaternary: "#5A5A5E", // Subtle text
+    
+    // Professional Purple Color Palette
+    accent: "#8b5cf6", // Purple accent
+    accentSecondary: "#a855f7", // Secondary purple
+    
+    // Semantic Colors (Coffee Roast Inspired)
+    success: "#228B22", // Forest green (fresh coffee)
+    warning: "#DAA520", // Golden rod (medium roast)
+    error: "#DC143C", // Crimson (over-extraction)
+    info: "#4682B4", // Steel blue (water temp)
+    
+    // Extraction Quality Colors
+    extraction: {
+      perfect: "#32CD32", // Lime green
+      good: "#9ACD32", // Yellow green
+      acceptable: "#FFD700", // Gold
+      poor: "#FF8C00", // Dark orange
+      bad: "#FF4500", // Orange red
+    },
+    
+    // Coffee Roast Level Colors (keeping coffee-inspired but with purple tints)
+    roast: {
+      light: "#c084fc", // Light purple
+      mediumLight: "#a855f7", // Purple accent
+      medium: "#8b5cf6", // Purple
+      mediumDark: "#7c3aed", // Darker purple
+      dark: "#6d28d9", // Primary purple
+      french: "#5b21b6", // Dark purple
+    },
+    
+    // Refined Borders & Dividers
+    border: "#2A2A2D", // Subtle borders
+    borderSubtle: "#1F1F22", // Very subtle borders
+    divider: "#323235", // Section dividers
+    
+    // Navigation & Interface
+    tint: "#8b5cf6", // Active tint (purple)
+    icon: "#B8B8B8", // Icon color
+    iconActive: "#8b5cf6", // Active icon (purple)
+    iconSubtle: "#8A8A8E", // Subtle icons
+    
+    // Card System
+    cardBackground: "#1A1A1D", // Main card background
+    cardSecondary: "#1F1F23", // Secondary cards
+    cardTertiary: "#242427", // Tertiary cards
+    cardHighlight: "#2A2A2E", // Highlighted cards
+    
+    // Input System
+    inputBackground: "#1A1A1D", // Form inputs
+    inputBorder: "#2A2A2D", // Input borders
+    inputFocus: "#8b5cf6", // Focused inputs (purple)
+    
+    // Progress & Status
+    progressTrack: "#2A2A2D", // Progress backgrounds
+    progressFill: "#8b5cf6", // Progress fill (purple)
+    statusIndicator: "#32CD32", // Status dots
+    
+    // Coffee Equipment Colors
+    equipment: {
+      grinder: "#708090", // Slate gray
+      scale: "#2F4F4F", // Dark slate gray
+      kettle: "#483D8B", // Dark slate blue
+      brewer: "#6d28d9", // Purple for consistency
+    },
+    
+    // Bean Origin Colors
+    origin: {
+      african: "#8b5cf6", // Purple
+      central: "#a855f7", // Purple accent
+      south: "#7c3aed", // Darker purple  
+      asian: "#6d28d9", // Primary purple
+      island: "#c084fc", // Light purple
+    },
   },
   dark: {
-    text: colorPalette.darkText,
-    background: colorPalette.darkBackground,
-    backgroundSecondary: colorPalette.darkBackgroundSecondary,
-    tint: tintColorDark,
-    icon: colorPalette.darkIcon,
-    tabIconDefault: colorPalette.darkIcon,
-    tabIconSelected: tintColorDark,
-    // Semantic colors
-    success: colorPalette.success,
-    warning: colorPalette.warning,
-    error: colorPalette.error,
-    info: colorPalette.info,
-    // Coffee colors
-    coffeeLight: colorPalette.coffeeLight,
-    coffeeLightMedium: colorPalette.coffeeLightMedium,
-    coffeeMedium: colorPalette.coffeeMedium,
-    coffeeMediumDark: colorPalette.coffeeMediumDark,
-    coffeeDark: colorPalette.coffeeDark,
-    // Card colors
-    cardBackground: colorPalette.cardBackground,
-    cardBackgroundSecondary: colorPalette.cardBackgroundSecondary,
+    // Professional Purple Primary Palette
+    primary: "#6d28d9", // Rich purple primary
+    primaryLight: "#8b5cf6", // Lighter purple
+    primaryDark: "#5b21b6", // Dark purple
+    primaryAccent: "#a855f7", // Purple accent
+    
+    // Professional Dark Background System
+    background: "#0A0A0B", // Deep black (slightly warmer)
+    surface: "#141416", // Card surface (warmer undertone)
+    surfaceElevated: "#1C1C1F", // Elevated surfaces
+    surfaceHighlight: "#242427", // Interactive surfaces
+    
+    // Sophisticated Typography Scale
+    text: "#FEFEFE", // Pure white for headers
+    textPrimary: "#F5F5F5", // Primary text (slightly softer)
+    textSecondary: "#B8B8B8", // Secondary text (higher contrast)
+    textTertiary: "#8A8A8E", // Tertiary text
+    textQuaternary: "#5A5A5E", // Subtle text
+    
+    // Professional Purple Color Palette
+    accent: "#8b5cf6", // Purple accent
+    accentSecondary: "#a855f7", // Secondary purple
+    
+    // Semantic Colors (Coffee Roast Inspired)
+    success: "#228B22", // Forest green (fresh coffee)
+    warning: "#DAA520", // Golden rod (medium roast)
+    error: "#DC143C", // Crimson (over-extraction)
+    info: "#4682B4", // Steel blue (water temp)
+    
+    // Extraction Quality Colors
+    extraction: {
+      perfect: "#32CD32", // Lime green
+      good: "#9ACD32", // Yellow green
+      acceptable: "#FFD700", // Gold
+      poor: "#FF8C00", // Dark orange
+      bad: "#FF4500", // Orange red
+    },
+    
+    // Coffee Roast Level Colors (keeping coffee-inspired but with purple tints)
+    roast: {
+      light: "#c084fc", // Light purple
+      mediumLight: "#a855f7", // Purple accent
+      medium: "#8b5cf6", // Purple
+      mediumDark: "#7c3aed", // Darker purple
+      dark: "#6d28d9", // Primary purple
+      french: "#5b21b6", // Dark purple
+    },
+    
+    // Refined Borders & Dividers
+    border: "#2A2A2D", // Subtle borders
+    borderSubtle: "#1F1F22", // Very subtle borders
+    divider: "#323235", // Section dividers
+    
+    // Navigation & Interface
+    tint: "#8b5cf6", // Active tint (purple)
+    icon: "#B8B8B8", // Icon color
+    iconActive: "#8b5cf6", // Active icon (purple)
+    iconSubtle: "#8A8A8E", // Subtle icons
+    
+    // Card System
+    cardBackground: "#1A1A1D", // Main card background
+    cardSecondary: "#1F1F23", // Secondary cards
+    cardTertiary: "#242427", // Tertiary cards
+    cardHighlight: "#2A2A2E", // Highlighted cards
+    
+    // Input System
+    inputBackground: "#1A1A1D", // Form inputs
+    inputBorder: "#2A2A2D", // Input borders
+    inputFocus: "#8b5cf6", // Focused inputs (purple)
+    
+    // Progress & Status
+    progressTrack: "#2A2A2D", // Progress backgrounds
+    progressFill: "#8b5cf6", // Progress fill (purple)
+    statusIndicator: "#32CD32", // Status dots
+    
+    // Coffee Equipment Colors
+    equipment: {
+      grinder: "#708090", // Slate gray
+      scale: "#2F4F4F", // Dark slate gray
+      kettle: "#483D8B", // Dark slate blue
+      brewer: "#6d28d9", // Purple for consistency
+    },
+    
+    // Bean Origin Colors
+    origin: {
+      african: "#8b5cf6", // Purple
+      central: "#a855f7", // Purple accent
+      south: "#7c3aed", // Darker purple  
+      asian: "#6d28d9", // Primary purple
+      island: "#c084fc", // Light purple
+    },
   },
 };
-
-// Export the color palette for direct access when needed
-export { colorPalette };

@@ -17,13 +17,6 @@ export default function BrewprintsLayout() {
           headerShown: false,
         }} 
       />
-      <Stack.Screen 
-        name="new" 
-        options={{ 
-          title: 'Nouvelle Recette',
-          headerShown: false,
-        }} 
-      />
     </Stack>
   );
 }

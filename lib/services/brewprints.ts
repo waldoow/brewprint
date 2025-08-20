@@ -241,9 +241,21 @@ export class BrewprintsService {
    */
   static async createBrewprint(brewprint: BrewprintInput): Promise<ServiceResponse<Brewprint>> {
     try {
-      // Set default version if not provided
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        return {
+          data: null,
+          error: 'User not authenticated',
+          success: false
+        };
+      }
+
+      // Set default version if not provided and add user_id
       const brewprintData = {
         ...brewprint,
+        user_id: user.id,
         version: brewprint.version || 'v1',
         status: 'experimenting' as const
       };

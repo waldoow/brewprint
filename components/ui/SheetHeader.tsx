@@ -33,7 +33,7 @@ export function SheetHeader({
 }: SheetHeaderProps) {
   const backgroundColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "surface"
   );
   const textColor = useThemeColor(
     { light: lightTextColor, dark: darkTextColor },
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.05)",
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
 
   headerRow: {

@@ -58,7 +58,7 @@ export function ThemedCollapsible({
   children,
   defaultOpen = false,
   disabled = false,
-  variant = "default",
+  variant = "ghost",
   size = "default",
   showBorder = false,
   noPadding = true,
@@ -87,7 +87,7 @@ export function ThemedCollapsible({
   );
   const borderColor = useThemeColor(
     { light: lightBorderColor, dark: darkBorderColor },
-    "icon"
+    "border"
   );
   const iconColor = useThemeColor({}, "icon");
 

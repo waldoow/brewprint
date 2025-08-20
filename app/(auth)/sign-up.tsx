@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +15,14 @@ import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedInput } from "@/components/ui/ThemedInput";
 import { ThemedText } from "@/components/ui/ThemedText";
 import { ThemedView } from "@/components/ui/ThemedView";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/Form";
 
 // Zod schema for sign-up validation
 const signUpSchema = z
@@ -65,12 +73,7 @@ export default function SignUp({
 }: SignUpProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<SignUpFormData>({
+  const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
@@ -88,14 +91,14 @@ export default function SignUp({
 
       if (onSignUp) {
         await onSignUp(submitData);
-        reset();
+        form.reset();
       } else {
         // Mock sign-up for demo
         await new Promise((resolve) => setTimeout(resolve, 2000));
         toast.success("Account created successfully!", {
           description: "Welcome to our platform. You can now sign in.",
         });
-        reset();
+        form.reset();
       }
     } catch (error) {
       // Let the parent component handle the error toast
@@ -106,7 +109,7 @@ export default function SignUp({
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView noBackground={false} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -128,82 +131,95 @@ export default function SignUp({
               </ThemedView>
 
               {/* Form */}
-              <ThemedView style={styles.form}>
-                {/* Username Input */}
-                <Controller
-                  control={control}
-                  name="username"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Username"
-                      placeholder="Choose a username"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.username?.message}
-                      autoCapitalize="none"
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+              <Form {...form}>
+                <ThemedView style={styles.form}>
+                  {/* Username Input */}
+                  <FormField
+                    control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            placeholder="Choose a username"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            autoCapitalize="none"
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Email Input */}
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.email?.message}
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+                  {/* Email Input */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            type="email"
+                            placeholder="Enter your email"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Password Input */}
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Password"
-                      type="password"
-                      placeholder="Create a password"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.password?.message}
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+                  {/* Password Input */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            type="password"
+                            placeholder="Create a password"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Confirm Password Input */}
-                <Controller
-                  control={control}
-                  name="confirmPassword"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <ThemedInput
-                      label="Confirm Password"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.confirmPassword?.message}
-                      editable={!isLoading}
-                      containerStyle={styles.inputContainer}
-                    />
-                  )}
-                />
+                  {/* Confirm Password Input */}
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <ThemedInput
+                            type="password"
+                            placeholder="Confirm your password"
+                            value={field.value}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            editable={!isLoading}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                 {/* Terms Checkbox */}
                 {/* <ThemedView style={styles.checkboxContainer}>
@@ -244,26 +260,27 @@ export default function SignUp({
                   )}
                 </ThemedView> */}
 
-                {/* Sign Up Button */}
-                <ThemedButton
-                  title={isLoading ? "Creating Account..." : "Create Account"}
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={isLoading}
-                  loading={isLoading}
-                  style={styles.signUpButton}
-                />
-
-                {/* Sign In Link */}
-                <ThemedView style={styles.signInContainer}>
-                  <ThemedText style={styles.signInText}>
-                    Already have an account?{" "}
-                  </ThemedText>
+                  {/* Sign Up Button */}
                   <ThemedButton
-                    variant="link"
-                    title="Sign In"
-                    onPress={onNavigateToSignIn}
+                    title={isLoading ? "Creating Account..." : "Create Account"}
+                    onPress={form.handleSubmit(onSubmit)}
+                    disabled={isLoading}
+                    loading={isLoading}
+                    style={styles.signUpButton}
                   />
                 </ThemedView>
+              </Form>
+
+              {/* Sign In Link */}
+              <ThemedView style={styles.signInContainer}>
+                <ThemedText style={styles.signInText}>
+                  Already have an account?{" "}
+                </ThemedText>
+                <ThemedButton
+                  variant="link"
+                  title="Sign In"
+                  onPress={onNavigateToSignIn}
+                />
               </ThemedView>
             </ThemedView>
           </ScrollView>

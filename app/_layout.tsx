@@ -45,9 +45,23 @@ export default function RootLayout() {
                   },
                 }),
               }}
+              initialRouteName="index"
             >
+              <Stack.Screen name="index" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="(auth)" />
+              <Stack.Screen name="beans" />
+              <Stack.Screen name="brewers" />
+              <Stack.Screen name="brewprints" />
+              <Stack.Screen name="bean-detail/[id]" />
+              <Stack.Screen name="brewer-detail/[id]" />
+              <Stack.Screen name="brewing/[id]" />
+              <Stack.Screen name="brewing/[id]/results" />
+              <Stack.Screen name="settings/about" />
+              <Stack.Screen name="settings/data" />
+              <Stack.Screen name="settings/notifications" />
+              <Stack.Screen name="settings/preferences" />
+              <Stack.Screen name="settings/profile" />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

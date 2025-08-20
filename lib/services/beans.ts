@@ -183,9 +183,26 @@ export class BeansService {
    */
   static async createBean(bean: BeanInput): Promise<ServiceResponse<Bean>> {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        return {
+          data: null,
+          error: 'User not authenticated',
+          success: false
+        };
+      }
+
+      // Add user_id to bean data
+      const beanWithUserId = {
+        ...bean,
+        user_id: user.id
+      };
+
       const { data, error } = await supabase
         .from('beans')
-        .insert(bean)
+        .insert(beanWithUserId)
         .select('*')
         .single();
 

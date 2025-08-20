@@ -61,7 +61,7 @@ export function HeaderSpacingExample() {
           />
           <ThemedView style={styles.exampleContent} noBackground>
             <ThemedText>
-              This header's spacing changes based on the toggle button above. 
+              This header&apos;s spacing changes based on the toggle button above. 
               Try toggling to see the difference!
             </ThemedText>
           </ThemedView>
