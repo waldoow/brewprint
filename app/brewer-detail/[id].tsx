@@ -34,7 +34,6 @@ const MOCK_BREWER: Brewer = {
   maintenance_schedule: "weekly",
   last_maintenance: "2024-08-10",
   maintenance_notes: "Regular cleaning with mild soap",
-  is_active: true,
   condition: "excellent",
   location: "Kitchen",
   notes: "Perfect for single-origin coffees. Produces clean, bright cups.",
@@ -101,39 +100,6 @@ export default function BrewerDetailScreen() {
     router.push(`/brewers/edit/${id}`);
   };
 
-  const handleToggleStatus = async () => {
-    if (!brewer) return;
-    
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
-    const newStatus = !brewer.is_active;
-    const actionText = newStatus ? "activate" : "deactivate";
-    
-    Alert.alert(
-      `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} Brewer`,
-      `Are you sure you want to ${actionText} this brewer?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: actionText.charAt(0).toUpperCase() + actionText.slice(1),
-          style: newStatus ? "default" : "destructive",
-          onPress: async () => {
-            try {
-              const result = await BrewersService.toggleBrewerStatus(brewer.id, newStatus);
-              if (result.success && result.data) {
-                setBrewer(result.data);
-                toast.success(`Brewer ${newStatus ? 'activated' : 'deactivated'} successfully`);
-              } else {
-                toast.error(`Failed to ${actionText} brewer`);
-              }
-            } catch (error) {
-              toast.error("An error occurred");
-            }
-          }
-        }
-      ]
-    );
-  };
 
   const handleRecordMaintenance = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -243,12 +209,6 @@ export default function BrewerDetailScreen() {
               size="sm"
               onPress={handleEdit}
             />
-            <ThemedButton
-              title={brewer.is_active ? "Deactivate" : "Activate"}
-              size="sm"
-              variant={brewer.is_active ? "secondary" : "default"}
-              onPress={handleToggleStatus}
-            />
           </ThemedView>
         }
       />
@@ -260,17 +220,6 @@ export default function BrewerDetailScreen() {
       >
         {/* Status Cards */}
         <ThemedView style={styles.statusSection}>
-          <ThemedView style={styles.statusCard}>
-            <ThemedText style={[styles.statusLabel, { color: colors.textSecondary }]}>
-              STATUS
-            </ThemedText>
-            <ThemedBadge 
-              variant={brewer.is_active ? "success" : "secondary"}
-              size="default"
-            >
-              {brewer.is_active ? "ACTIVE" : "INACTIVE"}
-            </ThemedBadge>
-          </ThemedView>
 
           <ThemedView style={styles.statusCard}>
             <ThemedText style={[styles.statusLabel, { color: colors.textSecondary }]}>

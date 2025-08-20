@@ -225,77 +225,81 @@ Créé avec Brewprint ☕
   }
 
   const getActionButtons = () => {
-    const buttons = [];
+    const primaryActions = [];
+    const secondaryActions = [];
 
     // Start Brewing button (primary action)
-    buttons.push(
+    primaryActions.push(
       <ThemedButton
         key="brew"
+        title="🚀 Start Brewing"
         variant="default"
         onPress={handleStartBrewing}
-        style={[styles.actionButton, styles.primaryActionButton]}
-      >
-        ☕ Start Brewing
-      </ThemedButton>
+        style={styles.primaryActionButton}
+      />
     );
 
-    // Duplicate button
-    buttons.push(
+    // Secondary actions
+    secondaryActions.push(
       <ThemedButton
         key="duplicate"
+        title="Duplicate"
         variant="outline"
         onPress={handleDuplicate}
         style={styles.actionButton}
-      >
-        📄 Duplicate Recipe
-      </ThemedButton>
+      />
     );
 
-    // Create iteration button
-    buttons.push(
+    secondaryActions.push(
       <ThemedButton
         key="iterate"
+        title="New Iteration"
         variant="outline"
         onPress={handleCreateIteration}
         style={styles.actionButton}
-      >
-        🧪 New Iteration
-      </ThemedButton>
+      />
     );
 
     // Mark as final button (only for experimenting recipes)
     if (brewprint.status === "experimenting") {
-      buttons.push(
+      secondaryActions.push(
         <ThemedButton
           key="final"
+          title="Mark as Final"
           variant="secondary"
           onPress={handleMarkAsFinal}
           style={styles.actionButton}
-        >
-          ✅ Mark Final
-        </ThemedButton>
+        />
       );
     }
 
     // Archive button (not for archived recipes)
     if (brewprint.status !== "archived") {
-      buttons.push(
+      secondaryActions.push(
         <ThemedButton
           key="archive"
+          title="Archive Recipe"
           variant="secondary"
           onPress={handleArchive}
           style={styles.actionButton}
-        >
-          📦 Archive
-        </ThemedButton>
+        />
       );
     }
 
-    return buttons;
+    return (
+      <ThemedView noBackground style={styles.actionsWrapper}>
+        <ThemedView noBackground style={styles.primaryActionsContainer}>
+          {primaryActions}
+        </ThemedView>
+        <ThemedView noBackground style={styles.secondaryActionsContainer}>
+          {secondaryActions}
+        </ThemedView>
+      </ThemedView>
+    );
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView noBackground={false} style={styles.container}>
       <Header
         title={brewprint.name}
         subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version}`}
@@ -313,63 +317,106 @@ Créé avec Brewprint ☕
         }
       />
 
-      <ThemedScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
-          {/* Status */}
-          <StatusCards
-            method={brewprint.method}
-            difficulty={brewprint.difficulty}
-            status={brewprint.status}
-            rating={brewprint.rating}
-          />
+      <ThemedScrollView 
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <ThemedView noBackground style={styles.content}>
+          {/* Hero Section */}
+          <ThemedView style={styles.heroSection}>
+            <StatusCards
+              method={brewprint.method}
+              difficulty={brewprint.difficulty}
+              status={brewprint.status}
+              rating={brewprint.rating}
+            />
+
+            {/* Quick Stats */}
+            <ThemedView style={styles.quickStatsContainer}>
+              <ThemedView style={styles.quickStat}>
+                <ThemedText style={styles.quickStatValue}>
+                  {brewprint.parameters.coffee_grams}g : {brewprint.parameters.water_grams}g
+                </ThemedText>
+                <ThemedText style={styles.quickStatLabel}>Ratio</ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.quickStat}>
+                <ThemedText style={styles.quickStatValue}>
+                  {brewprint.parameters.water_temp}°C
+                </ThemedText>
+                <ThemedText style={styles.quickStatLabel}>Température</ThemedText>
+              </ThemedView>
+              {brewprint.parameters.total_time && (
+                <ThemedView style={styles.quickStat}>
+                  <ThemedText style={styles.quickStatValue}>
+                    {Math.floor(brewprint.parameters.total_time / 60)}:{String(brewprint.parameters.total_time % 60).padStart(2, '0')}
+                  </ThemedText>
+                  <ThemedText style={styles.quickStatLabel}>Temps</ThemedText>
+                </ThemedView>
+              )}
+            </ThemedView>
+          </ThemedView>
 
           {/* Description */}
           {brewprint.description && (
-            <ThemedView style={styles.descriptionCard}>
-              <ThemedText style={styles.descriptionText}>
-                {brewprint.description}
-              </ThemedText>
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Description</ThemedText>
+              <ThemedView style={styles.descriptionCard}>
+                <ThemedText style={styles.descriptionText}>
+                  {brewprint.description}
+                </ThemedText>
+              </ThemedView>
             </ThemedView>
           )}
 
-          {/* Parameters */}
-          <ParametersCard
-            title="Paramètres cibles"
-            coffeeGrams={brewprint.parameters.coffee_grams}
-            waterGrams={brewprint.parameters.water_grams}
-            waterTemp={brewprint.parameters.water_temp}
-            grindSetting={brewprint.parameters.grind_setting}
-            totalTime={brewprint.parameters.total_time}
-          />
+          {/* Parameters Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Paramètres de Brassage</ThemedText>
+            <ParametersCard
+              title=""
+              coffeeGrams={brewprint.parameters.coffee_grams}
+              waterGrams={brewprint.parameters.water_grams}
+              waterTemp={brewprint.parameters.water_temp}
+              grindSetting={brewprint.parameters.grind_setting}
+              totalTime={brewprint.parameters.total_time}
+            />
+          </ThemedView>
 
-          {/* Steps */}
-          <StepsCard steps={brewprint.steps} />
+          {/* Steps Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Étapes de Brassage</ThemedText>
+            <StepsCard steps={brewprint.steps} />
+          </ThemedView>
 
-          {/* Results */}
-          <ResultsCard
-            actualParameters={brewprint.actual_parameters}
-            actualMetrics={brewprint.actual_metrics}
-            rating={brewprint.rating}
-            tastingNotes={brewprint.tasting_notes}
-            brewingNotes={brewprint.brewing_notes}
-            brewDate={brewprint.brew_date}
-          />
+          {/* Results Section */}
+          {(brewprint.actual_parameters || brewprint.actual_metrics || brewprint.tasting_notes || brewprint.brewing_notes) && (
+            <ThemedView style={styles.section}>
+              <ThemedText style={styles.sectionTitle}>Résultats</ThemedText>
+              <ResultsCard
+                actualParameters={brewprint.actual_parameters}
+                actualMetrics={brewprint.actual_metrics}
+                rating={brewprint.rating}
+                tastingNotes={brewprint.tasting_notes}
+                brewingNotes={brewprint.brewing_notes}
+                brewDate={brewprint.brew_date}
+              />
+            </ThemedView>
+          )}
 
           {/* Action Buttons */}
-          <ThemedView noBackground style={styles.actionsContainer}>
+          <ThemedView style={styles.section}>
+            <ThemedText style={styles.sectionTitle}>Actions</ThemedText>
             {getActionButtons()}
           </ThemedView>
 
           {/* Danger Zone */}
           <ThemedView style={styles.dangerZone}>
-            <ThemedText style={styles.dangerZoneTitle}>Zone de danger</ThemedText>
+            <ThemedText style={styles.dangerZoneTitle}>Danger Zone</ThemedText>
             <ThemedButton
+              title="Delete Recipe"
               variant="destructive"
               onPress={handleDelete}
-              style={styles.deleteButton}
-            >
-              Supprimer définitivement
-            </ThemedButton>
+            />
           </ThemedView>
         </ThemedView>
       </ThemedScrollView>
@@ -385,8 +432,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 24, // Increased padding for professional layout
-    paddingBottom: 40, // Increased bottom padding
+    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,
@@ -398,47 +444,100 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  
+  // Hero Section
+  heroSection: {
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+  },
+  quickStatsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.05)",
+  },
+  quickStat: {
+    alignItems: "center",
+    gap: 4,
+  },
+  quickStatValue: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#8b5cf6",
+  },
+  quickStatLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    opacity: 0.6,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+
+  // Sections
+  section: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+    color: "#ffffff",
+  },
+  
+  // Description
   descriptionCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)", // Slightly more visible
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 12,
-    padding: 20, // Increased padding
-    marginBottom: 20, // Increased margin
+    padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle border
+    borderColor: "rgba(255, 255, 255, 0.08)",
   },
   descriptionText: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 22,
     opacity: 0.9,
   },
-  actionsContainer: {
+  
+  // Actions
+  actionsWrapper: {
+    gap: 16,
+  },
+  primaryActionsContainer: {
+    gap: 12,
+  },
+  secondaryActionsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16, // Increased gap for better spacing
-    marginTop: 12, // Increased margin
-    marginBottom: 32, // Increased bottom margin
+    gap: 12,
   },
   actionButton: {
     flex: 1,
     minWidth: "45%",
   },
   primaryActionButton: {
-    minWidth: "100%",
+    width: "100%",
   },
+  
+  // Danger Zone
   dangerZone: {
-    backgroundColor: "rgba(220, 20, 60, 0.06)", // Using crimson with better opacity
+    backgroundColor: "rgba(255, 0, 0, 0.05)",
     borderRadius: 12,
-    padding: 20, // Increased padding
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "rgba(220, 20, 60, 0.15)", // More subtle border with crimson
+    borderColor: "rgba(255, 0, 0, 0.2)",
   },
   dangerZoneTitle: {
     fontSize: 14,
     fontWeight: "600",
     color: "#ff4444",
     marginBottom: 12,
-  },
-  deleteButton: {
-    backgroundColor: "#ff4444",
   },
 });

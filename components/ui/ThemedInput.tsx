@@ -63,6 +63,19 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
   const getInputProps = () => {
     const baseProps = { ...rest };
     
+    // Handle numeric input validation
+    const handleNumericChange = (text: string) => {
+      // Only allow numbers and decimal point
+      const numericValue = text.replace(/[^0-9.]/g, '');
+      // Prevent multiple decimal points
+      const parts = numericValue.split('.');
+      const validValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : numericValue;
+      
+      if (rest.onChangeText) {
+        rest.onChangeText(validValue);
+      }
+    };
+    
     switch (type) {
       case 'email':
         return {
@@ -83,6 +96,7 @@ export const ThemedInput = forwardRef<TextInput, ThemedInputProps>(({
           ...baseProps,
           keyboardType: 'numeric' as const,
           autoComplete: 'off' as const,
+          onChangeText: handleNumericChange,
         };
       case 'text':
       default:

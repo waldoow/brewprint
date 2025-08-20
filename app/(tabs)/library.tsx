@@ -84,7 +84,7 @@ export default function LibraryScreen() {
       const query = searchQuery.toLowerCase().trim();
       return (
         bean.name.toLowerCase().includes(query) ||
-        bean.roaster?.toLowerCase().includes(query) ||
+        bean.supplier?.toLowerCase().includes(query) ||
         bean.origin?.toLowerCase().includes(query) ||
         bean.roast_level?.toLowerCase().includes(query) ||
         bean.variety?.toLowerCase().includes(query) ||
@@ -114,16 +114,6 @@ export default function LibraryScreen() {
         brewer.notes?.toLowerCase().includes(query)
       );
     }).sort((a, b) => {
-      // Sort by active status first, then by condition, then by name
-      if (a.is_active !== b.is_active) {
-        return a.is_active ? -1 : 1;
-      }
-      const conditionOrder = { excellent: 0, good: 1, fair: 2, 'needs-replacement': 3 };
-      const aOrder = conditionOrder[a.condition];
-      const bOrder = conditionOrder[b.condition];
-      if (aOrder !== bOrder) {
-        return aOrder - bOrder;
-      }
       return a.name.localeCompare(b.name);
     });
 
@@ -138,19 +128,9 @@ export default function LibraryScreen() {
         grinder.notes?.toLowerCase().includes(query)
       );
     }).sort((a, b) => {
-      // Sort by active status first, then by condition, then by name
-      if (a.is_active !== b.is_active) {
-        return a.is_active ? -1 : 1;
-      }
-      const conditionOrder = { excellent: 0, good: 1, fair: 2, 'needs-replacement': 3 };
-      const aOrder = conditionOrder[a.condition];
-      const bOrder = conditionOrder[b.condition];
-      if (aOrder !== bOrder) {
-        return aOrder - bOrder;
-      }
       return a.name.localeCompare(b.name);
     });
-    
+
     return { beans: filteredBeans, brewers: filteredBrewers, grinders: filteredGrinders };
   }, [beans, brewers, grinders, searchQuery]);
 
@@ -204,6 +184,7 @@ export default function LibraryScreen() {
     router.push(`/(tabs)/grinder-detail/${grinderId}`);
   };
 
+
   const handleCreateMenuPress = () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -211,6 +192,123 @@ export default function LibraryScreen() {
       // Haptics not available, continue without feedback
     }
     setShowActionSheet(true);
+  };
+
+  const populateSampleData = async () => {
+    try {
+      toast.info('Creating sample data...');
+      
+      // Create default brewers
+      const brewersResult = await BrewersService.createDefaultBrewers();
+      if (brewersResult.success && brewersResult.data) {
+        toast.success(`Created ${brewersResult.data.length} sample brewers`);
+      } else {
+        toast.error('Failed to create brewers: ' + brewersResult.error);
+      }
+
+      // Create sample beans
+      const sampleBeans = [
+        {
+          name: "Ethiopian Yirgacheffe G1",
+          origin: "Ethiopia",
+          region: "Yirgacheffe",
+          farm: "Kochere Washing Station",
+          altitude: 1850,
+          process: 'washed' as const,
+          variety: "Heirloom Ethiopian",
+          purchase_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          roast_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          supplier: "Sweet Maria's Coffee Supply",
+          cost: 18.50,
+          total_grams: 340,
+          remaining_grams: 280,
+          roast_level: 'light' as const,
+          tasting_notes: ["lemon", "floral", "tea-like", "bright acidity"],
+          official_description: "Classic Yirgacheffe with bright citrus notes and floral aromatics.",
+          my_notes: "Perfect for pour-over methods. Really shines in V60.",
+          rating: 5
+        },
+        {
+          name: "Colombian Huila Supremo",
+          origin: "Colombia",
+          region: "Huila", 
+          farm: "Finca El Paraiso",
+          altitude: 1650,
+          process: 'washed' as const,
+          variety: "Caturra, Castillo",
+          purchase_date: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          roast_date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          supplier: "Blue Bottle Coffee",
+          cost: 16.00,
+          total_grams: 250,
+          remaining_grams: 175,
+          roast_level: 'medium' as const,
+          tasting_notes: ["chocolate", "caramel", "nuts", "balanced"],
+          official_description: "Well-balanced Colombian coffee with notes of chocolate and caramel.",
+          my_notes: "Great daily drinker. Works well in both pour-over and French press.",
+          rating: 4
+        },
+        {
+          name: "Kenya AA Nyeri",
+          origin: "Kenya",
+          region: "Nyeri",
+          farm: "Gachatha-ini Cooperative", 
+          altitude: 1700,
+          process: 'washed' as const,
+          variety: "SL28, SL34",
+          purchase_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          roast_date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          supplier: "Intelligentsia Coffee",
+          cost: 22.00,
+          total_grams: 340,
+          remaining_grams: 320,
+          roast_level: 'medium-light' as const,
+          tasting_notes: ["black currant", "wine-like", "bright acidity", "complex"],
+          official_description: "Classic Kenya AA with signature black currant notes and wine-like complexity.",
+          my_notes: "Intense black currant flavor. Beautiful in V60 but need to dial in the grind.",
+          rating: 5
+        },
+        {
+          name: "Brazil Santos Natural",
+          origin: "Brazil",
+          region: "Cerrado Mineiro",
+          farm: "Fazenda Santa Barbara",
+          altitude: 1200,
+          process: 'natural' as const,
+          variety: "Catuai Yellow",
+          purchase_date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          roast_date: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          supplier: "Stumptown Coffee Roasters",
+          cost: 14.50,
+          total_grams: 340,
+          remaining_grams: 85,
+          roast_level: 'medium' as const,
+          tasting_notes: ["nutty", "chocolate", "low acidity", "smooth"],
+          official_description: "Classic Brazilian profile with low acidity and smooth chocolate notes.",
+          my_notes: "Getting a bit stale but still decent for cold brew. Should finish this soon.",
+          rating: 3
+        }
+      ];
+
+      let beansCreated = 0;
+      for (const bean of sampleBeans) {
+        const result = await BeansService.createBean(bean);
+        if (result.success) {
+          beansCreated++;
+        }
+      }
+      
+      if (beansCreated > 0) {
+        toast.success(`Created ${beansCreated} sample beans`);
+      }
+
+      // Refresh the data
+      await loadInventoryData();
+      
+    } catch (error) {
+      console.error('Error populating sample data:', error);
+      toast.error('Failed to create sample data');
+    }
   };
 
   const createActions = [
@@ -231,6 +329,15 @@ export default function LibraryScreen() {
       title: 'Add New Grinder',
       icon: 'grinder',
       onPress: () => router.push('/grinders/new')
+    },
+    {
+      id: 'sample-data',
+      title: 'Create Sample Data',
+      icon: 'data',
+      onPress: () => {
+        setShowActionSheet(false);
+        populateSampleData();
+      }
     }
   ];
 
@@ -302,7 +409,7 @@ export default function LibraryScreen() {
               <ThemedText type="subtitle" style={[styles.emptyTitle, { color: colors.text }]}>
                 {activeTab === 'beans' 
                   ? (beans.length === 0 ? 'No beans' : 'No matching beans')
-                  : activeTab === 'brewers' 
+                  : activeTab === 'brewers'
                   ? (brewers.length === 0 ? 'No brewers' : 'No matching brewers')
                   : (grinders.length === 0 ? 'No grinders' : 'No matching grinders')
                 }
@@ -311,7 +418,7 @@ export default function LibraryScreen() {
                 {activeTab === 'beans' 
                   ? (beans.length === 0 
                       ? 'Add your first coffee beans to begin tracking freshness and optimization'
-                      : 'Refine search criteria: name, roaster, origin, variety, or process method'
+                      : 'Refine search criteria: name, supplier, origin, variety, or process method'
                     )
                   : activeTab === 'brewers'
                   ? (brewers.length === 0
@@ -319,7 +426,7 @@ export default function LibraryScreen() {
                       : 'Refine search criteria: name, brand, model, type, or notes'
                     )
                   : (grinders.length === 0
-                      ? 'Add your first grinder to begin tracking grind settings and maintenance'
+                      ? 'Add your first grinder to begin tracking grind profiles and consistency'
                       : 'Refine search criteria: name, brand, model, type, or notes'
                     )
                 }
@@ -349,10 +456,10 @@ export default function LibraryScreen() {
                     freshnessDays <= 14 ? 'good' : 
                     freshnessDays <= 21 ? 'fading' : 'stale';
                   
-                  const freshnessColor = freshnessStatus === 'peak' ? colors.statusGreen :
-                    freshnessStatus === 'good' ? colors.statusGreen :
-                    freshnessStatus === 'fading' ? colors.statusYellow :
-                    freshnessStatus === 'stale' ? colors.statusRed : colors.textSecondary;
+                  const freshnessColor = freshnessStatus === 'peak' ? colors.success :
+                    freshnessStatus === 'good' ? colors.success :
+                    freshnessStatus === 'fading' ? colors.warning :
+                    freshnessStatus === 'stale' ? colors.error : colors.textSecondary;
 
                   return (
                     <TouchableOpacity
@@ -369,7 +476,7 @@ export default function LibraryScreen() {
                             {bean.name}
                           </ThemedText>
                           <ThemedText style={[styles.itemSubtitle, { color: colors.textSecondary }]}>
-                            {bean.roaster || 'Independent Roaster'}
+                            {bean.supplier || 'Independent Roaster'}
                           </ThemedText>
                         </View>
                         <View style={styles.itemStatus}>
@@ -377,7 +484,7 @@ export default function LibraryScreen() {
                             {freshnessStatus.toUpperCase()}
                           </ThemedText>
                           <ThemedText style={[styles.itemWeight, { color: colors.text }]}>
-                            {bean.weight_grams || 0}g
+                            {bean.remaining_grams || 0}g
                           </ThemedText>
                         </View>
                       </View>
@@ -398,18 +505,14 @@ export default function LibraryScreen() {
               ) : activeTab === 'brewers' ? (
                 // Render brewers
                 (filteredData.brewers as Brewer[]).map((brewer) => {
-                  const statusColor = brewer.is_active ? colors.statusGreen : colors.textSecondary;
-                  const conditionColor = brewer.condition === 'excellent' ? colors.statusGreen :
-                    brewer.condition === 'good' ? colors.statusGreen :
-                    brewer.condition === 'fair' ? colors.statusYellow :
-                    colors.statusRed;
+                  const conditionColor = colors.success; // Default to good condition
 
                   return (
                     <TouchableOpacity
                       key={brewer.id}
                       style={[styles.itemCard, { 
                         backgroundColor: colors.cardBackground,
-                        borderLeftColor: statusColor,
+                        borderLeftColor: conditionColor,
                       }]}
                       onPress={() => handleBrewerPress(brewer.id)}
                     >
@@ -423,18 +526,15 @@ export default function LibraryScreen() {
                           </ThemedText>
                         </View>
                         <View style={styles.itemStatus}>
-                          <ThemedText style={[styles.statusText, { color: statusColor }]}>
-                            {brewer.is_active ? 'ACTIVE' : 'INACTIVE'}
-                          </ThemedText>
                           <ThemedText style={[styles.conditionText, { color: conditionColor }]}>
-                            {brewer.condition.toUpperCase()}
+                            ACTIVE
                           </ThemedText>
                         </View>
                       </View>
                       
                       <View style={styles.itemDetails}>
                         <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
-                          {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')} • {brewer.size || 'Standard Size'}
+                          {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')} • {brewer.material || 'Standard'}
                         </ThemedText>
                         {brewer.capacity_ml && (
                           <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
@@ -448,18 +548,14 @@ export default function LibraryScreen() {
               ) : (
                 // Render grinders
                 (filteredData.grinders as Grinder[]).map((grinder) => {
-                  const statusColor = grinder.is_active ? colors.statusGreen : colors.textSecondary;
-                  const conditionColor = grinder.condition === 'excellent' ? colors.statusGreen :
-                    grinder.condition === 'good' ? colors.statusGreen :
-                    grinder.condition === 'fair' ? colors.statusYellow :
-                    colors.statusRed;
+                  const conditionColor = colors.success; // Default to good condition
 
                   return (
                     <TouchableOpacity
                       key={grinder.id}
                       style={[styles.itemCard, { 
                         backgroundColor: colors.cardBackground,
-                        borderLeftColor: statusColor,
+                        borderLeftColor: conditionColor,
                       }]}
                       onPress={() => handleGrinderPress(grinder.id)}
                     >
@@ -473,22 +569,19 @@ export default function LibraryScreen() {
                           </ThemedText>
                         </View>
                         <View style={styles.itemStatus}>
-                          <ThemedText style={[styles.statusText, { color: statusColor }]}>
-                            {grinder.is_active ? 'ACTIVE' : 'INACTIVE'}
-                          </ThemedText>
                           <ThemedText style={[styles.conditionText, { color: conditionColor }]}>
-                            {grinder.condition.toUpperCase()}
+                            ACTIVE
                           </ThemedText>
                         </View>
                       </View>
                       
                       <View style={styles.itemDetails}>
                         <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
-                          {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')} • {grinder.size || 'Standard Size'}
+                          {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')} • {grinder.burr_material || 'Steel'}
                         </ThemedText>
                         {grinder.burr_size && (
                           <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
-                            {grinder.burr_size}mm burr size
+                            {grinder.burr_size}mm burr set
                           </ThemedText>
                         )}
                       </View>

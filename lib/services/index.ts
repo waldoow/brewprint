@@ -16,6 +16,13 @@ export type {
   SettingRange 
 } from './grinders';
 
+export { BrewersService } from './brewers';
+export type { 
+  Brewer, 
+  BrewerInput, 
+  BrewerUpdate
+} from './brewers';
+
 export { BrewprintsService } from './brewprints';
 export type { 
   Brewprint, 

@@ -190,9 +190,26 @@ export class GrindersService {
    */
   static async createGrinder(grinder: GrinderInput): Promise<ServiceResponse<Grinder>> {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        return {
+          data: null,
+          error: 'User not authenticated',
+          success: false
+        };
+      }
+
+      // Add user_id to grinder data
+      const grinderWithUserId = {
+        ...grinder,
+        user_id: user.id
+      };
+
       const { data, error } = await supabase
         .from('grinders')
-        .insert(grinder)
+        .insert(grinderWithUserId)
         .select('*')
         .single();
 

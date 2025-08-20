@@ -19,7 +19,7 @@ export function TimerDisplay({
   targetTime,
 }: TimerDisplayProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? "dark"];
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -83,12 +83,12 @@ export function TimerDisplay({
 
         {/* Progress bar instead of circle for minimal design */}
         <View style={styles.progressSection}>
-          <View style={[styles.progressTrack, { backgroundColor: colors.cardBackgroundSecondary }]}>
+          <View style={[styles.progressTrack, { backgroundColor: colors.progressTrack }]}>
             <View 
               style={[
                 styles.progressFill, 
                 { 
-                  backgroundColor: colors.primary,
+                  backgroundColor: colors.progressFill,
                   width: `${Math.min(progress, 100)}%`
                 }
               ]} 

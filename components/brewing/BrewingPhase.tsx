@@ -1,11 +1,10 @@
 // components/brewing/BrewingPhase.tsx
 import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View, Text } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 
 interface BrewingPhaseProps {
   currentPhase: "blooming" | "pouring" | "finished";
@@ -41,11 +40,14 @@ const phaseData = {
 
 export function BrewingPhase({ currentPhase, onNextPhase }: BrewingPhaseProps) {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? "dark"];
   const slideAnim = useRef(new Animated.Value(50)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    slideAnim.setValue(50);
+    fadeAnim.setValue(0);
+    
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -64,9 +66,9 @@ export function BrewingPhase({ currentPhase, onNextPhase }: BrewingPhaseProps) {
 
   const getBorderColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return colors.statusRed;
-      case 'high': return colors.statusYellow;
-      case 'complete': return colors.statusGreen;
+      case 'critical': return colors.error;
+      case 'high': return colors.warning;
+      case 'complete': return colors.success;
       default: return colors.primary;
     }
   };
@@ -155,7 +157,7 @@ export function BrewingPhase({ currentPhase, onNextPhase }: BrewingPhaseProps) {
             </ThemedText>
           </View>
           
-          <View style={[styles.progressTrack, { backgroundColor: colors.cardBackgroundSecondary }]}>
+          <View style={[styles.progressTrack, { backgroundColor: colors.progressTrack }]}>
             <View 
               style={[
                 styles.progressFill, 
@@ -171,16 +173,15 @@ export function BrewingPhase({ currentPhase, onNextPhase }: BrewingPhaseProps) {
         {/* Action Controls */}
         {currentPhase !== "finished" ? (
           <ThemedButton
+            title={currentPhase === "blooming" ? "PROCEED TO EXTRACTION" : "COMPLETE BREWING"}
             onPress={onNextPhase}
             variant="default"
             size="default"
             style={styles.actionButton}
-          >
-            {currentPhase === "blooming" ? "PROCEED TO EXTRACTION" : "COMPLETE BREWING"}
-          </ThemedButton>
+          />
         ) : (
           <View style={styles.completedSection}>
-            <ThemedText style={[styles.completedText, { color: colors.statusGreen }]}>
+            <ThemedText style={[styles.completedText, { color: colors.success }]}>
               EXTRACTION ANALYSIS READY
             </ThemedText>
           </View>

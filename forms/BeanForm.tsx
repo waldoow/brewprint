@@ -2,30 +2,28 @@ import { useAuth } from "@/context/AuthContext";
 import { BeansService, type BeanInput } from "@/lib/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
 // UI Components
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedCollapsible } from "@/components/ui/ThemedCollapsible";
-import { SheetHeader } from "@/components/ui/SheetHeader";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { ThemedDatePicker } from "@/components/ui/ThemedDatePicker";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+import { ThemedButton } from "@/components/ui/ThemedButton";
+import { ThemedCollapsible } from "@/components/ui/ThemedCollapsible";
+import { ThemedDatePicker } from "@/components/ui/ThemedDatePicker";
+import { ThemedInput } from "@/components/ui/ThemedInput";
+import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
+import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
+import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
+import { ThemedView } from "@/components/ui/ThemedView";
 
 // Bean form validation schema
 const beanFormSchema = z.object({
@@ -131,8 +129,12 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
       altitude: initialData?.altitude || "",
       process: initialData?.process || "washed",
       variety: initialData?.variety || "",
-      purchase_date: initialData?.purchase_date ? new Date(initialData.purchase_date) : new Date(),
-      roast_date: initialData?.roast_date ? new Date(initialData.roast_date) : new Date(),
+      purchase_date: initialData?.purchase_date
+        ? new Date(initialData.purchase_date)
+        : new Date(),
+      roast_date: initialData?.roast_date
+        ? new Date(initialData.roast_date)
+        : new Date(),
       supplier: initialData?.supplier || "",
       cost: initialData?.cost || "",
       total_grams: initialData?.total_grams || "",
@@ -170,8 +172,12 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         altitude: data.altitude ? parseInt(data.altitude) : undefined,
         process: data.process,
         variety: data.variety || undefined,
-        purchase_date: data.purchase_date ? data.purchase_date.toISOString().split('T')[0] : undefined,
-        roast_date: data.roast_date ? data.roast_date.toISOString().split('T')[0] : undefined,
+        purchase_date: data.purchase_date
+          ? data.purchase_date.toISOString().split("T")[0]
+          : undefined,
+        roast_date: data.roast_date
+          ? data.roast_date.toISOString().split("T")[0]
+          : undefined,
         supplier: data.supplier,
         cost: parseFloat(data.cost),
         total_grams: parseInt(data.total_grams),
@@ -185,7 +191,11 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         rating: data.rating ? parseInt(data.rating) : undefined,
       };
 
-      const { data: newBean, error, success } = await BeansService.createBean(beanData);
+      const {
+        data: newBean,
+        error,
+        success,
+      } = await BeansService.createBean(beanData);
 
       if (!success || error) {
         console.error("Error creating bean:", error);
@@ -211,13 +221,6 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
 
   return (
     <ThemedView noBackground style={styles.container}>
-      <SheetHeader
-        title="Add New Bean"
-        subtitle="Coffee inventory management"
-        onClose={handleCancel}
-        showCloseButton={true}
-      />
-
       <ThemedScrollView
         paddingVertical={0}
         paddingHorizontal={0}
@@ -310,16 +313,146 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
               />
             </ThemedCollapsible>
 
-          {/* Advanced Parameters Section - All Optional Fields */}
-          <ThemedCollapsible
-            title="Advanced Parameters"
-            subtitle="Detailed coffee information (optional)"
-            defaultOpen={false}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
+            {/* Purchase & Inventory Section - Required Fields */}
+            <ThemedCollapsible
+              title="Purchase & Inventory"
+              subtitle="Purchase details and inventory tracking"
+              defaultOpen={true}
+              variant="ghost"
+              showBorder={false}
+              noPadding={true}
+              noBackground={true}
+            >
+              <FormField
+                control={form.control}
+                name="purchase_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Purchase Date *</FormLabel>
+                    <FormControl>
+                      <ThemedDatePicker
+                        value={field.value}
+                        onDateChange={field.onChange}
+                        placeholder="Select purchase date"
+                        error={form.formState.errors.purchase_date?.message}
+                        maximumDate={new Date()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="roast_date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Roast Date *</FormLabel>
+                    <FormControl>
+                      <ThemedDatePicker
+                        value={field.value}
+                        onDateChange={field.onChange}
+                        placeholder="Select roast date"
+                        error={form.formState.errors.roast_date?.message}
+                        maximumDate={new Date()}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="supplier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Supplier *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="Blue Bottle Coffee"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost ($) *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="24.95"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="total_grams"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Grams *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="340"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="remaining_grams"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Remaining Grams *</FormLabel>
+                    <FormControl>
+                      <ThemedInput
+                        value={field.value}
+                        onChangeText={field.onChange}
+                        onBlur={field.onBlur}
+                        placeholder="340"
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </ThemedCollapsible>
+
+            {/* Advanced Parameters Section - All Optional Fields */}
+            <ThemedCollapsible
+              title="Advanced Parameters"
+              subtitle="Detailed coffee information (optional)"
+              defaultOpen={false}
+              variant="ghost"
+              showBorder={false}
+              noPadding={true}
+              noBackground={true}
+            >
               <FormField
                 control={form.control}
                 name="farm"
@@ -472,140 +605,10 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
                   </FormItem>
                 )}
               />
-          </ThemedCollapsible>
+            </ThemedCollapsible>
 
-          {/* Purchase & Inventory Section - Required Fields */}
-          <ThemedCollapsible
-            title="Purchase & Inventory"
-            subtitle="Purchase details and inventory tracking"
-            defaultOpen={true}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-              <FormField
-                control={form.control}
-                name="purchase_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purchase Date *</FormLabel>
-                    <FormControl>
-                      <ThemedDatePicker
-                        value={field.value}
-                        onDateChange={field.onChange}
-                        placeholder="Select purchase date"
-                        error={form.formState.errors.purchase_date?.message}
-                        maximumDate={new Date()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="roast_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Roast Date *</FormLabel>
-                    <FormControl>
-                      <ThemedDatePicker
-                        value={field.value}
-                        onDateChange={field.onChange}
-                        placeholder="Select roast date"
-                        error={form.formState.errors.roast_date?.message}
-                        maximumDate={new Date()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="supplier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Supplier *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Blue Bottle Coffee"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cost"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cost ($) *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="24.95"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="total_grams"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Grams *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="340"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="remaining_grams"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Remaining Grams *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="340"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-          </ThemedCollapsible>
-
-          {/* Form Actions */}
-          <ThemedView style={styles.actions} noBackground>
+            {/* Form Actions */}
+            <ThemedView style={styles.actions} noBackground>
               <ThemedButton
                 title="Add Bean"
                 onPress={form.handleSubmit(onSubmit)}

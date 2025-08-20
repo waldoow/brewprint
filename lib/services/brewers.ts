@@ -13,35 +13,17 @@ export interface Brewer {
   
   // Basic Info
   name: string;
-  type: 'v60' | 'chemex' | 'french-press' | 'aeropress' | 'espresso' | 
-        'cold-brew' | 'siphon' | 'percolator' | 'turkish' | 'moka' | 'clever' | 
-        'kalita-wave' | 'origami' | 'orea' | 'april' | 'other';
-  brand?: string;
-  model?: string;
-  size?: string; // "01", "02", "6-cup", "350ml", etc.
+  brand: string;
+  model: string;
+  type: 'pour-over' | 'immersion' | 'espresso' | 'cold-brew' | 'siphon' | 'percolator' | 'turkish' | 'moka';
   
-  // Physical Characteristics
-  material?: 'ceramic' | 'plastic' | 'glass' | 'metal' | 'wood' | 'other';
-  filter_type?: string; // "V60 02", "Chemex", "Metal", "Paper", etc.
-  capacity_ml?: number; // Total capacity in ml
+  // General Specifications (optional)
+  capacity_ml?: number;
+  material?: string;
+  filter_type?: string;
   
-  // Brewing Parameters
-  optimal_dose_range?: [number, number]; // [min, max] in grams
-  optimal_ratio_range?: [number, number]; // [min, max] ratio (1:15 to 1:17 = [15, 17])
-  optimal_temp_range?: [number, number]; // [min, max] in Celsius
-  optimal_grind_range?: [number, number]; // [min, max] grind setting
-  
-  // Usage & Care
-  purchase_date?: string; // ISO date
-  purchase_price?: number;
-  maintenance_schedule?: string; // "weekly", "monthly", etc.
-  last_maintenance?: string; // ISO date
-  maintenance_notes?: string;
-  
-  // Status
-  is_active: boolean;
-  condition: 'excellent' | 'good' | 'fair' | 'needs-replacement';
-  location?: string; // "Kitchen", "Office", "Travel Kit"
+  // Espresso-specific fields (only for espresso type)
+  espresso_specs?: any; // JSONB
   
   // Notes
   notes?: string;
@@ -54,53 +36,27 @@ export interface Brewer {
 
 export interface BrewerInput {
   name: string;
+  brand: string;
+  model: string;
   type: Brewer['type'];
-  brand?: string;
-  model?: string;
-  size?: string;
-  material?: Brewer['material'];
-  filter_type?: string;
   capacity_ml?: number;
-  optimal_dose_range?: [number, number];
-  optimal_ratio_range?: [number, number];
-  optimal_temp_range?: [number, number];
-  optimal_grind_range?: [number, number];
-  purchase_date?: string;
-  purchase_price?: number;
-  maintenance_schedule?: string;
-  last_maintenance?: string;
-  maintenance_notes?: string;
-  is_active?: boolean;
-  condition?: Brewer['condition'];
-  location?: string;
+  material?: string;
+  filter_type?: string;
+  espresso_specs?: any;
   notes?: string;
-  brewing_tips?: string[];
 }
 
 export interface BrewerUpdate {
   id: string;
   name?: string;
-  type?: Brewer['type'];
   brand?: string;
   model?: string;
-  size?: string;
-  material?: Brewer['material'];
-  filter_type?: string;
+  type?: Brewer['type'];
   capacity_ml?: number;
-  optimal_dose_range?: [number, number];
-  optimal_ratio_range?: [number, number];
-  optimal_temp_range?: [number, number];
-  optimal_grind_range?: [number, number];
-  purchase_date?: string;
-  purchase_price?: number;
-  maintenance_schedule?: string;
-  last_maintenance?: string;
-  maintenance_notes?: string;
-  is_active?: boolean;
-  condition?: Brewer['condition'];
-  location?: string;
+  material?: string;
+  filter_type?: string;
+  espresso_specs?: any;
   notes?: string;
-  brewing_tips?: string[];
 }
 
 export interface ServiceResponse<T> {
@@ -119,7 +75,6 @@ export class BrewersService {
       const { data, error } = await supabase
         .from('brewers')
         .select('*')
-        .order('is_active', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -182,20 +137,39 @@ export class BrewersService {
    */
   static async createBrewer(brewer: BrewerInput): Promise<ServiceResponse<Brewer>> {
     try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('Authentication error:', userError);
+        return {
+          data: null,
+          error: 'User not authenticated',
+          success: false
+        };
+      }
+
+      console.log('Authenticated user:', user.id);
+
+      // Add user_id to brewer data
+      const brewerWithUserId = {
+        ...brewer,
+        user_id: user.id
+      };
+
       const { data, error } = await supabase
         .from('brewers')
-        .insert({
-          ...brewer,
-          is_active: brewer.is_active !== undefined ? brewer.is_active : true,
-          condition: brewer.condition || 'excellent'
-        })
+        .insert(brewerWithUserId)
         .select('*')
         .single();
 
       if (error) {
+        console.error('Brewer creation error:', error);
+        console.error('User ID:', user.id);
+        console.error('Brewer data being inserted:', brewerWithUserId);
         return {
           data: null,
-          error: error.message,
+          error: `Failed to create brewer: ${error.message}`,
           success: false
         };
       }
@@ -282,38 +256,6 @@ export class BrewersService {
     }
   }
 
-  /**
-   * Get active brewers only
-   */
-  static async getActiveBrewers(): Promise<ServiceResponse<Brewer[]>> {
-    try {
-      const { data, error } = await supabase
-        .from('brewers')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        return {
-          data: null,
-          error: error.message,
-          success: false
-        };
-      }
-
-      return {
-        data: data || [],
-        error: null,
-        success: true
-      };
-    } catch (error) {
-      return {
-        data: null,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        success: false
-      };
-    }
-  }
 
   /**
    * Get brewers by type
@@ -324,7 +266,6 @@ export class BrewersService {
         .from('brewers')
         .select('*')
         .eq('type', type)
-        .order('is_active', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -358,7 +299,6 @@ export class BrewersService {
         .from('brewers')
         .select('*')
         .or(`name.ilike.%${query}%,brand.ilike.%${query}%,model.ilike.%${query}%,notes.ilike.%${query}%`)
-        .order('is_active', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -383,142 +323,7 @@ export class BrewersService {
     }
   }
 
-  /**
-   * Record maintenance for a brewer
-   */
-  static async recordMaintenance(
-    id: string, 
-    maintenanceNotes: string,
-    maintenanceDate?: string
-  ): Promise<ServiceResponse<Brewer>> {
-    try {
-      const maintenanceISODate = maintenanceDate || new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from('brewers')
-        .update({
-          last_maintenance: maintenanceISODate,
-          maintenance_notes: maintenanceNotes
-        })
-        .eq('id', id)
-        .select('*')
-        .single();
 
-      if (error) {
-        return {
-          data: null,
-          error: error.message,
-          success: false
-        };
-      }
-
-      return {
-        data,
-        error: null,
-        success: true
-      };
-    } catch (error) {
-      return {
-        data: null,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        success: false
-      };
-    }
-  }
-
-  /**
-   * Get brewers needing maintenance
-   */
-  static async getBrewersNeedingMaintenance(): Promise<ServiceResponse<Brewer[]>> {
-    try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { data, error } = await supabase
-        .from('brewers')
-        .select('*')
-        .eq('is_active', true)
-        .or(`last_maintenance.is.null,last_maintenance.lt.${thirtyDaysAgo.toISOString()}`)
-        .not('maintenance_schedule', 'is', null)
-        .order('last_maintenance', { ascending: true, nullsFirst: true });
-
-      if (error) {
-        return {
-          data: null,
-          error: error.message,
-          success: false
-        };
-      }
-
-      return {
-        data: data || [],
-        error: null,
-        success: true
-      };
-    } catch (error) {
-      return {
-        data: null,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        success: false
-      };
-    }
-  }
-
-  /**
-   * Get brewers by condition
-   */
-  static async getBrewersByCondition(condition: Brewer['condition']): Promise<ServiceResponse<Brewer[]>> {
-    try {
-      const { data, error } = await supabase
-        .from('brewers')
-        .select('*')
-        .eq('condition', condition)
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        return {
-          data: null,
-          error: error.message,
-          success: false
-        };
-      }
-
-      return {
-        data: data || [],
-        error: null,
-        success: true
-      };
-    } catch (error) {
-      return {
-        data: null,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        success: false
-      };
-    }
-  }
-
-  /**
-   * Update brewer condition
-   */
-  static async updateBrewerCondition(
-    id: string, 
-    condition: Brewer['condition'],
-    notes?: string
-  ): Promise<ServiceResponse<Brewer>> {
-    const updateData: Partial<Brewer> = { condition };
-    if (notes) {
-      updateData.notes = notes;
-    }
-
-    return this.updateBrewer({ id, ...updateData });
-  }
-
-  /**
-   * Activate/deactivate brewer
-   */
-  static async toggleBrewerStatus(id: string, isActive: boolean): Promise<ServiceResponse<Brewer>> {
-    return this.updateBrewer({ id, is_active: isActive });
-  }
 
   /**
    * Create default brewer templates for new users
@@ -527,63 +332,33 @@ export class BrewersService {
     const defaultBrewers: BrewerInput[] = [
       {
         name: "Hario V60 Size 02",
-        type: 'v60',
         brand: "Hario",
         model: "V60-02",
-        size: "02",
+        type: 'pour-over',
         material: 'ceramic',
         filter_type: "V60-02 Paper",
         capacity_ml: 500,
-        optimal_dose_range: [15, 30],
-        optimal_ratio_range: [15, 17],
-        optimal_temp_range: [88, 96],
-        condition: 'excellent',
-        is_active: true,
-        brewing_tips: [
-          "Use circular pouring motion",
-          "Start with 30g bloom for 30 seconds",
-          "Maintain steady pour rate"
-        ]
+        notes: "Classic pour-over dripper. Use circular pouring motion and 30g bloom for 30 seconds."
       },
       {
         name: "Chemex Classic 6-Cup",
-        type: 'chemex',
         brand: "Chemex",
         model: "Classic",
-        size: "6-cup",
+        type: 'pour-over',
         material: 'glass',
         filter_type: "Chemex Square",
         capacity_ml: 900,
-        optimal_dose_range: [30, 50],
-        optimal_ratio_range: [14, 16],
-        optimal_temp_range: [90, 96],
-        condition: 'excellent',
-        is_active: true,
-        brewing_tips: [
-          "Use medium-coarse grind",
-          "Pour slowly and evenly",
-          "Thick filters provide clean cup"
-        ]
+        notes: "Use medium-coarse grind. Pour slowly and evenly. Thick filters provide clean cup."
       },
       {
         name: "AeroPress Original",
-        type: 'aeropress',
         brand: "AeroPress",
         model: "Original",
-        size: "Standard",
+        type: 'immersion',
         material: 'plastic',
         filter_type: "AeroPress Paper",
         capacity_ml: 250,
-        optimal_dose_range: [14, 18],
-        optimal_ratio_range: [13, 15],
-        optimal_temp_range: [80, 92],
-        condition: 'excellent',
-        is_active: true,
-        brewing_tips: [
-          "Try inverted method for more control",
-          "Experiment with steeping time",
-          "Medium-fine grind works best"
-        ]
+        notes: "Try inverted method for more control. Experiment with steeping time. Medium-fine grind works best."
       }
     ];
 
