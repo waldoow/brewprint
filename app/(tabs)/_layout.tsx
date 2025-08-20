@@ -98,12 +98,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="new-brewprint"
-        options={{
-          href: null, // This hides the tab from the tab bar
-        }}
-      />
     </Tabs>
   );
 }

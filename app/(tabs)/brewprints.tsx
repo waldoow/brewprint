@@ -1,5 +1,5 @@
-import { BrewprintCard } from "@/components/brewprints/brewprint-card";
 import { Header } from "@/components/ui/Header";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { ThemedButton } from "@/components/ui/ThemedButton";
 import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
 import { ThemedTabs } from "@/components/ui/ThemedTabs";
@@ -10,7 +10,8 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { BrewprintsService, type Brewprint } from "@/lib/services";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { Alert, RefreshControl, StyleSheet } from "react-native";
+import { Alert, RefreshControl, StyleSheet, View, TouchableOpacity } from "react-native";
+import * as Haptics from 'expo-haptics';
 
 export default function BrewprintsTab() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function BrewprintsTab() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadBrewprints = useCallback(async () => {
     try {
@@ -49,16 +51,32 @@ export default function BrewprintsTab() {
   }, [loadBrewprints]);
 
   const getFilteredBrewprints = (): Brewprint[] => {
+    let filtered = brewprints;
+    
+    // Filter by tab
     switch (activeTab) {
       case "experimenting":
-        return brewprints.filter((b) => b.status === "experimenting");
+        filtered = filtered.filter((b) => b.status === "experimenting");
+        break;
       case "final":
-        return brewprints.filter((b) => b.status === "final");
+        filtered = filtered.filter((b) => b.status === "final");
+        break;
       case "archived":
-        return brewprints.filter((b) => b.status === "archived");
-      default:
-        return brewprints;
+        filtered = filtered.filter((b) => b.status === "archived");
+        break;
     }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((b) =>
+        b.name.toLowerCase().includes(query) ||
+        (b.description && b.description.toLowerCase().includes(query)) ||
+        (b.method && b.method.toLowerCase().includes(query))
+      );
+    }
+    
+    return filtered;
   };
 
   const getTabCounts = () => {
@@ -82,12 +100,24 @@ export default function BrewprintsTab() {
   ];
 
   const handleBrewprintPress = (brewprint: Brewprint) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/brewprints/${brewprint.id}`);
   };
 
   const handleNewBrewprint = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push("/(tabs)/new-brewprint");
   };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilter = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    console.log('Filter pressed');
+  };
+
 
   const getEmptyMessage = () => {
     switch (activeTab) {
@@ -139,11 +169,19 @@ export default function BrewprintsTab() {
         showBackButton={false}
         showMenuButton={true}
         showProfileAvatar={true}
-        showSearchButton={true}
+        showSearchButton={false}
         onMenuPress={() => console.log("Menu pressed")}
         onProfilePress={() => console.log("Profile pressed")}
-        onSearchPress={() => console.log("Search pressed")}
+        showTopSpacing={true}
       />
+
+      <View style={styles.searchSection}>
+        <SearchBar
+          placeholder="Search recipes..."
+          onSearch={handleSearch}
+          onFilterPress={handleFilter}
+        />
+      </View>
 
       <ThemedView style={styles.actionContainer}>
         <ThemedButton
@@ -166,7 +204,11 @@ export default function BrewprintsTab() {
       <ThemedScrollView
         style={styles.scrollView}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+          <RefreshControl 
+            refreshing={isRefreshing} 
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
         }
       >
         {filteredBrewprints.length === 0 ? (
@@ -185,16 +227,129 @@ export default function BrewprintsTab() {
             </ThemedButton>
           </ThemedView>
         ) : (
-          <ThemedView style={styles.grid}>
+          <View style={styles.section}>
             {filteredBrewprints.map((brewprint) => (
-              <BrewprintCard
+              <View
                 key={brewprint.id}
-                brewprint={brewprint}
-                onPress={() => handleBrewprintPress(brewprint)}
-              />
+                style={[styles.brewprintCard, { 
+                  backgroundColor: colors.primary + '20',
+                  borderColor: colors.primary,
+                }]}
+              >
+                <TouchableOpacity
+                  style={styles.brewprintContent}
+                  onPress={() => handleBrewprintPress(brewprint)}
+                >
+                  <View style={styles.brewprintHeader}>
+                    <View style={styles.brewprintMain}>
+                      <ThemedText type="defaultSemiBold" style={[styles.brewprintName, { color: colors.text }]}>
+                        {brewprint.name}
+                      </ThemedText>
+                      <ThemedText style={[styles.brewprintSubtitle, { color: colors.textSecondary }]}>
+                        {brewprint.method ? brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ') : 'Unknown Method'}
+                      </ThemedText>
+                    </View>
+                    <View style={styles.brewprintStatus}>
+                      <ThemedText style={[
+                        styles.statusBadge, 
+                        { 
+                          color: brewprint.status === 'final' ? colors.statusGreen : 
+                                 brewprint.status === 'experimenting' ? colors.primary : colors.textSecondary,
+                          backgroundColor: brewprint.status === 'final' ? colors.statusGreen + '20' : 
+                                         brewprint.status === 'experimenting' ? colors.primary + '20' : colors.textSecondary + '20'
+                        }
+                      ]}>
+                        {brewprint.status ? brewprint.status.toUpperCase() : 'DRAFT'}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.brewprintDetails}>
+                    <View style={styles.brewprintDetailRow}>
+                      <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                        Coffee Dose
+                      </ThemedText>
+                      <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                        {brewprint.parameters?.coffee_grams || 'Unknown'}g
+                      </ThemedText>
+                    </View>
+                    
+                    <View style={styles.brewprintDetailRow}>
+                      <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                        Water Temp
+                      </ThemedText>
+                      <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                        {brewprint.parameters?.water_temp || 'Unknown'}°C
+                      </ThemedText>
+                    </View>
+                    
+                    <View style={styles.brewprintDetailRow}>
+                      <ThemedText style={[styles.brewprintDetailLabel, { color: colors.textSecondary }]}>
+                        Brew Time
+                      </ThemedText>
+                      <ThemedText style={[styles.brewprintDetailValue, { color: colors.text }]}>
+                        {brewprint.parameters?.total_time ? `${Math.floor(brewprint.parameters.total_time / 60)}:${(brewprint.parameters.total_time % 60).toString().padStart(2, '0')}` : 'Unknown'}
+                      </ThemedText>
+                    </View>
+                    
+                    {brewprint.description && (
+                      <View style={styles.brewprintDescription}>
+                        <ThemedText style={[styles.brewprintDescriptionText, { color: colors.textSecondary }]} numberOfLines={2}>
+                          {brewprint.description}
+                        </ThemedText>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {/* Action Buttons */}
+                <View style={styles.brewprintActions}>
+                  <ThemedButton
+                    variant="default"
+                    size="sm"
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push(`/brewing/${brewprint.id}`);
+                    }}
+                    style={[styles.brewprintActionButton, styles.primaryAction]}
+                  >
+                    ☕ Start Brewing
+                  </ThemedButton>
+                  
+                  <ThemedButton
+                    variant="outline"
+                    size="sm"
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push({
+                        pathname: "/brewprints/new",
+                        params: { 
+                          template: JSON.stringify({
+                            name: `${brewprint.name} (Copy)`,
+                            description: brewprint.description,
+                            method: brewprint.method,
+                            difficulty: brewprint.difficulty || 1,
+                            parameters: brewprint.parameters,
+                            steps: brewprint.steps || [],
+                            bean_id: brewprint.bean_id,
+                            grinder_id: brewprint.grinder_id,
+                            brewer_id: brewprint.brewer_id,
+                            water_profile_id: brewprint.water_profile_id,
+                          })
+                        }
+                      });
+                    }}
+                    style={styles.brewprintActionButton}
+                  >
+                    📄 Duplicate
+                  </ThemedButton>
+                </View>
+              </View>
             ))}
-          </ThemedView>
+          </View>
         )}
+        
+        <View style={styles.bottomSpacing} />
       </ThemedScrollView>
     </ThemedView>
   );
@@ -209,36 +364,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  searchSection: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   actionContainer: {
     flexDirection: "row",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     gap: 12,
     marginBottom: 16,
     justifyContent: "flex-end",
   },
   tabsContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 8,
-  },
-  newButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 8,
-    minWidth: 120,
-  },
-  newButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
   },
   scrollView: {
     flex: 1,
   },
-  grid: {
-    padding: 16,
-    gap: 16,
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   emptyContainer: {
     flex: 1,
@@ -258,5 +404,97 @@ const styles = StyleSheet.create({
   },
   emptyButton: {
     minWidth: 200,
+  },
+  bottomSpacing: {
+    height: 20,
+  },
+  
+  // Professional Brewprint Card for Coffee Professionals (from home screen)
+  brewprintCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  brewprintContent: {
+    padding: 20,
+  },
+  brewprintHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  brewprintMain: {
+    flex: 1,
+  },
+  brewprintName: {
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  brewprintSubtitle: {
+    fontSize: 13,
+  },
+  brewprintStatus: {
+    alignItems: 'flex-end',
+  },
+  statusBadge: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  brewprintDetails: {
+    gap: 6,
+  },
+  brewprintDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brewprintDetailLabel: {
+    fontSize: 12,
+    flex: 1,
+  },
+  brewprintDetailValue: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'right',
+    flex: 1,
+    fontVariant: ['tabular-nums'],
+  },
+  brewprintDescription: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  brewprintDescriptionText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  // Professional Action System for Coffee Workflow
+  brewprintActions: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  brewprintActionButton: {
+    flex: 1,
+  },
+  primaryAction: {
+    // Primary action styling handled by ThemedButton variant
   },
 });
