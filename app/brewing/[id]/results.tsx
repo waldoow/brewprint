@@ -51,25 +51,37 @@ export default function ResultsScreen() {
     },
   });
 
-  const rating = watch("rating");
+  const rating = form.watch("rating");
 
   const onSubmit = async (data: ResultsForm) => {
     if (!user) return;
 
+    // Validate rating before submission
+    if (!data.rating || data.rating < 1 || data.rating > 5) {
+      toast.error("Please provide a rating between 1 and 5");
+      return;
+    }
+
     setSaving(true);
     try {
+      // Prepare the update data according to the actual schema
+      const updateData: any = {
+        rating: data.rating,
+        brewing_notes: data.notes || "", // Ensure it's never null
+        brew_date: new Date().toISOString(),
+        status: "final",
+      };
+
+      // Add actual_metrics if TDS or extraction data is provided
+      if (data.tds || data.extraction) {
+        updateData.actual_metrics = {};
+        if (data.tds && data.tds > 0) updateData.actual_metrics.tds = data.tds;
+        if (data.extraction && data.extraction > 0) updateData.actual_metrics.extraction_yield = data.extraction;
+      }
+
       const { error } = await supabase
         .from("brewprints")
-        .update({
-          results: {
-            rating: data.rating,
-            notes: data.notes,
-            tds: data.tds,
-            extraction: data.extraction,
-            brewedAt: new Date().toISOString(),
-          },
-          status: "final",
-        })
+        .update(updateData)
         .eq("id", id)
         .eq("user_id", user.id);
 
@@ -79,7 +91,7 @@ export default function ResultsScreen() {
       router.replace("/(tabs)");
     } catch (error) {
       toast.error("Failed to save results");
-      console.error(error);
+      console.error("Error saving results:", error);
     } finally {
       setSaving(false);
     }
@@ -91,31 +103,36 @@ export default function ResultsScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ThemedView style={styles.container}>
-        <Header title="How was it?" onBack={() => router.back()} />
+        <Header title="How was it?" onBackPress={() => router.back()} />
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* Rating Section */}
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Rate your brew
-            </ThemedText>
+        <Form {...form}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {/* Rating Section */}
+            <View style={[styles.section, { backgroundColor: colors.surface }]}>
+              <ThemedText type="subtitle" style={styles.sectionTitle}>
+                Rate your brew
+              </ThemedText>
 
-            <FormField
-              control={form.control}
-              name="rating"
-              rules={{ required: true, min: 1 }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <RatingInput value={field.value} onChange={field.onChange} size="large" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="rating"
+                rules={{ 
+                  required: "Please rate your brew",
+                  min: { value: 1, message: "Rating must be at least 1" },
+                  max: { value: 5, message: "Rating cannot exceed 5" }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <RatingInput value={field.value} onChange={field.onChange} size="large" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             <ThemedText type="caption" style={styles.ratingText}>
               {rating === 0 && "Tap to rate"}
@@ -229,8 +246,9 @@ export default function ResultsScreen() {
 
             <ThemedButton
               title="Save & Brew Again"
-              onPress={handleSubmit(async (data) => {
+              onPress={form.handleSubmit(async (data) => {
                 await onSubmit(data);
+                router.push(`/brewing/${id}`);
               })}
               loading={saving}
               disabled={rating === 0}
@@ -238,6 +256,7 @@ export default function ResultsScreen() {
             />
           </View>
         </ScrollView>
+        </Form>
       </ThemedView>
     </KeyboardAvoidingView>
   );

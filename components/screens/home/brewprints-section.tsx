@@ -36,7 +36,7 @@ export function BrewprintsSection() {
   };
 
   const handleViewAll = () => {
-    router.push("/brewprints");
+    router.push("/(tabs)/brewprints");
   };
 
   const handleCreateNew = () => {

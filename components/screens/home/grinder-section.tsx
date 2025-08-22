@@ -100,10 +100,7 @@ export function HomeGrinderSection({ onAddGrinderPress }: HomeGrinderSectionProp
   
   const handleGrinderPress = (grinder: (typeof MOCK_GRINDERS)[0]) => {
     // Navigation to grinder detail - will be implemented later
-    router.push({
-      pathname: "/(tabs)/grinder-detail",
-      params: { id: grinder.id }
-    });
+    router.push(`/(tabs)/grinder-detail/${grinder.id}`);
   };
 
   return (
@@ -111,7 +108,7 @@ export function HomeGrinderSection({ onAddGrinderPress }: HomeGrinderSectionProp
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <ThemedText style={styles.sectionTitle}>Grinders</ThemedText>
-        <ThemedText style={styles.seeAll} onPress={() => router.push("/(tabs)/grinders")}>
+        <ThemedText style={styles.seeAll} onPress={() => router.push("/(tabs)/library")}>
           View all →
         </ThemedText>
       </View>

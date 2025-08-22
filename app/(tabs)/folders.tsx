@@ -121,17 +121,20 @@ export default function FoldersScreen() {
 
   const handleCreateFolder = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/(tabs)/folders/new");
+    console.log('Create folder - feature coming soon');
+    // TODO: Implement folder creation
   };
 
   const handleFolderPress = (folderId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(tabs)/folders/${folderId}`);
+    console.log('Folder details - feature coming soon', folderId);
+    // TODO: Implement folder details view
   };
 
   const handleTagPress = (tagName: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(tabs)/tags/${encodeURIComponent(tagName)}`);
+    console.log('Tag view - feature coming soon', tagName);
+    // TODO: Implement tag filtering view
   };
 
   return (

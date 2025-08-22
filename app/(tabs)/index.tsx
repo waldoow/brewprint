@@ -155,7 +155,7 @@ export default function HomeScreen() {
         router.push('/beans/new');
         break;
       case 'view-recipes':
-        router.push('/brewprints');
+        router.push('/(tabs)/brewprints');
         break;
       case 'view-beans':
         router.push('/(tabs)/library');
@@ -208,7 +208,7 @@ export default function HomeScreen() {
 
   const handleBeanPress = (beanId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/bean-detail/${beanId}`);
+    router.push(`/(tabs)/bean-detail/${beanId}`);
   };
 
   const getGreeting = () => {
@@ -296,7 +296,7 @@ export default function HomeScreen() {
             <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
               Latest Brewprint
             </ThemedText>
-            <TouchableOpacity onPress={() => router.push('/brewprints')}>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/brewprints')}>
               <ThemedText style={[styles.cardAction, { color: colors.primary }]}>
                 View All →
               </ThemedText>

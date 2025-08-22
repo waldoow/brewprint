@@ -17,10 +17,7 @@ export function HomeBeansSection({ onAddBeanPress }: HomeBeansSectionProps) {
   
   const handleBeanPress = (bean: (typeof MOCK_BEANS)[0]) => {
     // Navigation vers le détail du grain - direct route
-    router.push({
-      pathname: "/(tabs)/bean-detail",
-      params: { id: bean.id }
-    });
+    router.push(`/(tabs)/bean-detail/${bean.id}`);
   };
 
   return (
@@ -28,7 +25,7 @@ export function HomeBeansSection({ onAddBeanPress }: HomeBeansSectionProps) {
       {/* Section Header */}
       <View style={styles.sectionHeader}>
         <ThemedText style={styles.sectionTitle}>Mes Grains</ThemedText>
-        <ThemedText style={styles.seeAll} onPress={() => router.push("/beans")}>
+        <ThemedText style={styles.seeAll} onPress={() => router.push("/(tabs)/library")}>
           Voir tout →
         </ThemedText>
       </View>

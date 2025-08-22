@@ -1,5 +1,4 @@
 // app/brewing/[id].tsx
-import { BrewingPhase } from "@/components/brewing/BrewingPhase";
 import { TimerDisplay } from "@/components/brewing/TimerDisplay";
 import { Header } from "@/components/ui/Header";
 import { ThemedButton } from "@/components/ui/ThemedButton";
@@ -9,6 +8,7 @@ import { Colors } from "@/constants/Colors";
 import { useBrewprint } from "@/hooks/useBrewprint";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useTimer } from "@/hooks/useTimer";
+import type { BrewStep } from "@/lib/services/brewprints";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -21,8 +21,6 @@ import {
 } from "react-native";
 import { toast } from "sonner-native";
 
-type BrewingStep = "preparation" | "blooming" | "pouring" | "finished";
-
 export default function BrewingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colorScheme = useColorScheme();
@@ -30,7 +28,9 @@ export default function BrewingScreen() {
 
   const { brewprint, loading, error } = useBrewprint(id);
 
-  const [currentStep, setCurrentStep] = useState<BrewingStep>("preparation");
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1); // -1 = preparation phase
+  const [isBrewingStarted, setIsBrewingStarted] = useState(false);
+  const [isBrewingComplete, setIsBrewingComplete] = useState(false);
 
   const {
     time,
@@ -62,25 +62,39 @@ export default function BrewingScreen() {
 
   const handleStartBrewing = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setCurrentStep("blooming");
+    setIsBrewingStarted(true);
+    setCurrentStepIndex(0);
     startTimer();
-    toast.success("Brewing started! Begin blooming phase.");
+    
+    if (brewprint?.steps && brewprint.steps.length > 0) {
+      const firstStep = brewprint.steps[0];
+      toast.success(`Brewing started! Begin: ${firstStep.title}`);
+    } else {
+      toast.success("Brewing started!");
+    }
   };
 
-  const handleNextPhase = () => {
+  const handleNextStep = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    switch (currentStep) {
-      case "blooming":
-        setCurrentStep("pouring");
-        toast.info("Blooming complete. Start main pour.");
-        break;
-      case "pouring":
-        setCurrentStep("finished");
-        pauseTimer();
-        toast.success("Brewing complete! How was it?");
-        break;
+    
+    if (!brewprint?.steps) return;
+    
+    if (currentStepIndex < brewprint.steps.length - 1) {
+      const nextIndex = currentStepIndex + 1;
+      setCurrentStepIndex(nextIndex);
+      const nextStep = brewprint.steps[nextIndex];
+      toast.info(`Next step: ${nextStep.title}`);
+    } else {
+      // All steps completed
+      setIsBrewingComplete(true);
+      pauseTimer();
+      toast.success("Brewing complete! How was it?");
     }
+  };
+
+  const getCurrentStep = (): BrewStep | null => {
+    if (!brewprint?.steps || currentStepIndex < 0) return null;
+    return brewprint.steps[currentStepIndex] || null;
   };
 
   if (loading) {
@@ -133,25 +147,31 @@ export default function BrewingScreen() {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          {/* Simple Recipe Info */}
+          {/* Recipe Info */}
           <View style={[styles.infoCard, { backgroundColor: colors.cardBackground }]}>
             <ThemedText style={[styles.recipeName, { color: colors.text }]}>
               {brewprint.name}
             </ThemedText>
             <ThemedText style={[styles.recipeMethod, { color: colors.textSecondary }]}>
-              {brewprint.method} • {brewprint.beans.name}
+              {brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')}
+              {brewprint.description && ` • ${brewprint.description}`}
             </ThemedText>
             
             <View style={styles.quickParams}>
               <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
-                {brewprint.parameters.coffeeAmount}g coffee
+                {brewprint.parameters.coffee_grams}g coffee
               </ThemedText>
               <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
-                {brewprint.parameters.waterAmount}ml water
+                {brewprint.parameters.water_grams}ml water
               </ThemedText>
               <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
-                {brewprint.parameters.waterTemp}°C
+                {brewprint.parameters.water_temp}°C
               </ThemedText>
+              {brewprint.parameters.ratio && (
+                <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+                  {brewprint.parameters.ratio} ratio
+                </ThemedText>
+              )}
             </View>
           </View>
 
@@ -159,19 +179,70 @@ export default function BrewingScreen() {
           <TimerDisplay
             time={time}
             isRunning={isRunning}
-            targetTime={brewprint.parameters.totalTime}
+            targetTime={brewprint.parameters.total_time}
           />
 
-          {currentStep !== "preparation" && (
-            <BrewingPhase
-              currentPhase={currentStep}
-              onNextPhase={handleNextPhase}
-            />
+          {/* Current Step Display */}
+          {isBrewingStarted && !isBrewingComplete && getCurrentStep() && (
+            <View style={[styles.currentStepCard, { backgroundColor: colors.cardBackground }]}>
+              <View style={styles.stepHeader}>
+                <ThemedText style={[styles.stepNumber, { color: colors.primary }]}>
+                  Step {currentStepIndex + 1} of {brewprint.steps.length}
+                </ThemedText>
+                <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
+                  {getCurrentStep()?.title}
+                </ThemedText>
+              </View>
+              
+              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+                {getCurrentStep()?.description}
+              </ThemedText>
+              
+              <View style={styles.stepDetails}>
+                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                  Duration: {getCurrentStep()?.duration}s
+                </ThemedText>
+                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                  Water: {getCurrentStep()?.water_amount}g
+                </ThemedText>
+                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                  Technique: {getCurrentStep()?.technique}
+                </ThemedText>
+              </View>
+            </View>
           )}
 
-          {/* Simple Action Panel */}
-          {currentStep === "preparation" ? (
-            <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
+          {/* All Steps Overview (when not brewing) */}
+          {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
+            <View style={[styles.stepsOverview, { backgroundColor: colors.cardBackground }]}>
+              <ThemedText style={[styles.stepsTitle, { color: colors.text }]}>
+                Brewing Steps ({brewprint.steps.length} steps)
+              </ThemedText>
+              
+              {brewprint.steps.map((step, index) => (
+                <View key={step.id} style={styles.stepPreview}>
+                  <View style={styles.stepPreviewHeader}>
+                    <ThemedText style={[styles.stepPreviewNumber, { color: colors.primary }]}>
+                      {index + 1}
+                    </ThemedText>
+                    <ThemedText style={[styles.stepPreviewTitle, { color: colors.text }]}>
+                      {step.title}
+                    </ThemedText>
+                    <ThemedText style={[styles.stepPreviewTime, { color: colors.textSecondary }]}>
+                      {step.duration}s
+                    </ThemedText>
+                  </View>
+                  <ThemedText style={[styles.stepPreviewDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+                    {step.description} • {step.water_amount}g water • {step.technique}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Action Panel */}
+          <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
+            {!isBrewingStarted ? (
               <ThemedButton
                 title="Start Brewing"
                 onPress={handleStartBrewing}
@@ -179,28 +250,47 @@ export default function BrewingScreen() {
                 size="lg"
                 style={styles.primaryAction}
               />
-            </View>
-          ) : currentStep === "finished" ? (
-            <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
-              <ThemedButton
-                title="View Results"
-                onPress={() => router.push(`/brewing/${id}/results`)}
-                variant="default"
-                size="lg"
-                style={styles.primaryAction}
-              />
-              <ThemedButton
-                title="Brew Again"
-                onPress={() => {
-                  setCurrentStep("preparation");
-                  resetTimer();
-                }}
-                variant="outline"
-                size="lg"
-                style={styles.secondaryAction}
-              />
-            </View>
-          ) : null}
+            ) : isBrewingComplete ? (
+              <>
+                <ThemedButton
+                  title="View Results"
+                  onPress={() => router.push(`/brewing/${id}/results`)}
+                  variant="default"
+                  size="lg"
+                  style={styles.primaryAction}
+                />
+                <ThemedButton
+                  title="Brew Again"
+                  onPress={() => {
+                    setIsBrewingStarted(false);
+                    setIsBrewingComplete(false);
+                    setCurrentStepIndex(-1);
+                    resetTimer();
+                  }}
+                  variant="outline"
+                  size="lg"
+                  style={styles.secondaryAction}
+                />
+              </>
+            ) : (
+              <>
+                <ThemedButton
+                  title={currentStepIndex < (brewprint.steps?.length || 0) - 1 ? "Next Step" : "Complete Brewing"}
+                  onPress={handleNextStep}
+                  variant="default"
+                  size="lg"
+                  style={styles.primaryAction}
+                />
+                <ThemedButton
+                  title={isRunning ? "Pause Timer" : "Resume Timer"}
+                  onPress={isRunning ? pauseTimer : startTimer}
+                  variant="outline"
+                  size="lg"
+                  style={styles.secondaryAction}
+                />
+              </>
+            )}
+          </View>
         </Animated.View>
       </ScrollView>
     </ThemedView>
@@ -262,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  // Simple Action Panel
+  // Action Panel
   actionPanel: {
     padding: 16,
     borderRadius: 8,
@@ -274,5 +364,79 @@ const styles = StyleSheet.create({
   },
   secondaryAction: {
     alignSelf: "stretch",
+  },
+
+  // Current Step Card
+  currentStepCard: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  stepHeader: {
+    marginBottom: 12,
+  },
+  stepNumber: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  stepTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  stepDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  stepDetails: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  stepDetail: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+
+  // Steps Overview
+  stepsOverview: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  stepsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  stepPreview: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  stepPreviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+    gap: 8,
+  },
+  stepPreviewNumber: {
+    fontSize: 12,
+    fontWeight: "700",
+    minWidth: 20,
+  },
+  stepPreviewTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    flex: 1,
+  },
+  stepPreviewTime: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  stepPreviewDesc: {
+    fontSize: 12,
+    lineHeight: 16,
+    marginLeft: 28,
   },
 });
