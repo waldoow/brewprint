@@ -1,5 +1,5 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -19,24 +19,22 @@ export default function NewBrewerScreen() {
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
+    <ProfessionalContainer>
+      <ProfessionalHeader
         title="New Brewer"
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Inventory"
+        subtitle="Add brewing equipment"
+        action={{
+          title: "Cancel",
+          onPress: handleCancel,
+        }}
       />
       
       <BrewerForm
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+const styles = StyleSheet.create({});

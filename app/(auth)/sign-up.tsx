@@ -4,17 +4,17 @@ import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
+  View,
   StyleSheet,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { ProfessionalInput } from "@/components/ui/professional/Input";
 import {
   Form,
   FormControl,
@@ -109,261 +109,195 @@ export default function SignUp({
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedView style={styles.content}>
-              {/* Header */}
-              <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                  Create Account
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  Sign up to get started with your new account
-                </ThemedText>
-              </ThemedView>
+    <ProfessionalContainer scrollable>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.header}>
+            <ProfessionalText variant="h1" weight="semibold" style={styles.title}>
+              Create Account
+            </ProfessionalText>
+            <ProfessionalText variant="body" color="secondary" style={styles.subtitle}>
+              Sign up to get started with your new account
+            </ProfessionalText>
+          </View>
 
-              {/* Form */}
-              <Form {...form}>
-                <ThemedView style={styles.form}>
-                  {/* Username Input */}
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            placeholder="Choose a username"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            autoCapitalize="none"
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Email Input */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="email"
-                            placeholder="Enter your email"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Create a password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Confirm Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Confirm your password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                {/* Terms Checkbox */}
-                {/* <ThemedView style={styles.checkboxContainer}>
-                  <Controller
-                    control={control}
-                    name="acceptTerms"
-                    render={({ field: { onChange, value } }) => (
-                      <ThemedView>
-                        <ThemedCheckBox
-                          checked={value}
-                          onCheckedChange={onChange}
-                          disabled={isLoading}
-                          containerStyle={styles.checkbox}
+          {/* Form Card */}
+          <ProfessionalCard variant="default" style={styles.formCard}>
+            <Form {...form}>
+              <View style={styles.form}>
+                {/* Username Input */}
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Username
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          placeholder="Choose a username"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          autoCapitalize="none"
+                          editable={!isLoading}
                         />
-                        <ThemedView style={styles.checkboxText}>
-                          <ThemedText style={styles.termsText}>
-                            I agree to the{" "}
-                            <TouchableOpacity onPress={onTermsPress}>
-                              <ThemedText type="link" style={styles.termsLink}>
-                                Terms of Service
-                              </ThemedText>
-                            </TouchableOpacity>{" "}
-                            and{" "}
-                            <TouchableOpacity onPress={onPrivacyPress}>
-                              <ThemedText type="link" style={styles.termsLink}>
-                                Privacy Policy
-                              </ThemedText>
-                            </TouchableOpacity>
-                          </ThemedText>
-                        </ThemedView>
-                      </ThemedView>
-                    )}
-                  />
-                  {errors.acceptTerms && (
-                    <ThemedText style={[styles.errorText, { marginLeft: 32 }]}>
-                      {errors.acceptTerms.message}
-                    </ThemedText>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </ThemedView> */}
-
-                  {/* Sign Up Button */}
-                  <ThemedButton
-                    title={isLoading ? "Creating Account..." : "Create Account"}
-                    onPress={form.handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                    loading={isLoading}
-                    style={styles.signUpButton}
-                  />
-                </ThemedView>
-              </Form>
-
-              {/* Sign In Link */}
-              <ThemedView style={styles.signInContainer}>
-                <ThemedText style={styles.signInText}>
-                  Already have an account?{" "}
-                </ThemedText>
-                <ThemedButton
-                  variant="link"
-                  title="Sign In"
-                  onPress={onNavigateToSignIn}
                 />
-              </ThemedView>
-            </ThemedView>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+
+                {/* Email Input */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Email
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          type="email"
+                          placeholder="Enter your email"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          editable={!isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Password Input */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Password
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          type="password"
+                          placeholder="Create a password"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          editable={!isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Confirm Password Input */}
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Confirm Password
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          type="password"
+                          placeholder="Confirm your password"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          editable={!isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Sign Up Button */}
+                <ProfessionalButton
+                  title="Create Account"
+                  onPress={form.handleSubmit(onSubmit)}
+                  disabled={isLoading}
+                  loading={isLoading}
+                  style={styles.signUpButton}
+                />
+              </View>
+            </Form>
+          </ProfessionalCard>
+
+          {/* Sign In Link */}
+          <View style={styles.signInContainer}>
+            <ProfessionalText variant="body" color="secondary" style={styles.signInText}>
+              Already have an account?{" "}
+            </ProfessionalText>
+            <ProfessionalButton
+              variant="ghost"
+              title="Sign In"
+              onPress={onNavigateToSignIn}
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
   keyboardView: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    minHeight: "100%",
-  },
   content: {
+    flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 40,
   },
   title: {
     marginBottom: 8,
   },
   subtitle: {
     textAlign: "center",
-    opacity: 0.7,
+  },
+  formCard: {
+    marginBottom: 32,
   },
   form: {
     width: "100%",
   },
-  inputContainer: {
-    marginBottom: 16,
+  signUpButton: {
+    marginTop: 8,
   },
-  checkboxContainer: {
-    marginBottom: 24,
-  },
-  checkbox: {
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  checkboxText: {
-    flex: 1,
-    marginLeft: 32,
-    marginTop: -24,
-  },
-  termsText: {
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.7,
-  },
-  termsLink: {
-    fontSize: 14,
-  },
-  signUpButton: {},
   signInContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 4,
   },
   signInText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  signInLink: {
-    fontSize: 14,
-  },
-  errorText: {
-    fontSize: 14,
-    marginTop: 6,
-    marginLeft: 4,
-    color: "#dc2626",
+    fontSize: 16,
   },
 });

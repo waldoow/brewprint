@@ -1,10 +1,13 @@
-import { GrinderForm } from '@/forms/GrinderForm';
-import { GrindersService } from '@/lib/services/grinders';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner-native';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { toast } from "sonner-native";
+
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { GrinderForm } from "@/forms/GrinderForm";
+import { GrindersService } from "@/lib/services/grinders";
 
 export default function EditGrinderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,12 +26,12 @@ export default function EditGrinderScreen() {
       if (result.success && result.data) {
         setGrinderData(result.data);
       } else {
-        toast.error('Failed to load grinder details');
+        toast.error("Failed to load grinder details");
         router.back();
       }
     } catch (error) {
-      console.error('Error loading grinder:', error);
-      toast.error('Failed to load grinder details');
+      console.error("Error loading grinder:", error);
+      toast.error("Failed to load grinder details");
       router.back();
     } finally {
       setIsLoading(false);
@@ -36,7 +39,7 @@ export default function EditGrinderScreen() {
   };
 
   const handleSuccess = () => {
-    toast.success('Grinder updated successfully');
+    toast.success("Grinder updated successfully");
     router.back();
   };
 
@@ -46,25 +49,67 @@ export default function EditGrinderScreen() {
 
   if (isLoading) {
     return (
-      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ThemedText>Loading grinder details...</ThemedText>
-      </ThemedView>
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Loading..."
+          action={{
+            title: "Back",
+            onPress: handleCancel,
+          }}
+        />
+        <View style={styles.loadingContainer}>
+          <ProfessionalText variant="body" color="secondary">
+            Loading grinder details...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   if (!grinderData) {
     return (
-      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ThemedText>Grinder not found</ThemedText>
-      </ThemedView>
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Not Found"
+          action={{
+            title: "Back",
+            onPress: handleCancel,
+          }}
+        />
+        <View style={styles.loadingContainer}>
+          <ProfessionalText variant="body" color="secondary">
+            Grinder not found
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <GrinderForm 
-      initialData={grinderData}
-      onSuccess={handleSuccess} 
-      onCancel={handleCancel} 
-    />
+    <ProfessionalContainer>
+      <ProfessionalHeader
+        title="Edit Grinder"
+        subtitle="Update grinding equipment"
+        action={{
+          title: "Cancel",
+          onPress: handleCancel,
+        }}
+      />
+
+      <GrinderForm
+        initialData={grinderData}
+        onSuccess={handleSuccess}
+        onCancel={handleCancel}
+      />
+    </ProfessionalContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
+  },
+});

@@ -1,5 +1,5 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
 import { BrewprintForm } from "@/forms/BrewprintForm";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo } from "react";
@@ -24,8 +24,8 @@ export default function NewBrewprintScreen() {
 
   const handleSuccess = (brewprint: any) => {
     const message = initialData
-      ? "Recette dupliquée avec succès!"
-      : "Recette créée avec succès!";
+      ? "Recipe duplicated successfully!"
+      : "Recipe created successfully!";
     toast.success(message);
     router.replace(`/brewprints/${brewprint.id}`);
   };
@@ -34,15 +34,17 @@ export default function NewBrewprintScreen() {
     router.back();
   };
 
-  const title = initialData ? "Dupliquer Recette" : "Nouvelle Recette";
+  const title = initialData ? "Duplicate Recipe" : "New Recipe";
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
+    <ProfessionalContainer>
+      <ProfessionalHeader
         title={title}
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Recipes"
+        subtitle={initialData ? "Duplicate existing recipe" : "Create new recipe"}
+        action={{
+          title: "Cancel",
+          onPress: handleCancel,
+        }}
       />
 
       <BrewprintForm
@@ -50,12 +52,8 @@ export default function NewBrewprintScreen() {
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+const styles = StyleSheet.create({});

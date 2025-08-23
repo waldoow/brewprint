@@ -1,10 +1,11 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { ProfessionalText } from "@/components/ui/professional/Text";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { BrewersService } from "@/lib/services/brewers";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
 
 export default function EditBrewerScreen() {
@@ -81,24 +82,32 @@ export default function EditBrewerScreen() {
 
   if (loading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
+      <ProfessionalContainer>
+        <ProfessionalHeader
           title="Loading..."
-          showBackButton={true}
-          onBackPress={handleCancel}
-          backButtonTitle="Back"
+          action={{
+            title: "Back",
+            onPress: handleCancel,
+          }}
         />
-      </ThemedView>
+        <View style={styles.loadingContainer}>
+          <ProfessionalText variant="body" color="secondary">
+            Loading brewer details...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
+    <ProfessionalContainer>
+      <ProfessionalHeader
         title="Edit Brewer"
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Back"
+        subtitle="Update brewing equipment"
+        action={{
+          title: "Cancel",
+          onPress: handleCancel,
+        }}
       />
       
       {initialData && (
@@ -109,12 +118,15 @@ export default function EditBrewerScreen() {
           isEditing={true}
         />
       )}
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
   },
 });

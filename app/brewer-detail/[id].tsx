@@ -1,11 +1,10 @@
 import { BrewersService, type Brewer } from "@/lib/services/brewers";
-import { Header } from "@/components/ui/Header";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
-import { Colors } from "@/constants/Colors";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { getTheme } from "@/constants/ProfessionalDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -50,7 +49,7 @@ const MOCK_BREWER: Brewer = {
 export default function BrewerDetailScreen() {
   const { id } = useLocalSearchParams();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
   
   const [brewer, setBrewer] = useState<Brewer | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,52 +143,66 @@ export default function BrewerDetailScreen() {
 
   const getConditionColor = (condition: Brewer['condition']) => {
     switch (condition) {
-      case 'excellent': return colors.statusGreen;
-      case 'good': return colors.statusGreen;
-      case 'fair': return colors.statusYellow;
-      case 'needs-replacement': return colors.statusRed;
-      default: return colors.textSecondary;
+      case 'excellent': return theme.colors.success;
+      case 'good': return theme.colors.success;
+      case 'fair': return theme.colors.warning;
+      case 'needs-replacement': return theme.colors.error;
+      default: return theme.colors.gray[500];
     }
-  };
-
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? colors.statusGreen : colors.textSecondary;
   };
 
   if (loading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
+      <ProfessionalContainer>
+        <ProfessionalHeader
           title="Loading..."
-          showBackButton={true}
-          onBackPress={() => router.back()}
-          backButtonTitle="Inventory"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
         />
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Loading brewer details...</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <View style={styles.loadingContainer}>
+          <ProfessionalText variant="body" color="secondary">
+            Loading brewer details...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   if (!brewer) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
+      <ProfessionalContainer>
+        <ProfessionalHeader
           title="Brewer Not Found"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-          backButtonTitle="Inventory"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
         />
-        <ThemedView style={styles.errorContainer}>
-          <ThemedText>This brewer could not be found.</ThemedText>
-          <ThemedButton
-            title="Go Back"
+        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
+          <ProfessionalText 
+            variant="h4" 
+            weight="semibold" 
+            style={{ textAlign: 'center', marginBottom: 8 }}
+          >
+            Brewer Not Found
+          </ProfessionalText>
+          <ProfessionalText 
+            variant="body" 
+            color="secondary" 
+            style={{ textAlign: 'center', marginBottom: 24 }}
+          >
+            The requested brewer could not be found.
+          </ProfessionalText>
+          <ProfessionalButton
+            title="Back to Library"
             onPress={() => router.back()}
-            style={styles.backButton}
+            variant="primary"
+            fullWidth
           />
-        </ThemedView>
-      </ThemedView>
+        </ProfessionalCard>
+      </ProfessionalContainer>
     );
   }
 

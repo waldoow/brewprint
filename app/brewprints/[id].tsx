@@ -1,11 +1,9 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from '@/components/ui/professional/Container';
+import { ProfessionalHeader } from '@/components/ui/professional/Header';
+import { ProfessionalCard } from '@/components/ui/professional/Card';
+import { ProfessionalText } from '@/components/ui/professional/Text';
+import { ProfessionalButton } from '@/components/ui/professional/Button';
 import { BrewprintsService, type Brewprint } from "@/lib/services";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
   Coffee,
@@ -20,16 +18,20 @@ import {
   Alert,
   Platform,
   Share,
-  StyleSheet,
+  View,
   type AlertButton,
 } from "react-native";
 import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function BrewprintDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [brewprint, setBrewprint] = useState<Brewprint | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const loadBrewprint = useCallback(async () => {
     if (!id) return;
@@ -39,11 +41,11 @@ export default function BrewprintDetailScreen() {
       if (result.success && result.data) {
         setBrewprint(result.data);
       } else {
-        Alert.alert("Erreur", "Impossible de charger la recette");
+        Alert.alert("Error", "Unable to load recipe");
         router.back();
       }
     } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
+      Alert.alert("Error", "An error occurred");
       router.back();
     } finally {
       setIsLoading(false);
@@ -63,12 +65,12 @@ export default function BrewprintDetailScreen() {
       const result = await BrewprintsService.markAsFinal(brewprint.id);
       if (result.success && result.data) {
         setBrewprint(result.data);
-        toast.success("Recette marquée comme finale!");
+        toast.success("Recipe marked as final!");
       } else {
-        Alert.alert("Erreur", "Impossible de marquer comme finale");
+        Alert.alert("Error", "Unable to mark as final");
       }
     } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
+      Alert.alert("Error", "An error occurred");
     }
   };
 
@@ -95,7 +97,7 @@ export default function BrewprintDetailScreen() {
                 Alert.alert("Erreur", "Impossible d'archiver la recette");
               }
             } catch {
-              Alert.alert("Erreur", "Une erreur s'est produite");
+              Alert.alert("Error", "An error occurred");
             }
           },
         },
@@ -126,7 +128,7 @@ export default function BrewprintDetailScreen() {
                 Alert.alert("Erreur", "Impossible de supprimer la recette");
               }
             } catch {
-              Alert.alert("Erreur", "Une erreur s'est produite");
+              Alert.alert("Error", "An error occurred");
             }
           },
         },
@@ -152,7 +154,7 @@ export default function BrewprintDetailScreen() {
         Alert.alert("Erreur", "Impossible de créer l'itération");
       }
     } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
+      Alert.alert("Error", "An error occurred");
     }
   };
 
@@ -329,484 +331,247 @@ Créé avec Brewprint ☕
 
   if (isLoading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Chargement..."
-          showBackButton={true}
-          onBackPress={() => router.back()}
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Loading..."
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
         />
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Chargement de la recette...</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ProfessionalText variant="body" color="secondary">
+            Loading recipe...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   if (!brewprint) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Erreur"
-          showBackButton={true}
-          onBackPress={() => router.back()}
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Error"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
         />
-        <ThemedView style={styles.errorContainer}>
-          <ThemedText>Recette introuvable</ThemedText>
-        </ThemedView>
-      </ThemedView>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ProfessionalText variant="body" color="secondary">
+            Recipe not found
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
+    <ProfessionalContainer scrollable>
+      <ProfessionalHeader
         title={brewprint.name}
         subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version}`}
-        showBackButton={true}
-        onBackPress={() => router.back()}
-        backButtonTitle="Recipes"
-        customContent={
-          <ThemedButton
-            title="⋮"
-            size="sm"
-            variant="ghost"
-            onPress={showActionSheet}
-          />
-        }
+        action={{
+          title: "Actions",
+          onPress: showActionSheet,
+        }}
       />
 
-      <ThemedScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-        contentInsetAdjustmentBehavior="automatic"
-      >
-        <ThemedView noBackground style={styles.content}>
-          {/* Hero Section */}
-          <LinearGradient
-            colors={["#1f1b2e", "#0f0c16"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.heroCard}
-          >
-            <ThemedView noBackground style={styles.heroHeaderRow}>
-              <ThemedBadge
-                variant={
-                  brewprint.status === "final"
-                    ? "success"
-                    : brewprint.status === "archived"
-                    ? "secondary"
-                    : "warning"
-                }
-                size="sm"
-              >
-                {brewprint.status === "final"
-                  ? "Final"
-                  : brewprint.status === "archived"
-                  ? "Archived"
-                  : "Experiment"}
-              </ThemedBadge>
-              {typeof brewprint.rating === "number" && (
-                <ThemedText type="defaultSemiBold" style={styles.ratingText}>
-                  {brewprint.rating}/5
-                </ThemedText>
-              )}
-            </ThemedView>
-            <ThemedText type="title" style={styles.heroTitle}>
-              {brewprint.name}
-            </ThemedText>
-            <ThemedText type="caption" style={styles.heroSubtitle}>
-              {brewprint.method.toUpperCase()} • {brewprint.version}
-            </ThemedText>
-
-            <ThemedView noBackground style={styles.heroActions}>
-              <ThemedButton
-                title="Start Brewing"
-                size="lg"
-                onPress={handleStartBrewing}
-                style={styles.heroBrewButton}
-              />
-              <ThemedButton
-                title="Share"
-                variant="outline"
-                size="lg"
-                onPress={handleShare}
-              />
-            </ThemedView>
-          </LinearGradient>
-
-          {/* Stats Card */}
-          <ThemedView noBackground style={styles.card}>
-            <ThemedText type="subtitle" style={styles.cardHeader}>
-              Parameters
-            </ThemedText>
-            <ThemedView noBackground style={styles.statsGrid}>
-              <ThemedView noBackground style={styles.statItem}>
-                <Coffee size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Coffee
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.coffee_grams}g
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Droplets size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Water
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.water_grams}g
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Droplets size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Ratio
-                </ThemedText>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.statValue, styles.accentDataValue]}
-                >
-                  1:
-                  {(
-                    brewprint.parameters.water_grams /
-                    brewprint.parameters.coffee_grams
-                  ).toFixed(1)}
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Thermometer size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Temperature
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.water_temp}°C
-                </ThemedText>
-              </ThemedView>
-
-              {brewprint.parameters.grind_setting && (
-                <ThemedView noBackground style={styles.statItem}>
-                  <SlidersHorizontal size={18} color="#8b5cf6" />
-                  <ThemedText type="caption" style={styles.statLabel}>
-                    Grind
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                    {brewprint.parameters.grind_setting}
-                  </ThemedText>
-                </ThemedView>
-              )}
-
-              {brewprint.parameters.total_time && (
-                <ThemedView noBackground style={styles.statItem}>
-                  <TimerIcon size={18} color="#8b5cf6" />
-                  <ThemedText type="caption" style={styles.statLabel}>
-                    Time
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                    {Math.floor(brewprint.parameters.total_time / 60)}:
-                    {String(brewprint.parameters.total_time % 60).padStart(
-                      2,
-                      "0"
-                    )}
-                  </ThemedText>
-                </ThemedView>
-              )}
-            </ThemedView>
-          </ThemedView>
-
-          {/* Steps Card */}
-          {brewprint.steps && brewprint.steps.length > 0 && (
-            <ThemedView noBackground style={styles.card}>
-              <ThemedText type="subtitle" style={styles.cardHeader}>
-                Steps
-              </ThemedText>
-              <ThemedView noBackground style={styles.timeline}>
-                {brewprint.steps.map((step, index) => (
-                  <ThemedView
-                    key={index}
-                    noBackground
-                    style={styles.timelineRow}
-                  >
-                    <ThemedView noBackground style={styles.timelineLeft}>
-                      <ThemedView noBackground style={styles.timelineBullet}>
-                        <ThemedText
-                          type="caption"
-                          style={styles.timelineNumber}
-                        >
-                          {index + 1}
-                        </ThemedText>
-                      </ThemedView>
-                      {index < brewprint.steps.length - 1 && (
-                        <ThemedView
-                          noBackground
-                          style={styles.timelineConnector}
-                        />
-                      )}
-                    </ThemedView>
-
-                    <ThemedView noBackground style={styles.timelineContent}>
-                      <ThemedText type="body" style={styles.stepDescription}>
-                        {step.description}
-                      </ThemedText>
-                      {(step.duration || step.water_amount) && (
-                        <ThemedView noBackground style={styles.stepMeta}>
-                          {step.duration && (
-                            <ThemedText
-                              type="caption"
-                              style={styles.stepMetaText}
-                            >
-                              {step.duration}s
-                            </ThemedText>
-                          )}
-                          {step.water_amount && (
-                            <ThemedText
-                              type="caption"
-                              style={styles.stepMetaText}
-                            >
-                              {step.water_amount}g
-                            </ThemedText>
-                          )}
-                        </ThemedView>
-                      )}
-                    </ThemedView>
-                  </ThemedView>
-                ))}
-              </ThemedView>
-            </ThemedView>
+      {/* Status and Actions */}
+      <ProfessionalCard variant="elevated" style={{ marginBottom: theme.spacing.lg }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
+          <View style={{
+            backgroundColor: brewprint.status === 'final'
+              ? theme.colors.success
+              : brewprint.status === 'archived'
+              ? theme.colors.gray[400]
+              : theme.colors.warning,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 12,
+          }}>
+            <ProfessionalText variant="caption" color="inverse">
+              {brewprint.status === 'final'
+                ? 'FINAL'
+                : brewprint.status === 'archived'
+                ? 'ARCHIVED'
+                : 'EXPERIMENT'}
+            </ProfessionalText>
+          </View>
+          {typeof brewprint.rating === 'number' && (
+            <ProfessionalText variant="body" weight="semibold">
+              {brewprint.rating}/5 ★
+            </ProfessionalText>
           )}
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+        </View>
+        
+        <View style={{ flexDirection: 'row', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
+          <ProfessionalButton
+            title="Start Brewing"
+            variant="primary"
+            onPress={handleStartBrewing}
+            style={{ flex: 1 }}
+          />
+          <ProfessionalButton
+            title="Share"
+            variant="secondary"
+            onPress={handleShare}
+            style={{ flex: 1 }}
+          />
+        </View>
+      </ProfessionalCard>
+
+      {/* Parameters */}
+      <ProfessionalCard variant="default">
+        <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: theme.spacing.md }}>
+          Parameters
+        </ProfessionalText>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.md }}>
+          <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+            <Coffee size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
+            <ProfessionalText variant="caption" color="tertiary">
+              Coffee
+            </ProfessionalText>
+            <ProfessionalText variant="body" weight="semibold">
+              {brewprint.parameters.coffee_grams}g
+            </ProfessionalText>
+          </View>
+
+          <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+            <Droplets size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
+            <ProfessionalText variant="caption" color="tertiary">
+              Water
+            </ProfessionalText>
+            <ProfessionalText variant="body" weight="semibold">
+              {brewprint.parameters.water_grams}g
+            </ProfessionalText>
+          </View>
+
+          <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+            <ProfessionalText variant="caption" color="tertiary">
+              Ratio
+            </ProfessionalText>
+            <ProfessionalText variant="body" weight="semibold">
+              1:{(
+                brewprint.parameters.water_grams /
+                brewprint.parameters.coffee_grams
+              ).toFixed(1)}
+            </ProfessionalText>
+          </View>
+
+          <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+            <Thermometer size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
+            <ProfessionalText variant="caption" color="tertiary">
+              Temperature
+            </ProfessionalText>
+            <ProfessionalText variant="body" weight="semibold">
+              {brewprint.parameters.water_temp}°C
+            </ProfessionalText>
+          </View>
+
+          {brewprint.parameters.grind_setting && (
+            <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+              <SlidersHorizontal size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
+              <ProfessionalText variant="caption" color="tertiary">
+                Grind
+              </ProfessionalText>
+              <ProfessionalText variant="body" weight="semibold">
+                {brewprint.parameters.grind_setting}
+              </ProfessionalText>
+            </View>
+          )}
+
+          {brewprint.parameters.total_time && (
+            <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
+              <TimerIcon size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
+              <ProfessionalText variant="caption" color="tertiary">
+                Time
+              </ProfessionalText>
+              <ProfessionalText variant="body" weight="semibold">
+                {Math.floor(brewprint.parameters.total_time / 60)}:
+                {String(brewprint.parameters.total_time % 60).padStart(
+                  2,
+                  "0"
+                )}
+              </ProfessionalText>
+            </View>
+          )}
+        </View>
+      </ProfessionalCard>
+
+      {/* Steps */}
+      {brewprint.steps && brewprint.steps.length > 0 && (
+        <ProfessionalCard variant="default">
+          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: theme.spacing.md }}>
+            Brewing Steps
+          </ProfessionalText>
+          <View style={{ gap: theme.spacing.lg }}>
+            {brewprint.steps.map((step, index) => (
+              <View key={index} style={{ flexDirection: 'row', gap: theme.spacing.md }}>
+                <View style={{ alignItems: 'center' }}>
+                  <View style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    backgroundColor: theme.colors.gray[900],
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <ProfessionalText variant="caption" color="inverse">
+                      {index + 1}
+                    </ProfessionalText>
+                  </View>
+                  {index < brewprint.steps.length - 1 && (
+                    <View style={{
+                      width: 2,
+                      flex: 1,
+                      backgroundColor: theme.colors.borderSubtle,
+                      marginTop: theme.spacing.xs,
+                      marginBottom: theme.spacing.sm,
+                    }} />
+                  )}
+                </View>
+
+                <View style={{ flex: 1, paddingBottom: theme.spacing.md }}>
+                  <ProfessionalText variant="body">
+                    {step.description}
+                  </ProfessionalText>
+                  {(step.duration || step.water_amount) && (
+                    <View style={{ flexDirection: 'row', gap: theme.spacing.sm, marginTop: theme.spacing.xs }}>
+                      {step.duration && (
+                        <View style={{
+                          backgroundColor: theme.colors.surface,
+                          paddingHorizontal: theme.spacing.sm,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                        }}>
+                          <ProfessionalText variant="caption" color="secondary">
+                            {step.duration}s
+                          </ProfessionalText>
+                        </View>
+                      )}
+                      {step.water_amount && (
+                        <View style={{
+                          backgroundColor: theme.colors.surface,
+                          paddingHorizontal: theme.spacing.sm,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                        }}>
+                          <ProfessionalText variant="caption" color="secondary">
+                            {step.water_amount}g
+                          </ProfessionalText>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              </View>
+            ))}
+          </View>
+        </ProfessionalCard>
+      )}
+    </ProfessionalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 4,
-    paddingVertical: 16,
-    gap: 32,
-  },
-  heroCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
-  },
-  heroHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  heroTitle: {
-    marginBottom: 4,
-  },
-  heroSubtitle: {
-    opacity: 0.8,
-  },
-  heroActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 16,
-  },
-  heroBrewButton: {
-    backgroundColor: "#8b5cf6",
-  },
-  ratingText: {
-    opacity: 0.9,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  // Primary Action
-  primaryAction: {
-    paddingTop: 8,
-  },
-
-  // Section Divider
-  sectionDivider: {
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    marginHorizontal: 16,
-  },
-  brewButton: {
-    backgroundColor: "#8b5cf6",
-    shadowColor: "#8b5cf6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-
-  // Data Section - Clean and minimal
-  dataSection: {
-    gap: 8,
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    borderRadius: 12,
-    padding: 12,
-    marginHorizontal: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    gap: 8,
-  },
-  cardHeader: {
-    marginBottom: 8,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  statItem: {
-    width: "48%",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 10,
-    padding: 10,
-    gap: 4,
-  },
-  statLabel: {
-    opacity: 0.7,
-  },
-  statValue: {
-    marginTop: 2,
-  },
-  dataRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
-  },
-  primaryDataRow: {
-    // Remove special styling for now
-  },
-  accentDataRow: {
-    // Keep just a subtle highlight for ratio
-    backgroundColor: "rgba(139, 92, 246, 0.03)",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    marginHorizontal: -8,
-  },
-  dataLabel: {
-    opacity: 0.7,
-    minWidth: 80,
-  },
-  primaryDataValue: {
-    // Remove color
-  },
-  accentDataValue: {
-    color: "#8b5cf6",
-  },
-  methodValue: {
-    // Remove color
-  },
-  ratingValue: {
-    // Remove color
-  },
-
-  // Steps Section
-  stepsSection: {
-    gap: 12,
-  },
-  timeline: {
-    gap: 12,
-  },
-  timelineRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  timelineLeft: {
-    alignItems: "center",
-  },
-  timelineBullet: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "rgba(139, 92, 246, 0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timelineNumber: {
-    fontSize: 12,
-  },
-  timelineConnector: {
-    width: 2,
-    flex: 1,
-    backgroundColor: "rgba(139, 92, 246, 0.15)",
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  timelineContent: {
-    flex: 1,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.06)",
-  },
-  sectionHeader: {
-    marginBottom: 8,
-  },
-  stepRow: {
-    flexDirection: "row",
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
-  stepNumber: {
-    minWidth: 24,
-    opacity: 0.6,
-    textAlign: "center",
-    marginTop: 2,
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  stepDescription: {
-    flex: 1,
-  },
-  stepMeta: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-  },
-  stepMetaText: {
-    opacity: 0.7,
-    fontSize: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-});

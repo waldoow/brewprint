@@ -7,11 +7,12 @@ import {
   Switch,
 } from 'react-native';
 import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
+import { ProfessionalContainer } from '@/components/ui/professional/Container';
+import { ProfessionalHeader } from '@/components/ui/professional/Header';
+import { ProfessionalCard } from '@/components/ui/professional/Card';
+import { ProfessionalText } from '@/components/ui/professional/Text';
+import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
@@ -64,7 +65,7 @@ const BREW_METHODS = [
 
 export default function PreferencesScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [loading, setLoading] = useState(true);
@@ -117,23 +118,33 @@ export default function PreferencesScreen() {
 
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Preferences" onBack={() => router.back()} />
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Preferences"
+          subtitle="Customize your coffee tracking experience"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
+        />
         <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
+          <ProfessionalText variant="body" color="secondary">
             Loading preferences...
-          </ThemedText>
+          </ProfessionalText>
         </View>
-      </ThemedView>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Preferences" 
-        onBack={() => router.back()}
-        loading={saving}
+    <ProfessionalContainer scrollable>
+      <ProfessionalHeader
+        title="Preferences"
+        subtitle="Customize your coffee tracking experience"
+        action={{
+          title: "Back",
+          onPress: () => router.back(),
+        }}
       />
 
       <ScrollView 
@@ -142,16 +153,16 @@ export default function PreferencesScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Units Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
             Units
-          </ThemedText>
+          </ProfessionalText>
 
           {/* Temperature Unit */}
           <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
               Temperature
-            </ThemedText>
+            </ProfessionalText>
             <View style={styles.unitOptions}>
               {TEMPERATURE_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -160,24 +171,24 @@ export default function PreferencesScreen() {
                     styles.unitButton,
                     {
                       backgroundColor: preferences.temperatureUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
+                        ? theme.colors.primary 
+                        : theme.colors.surface,
                       borderColor: preferences.temperatureUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
+                        ? theme.colors.primary 
+                        : theme.colors.border,
                     }
                   ]}
                   onPress={() => updatePreference('temperatureUnit', unit.value as 'celsius' | 'fahrenheit')}
                 >
-                  <ThemedText
-                    type="caption"
+                  <ProfessionalText
+                    variant="caption"
                     style={[
                       styles.unitText,
-                      { color: preferences.temperatureUnit === unit.value ? '#fff' : colors.text }
+                      { color: preferences.temperatureUnit === unit.value ? theme.colors.surface : theme.colors.text }
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </ProfessionalText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -185,9 +196,9 @@ export default function PreferencesScreen() {
 
           {/* Weight Unit */}
           <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
               Weight
-            </ThemedText>
+            </ProfessionalText>
             <View style={styles.unitOptions}>
               {WEIGHT_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -196,24 +207,24 @@ export default function PreferencesScreen() {
                     styles.unitButton,
                     {
                       backgroundColor: preferences.weightUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
+                        ? theme.colors.primary 
+                        : theme.colors.surface,
                       borderColor: preferences.weightUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
+                        ? theme.colors.primary 
+                        : theme.colors.border,
                     }
                   ]}
                   onPress={() => updatePreference('weightUnit', unit.value as 'grams' | 'ounces')}
                 >
-                  <ThemedText
-                    type="caption"
+                  <ProfessionalText
+                    variant="caption"
                     style={[
                       styles.unitText,
-                      { color: preferences.weightUnit === unit.value ? '#fff' : colors.text }
+                      { color: preferences.weightUnit === unit.value ? theme.colors.surface : theme.colors.text }
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </ProfessionalText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -221,9 +232,9 @@ export default function PreferencesScreen() {
 
           {/* Volume Unit */}
           <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
               Volume
-            </ThemedText>
+            </ProfessionalText>
             <View style={styles.unitOptions}>
               {VOLUME_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -232,41 +243,41 @@ export default function PreferencesScreen() {
                     styles.unitButton,
                     {
                       backgroundColor: preferences.volumeUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
+                        ? theme.colors.primary 
+                        : theme.colors.surface,
                       borderColor: preferences.volumeUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
+                        ? theme.colors.primary 
+                        : theme.colors.border,
                     }
                   ]}
                   onPress={() => updatePreference('volumeUnit', unit.value as 'ml' | 'fl_oz')}
                 >
-                  <ThemedText
-                    type="caption"
+                  <ProfessionalText
+                    variant="caption"
                     style={[
                       styles.unitText,
-                      { color: preferences.volumeUnit === unit.value ? '#fff' : colors.text }
+                      { color: preferences.volumeUnit === unit.value ? theme.colors.surface : theme.colors.text }
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </ProfessionalText>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Brewing Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
             Brewing
-          </ThemedText>
+          </ProfessionalText>
 
           {/* Default Brew Method */}
           <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
               Default Method
-            </ThemedText>
+            </ProfessionalText>
             <View style={styles.methodOptions}>
               {BREW_METHODS.map((method) => (
                 <TouchableOpacity
@@ -275,24 +286,24 @@ export default function PreferencesScreen() {
                     styles.methodButton,
                     {
                       backgroundColor: preferences.defaultBrewMethod === method.value 
-                        ? colors.primary 
-                        : colors.surface,
+                        ? theme.colors.primary 
+                        : theme.colors.surface,
                       borderColor: preferences.defaultBrewMethod === method.value 
-                        ? colors.primary 
-                        : colors.border,
+                        ? theme.colors.primary 
+                        : theme.colors.border,
                     }
                   ]}
                   onPress={() => updatePreference('defaultBrewMethod', method.value)}
                 >
-                  <ThemedText
-                    type="caption"
+                  <ProfessionalText
+                    variant="caption"
                     style={[
                       styles.methodText,
-                      { color: preferences.defaultBrewMethod === method.value ? '#fff' : colors.text }
+                      { color: preferences.defaultBrewMethod === method.value ? theme.colors.surface : theme.colors.text }
                     ]}
                   >
                     {method.label}
-                  </ThemedText>
+                  </ProfessionalText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -301,117 +312,99 @@ export default function PreferencesScreen() {
           {/* Auto-start Timer */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Auto-start Timer
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Start timer automatically when brewing begins
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={preferences.timerAutoStart}
               onValueChange={(value) => updatePreference('timerAutoStart', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.timerAutoStart ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={preferences.timerAutoStart ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
 
           {/* Auto-save Brews */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Auto-save Brews
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Automatically save completed brewing sessions
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={preferences.autoSaveBrews}
               onValueChange={(value) => updatePreference('autoSaveBrews', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.autoSaveBrews ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={preferences.autoSaveBrews ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
 
           {/* Show Detailed Metrics */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Detailed Metrics
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Show advanced brewing metrics and analytics
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={preferences.showDetailedMetrics}
               onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.showDetailedMetrics ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={preferences.showDetailedMetrics ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Interface Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
             Interface
-          </ThemedText>
+          </ProfessionalText>
 
           {/* Haptic Feedback */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Haptic Feedback
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Vibration feedback for button taps and interactions
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={preferences.hapticFeedback}
               onValueChange={(value) => updatePreference('hapticFeedback', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.hapticFeedback ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={preferences.hapticFeedback ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   section: {
-    padding: 20,
-    borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   sectionTitle: {
-    fontWeight: '600',
     marginBottom: 16,
   },
   settingRow: {
@@ -419,11 +412,6 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     marginBottom: 8,
-    fontSize: 14,
-  },
-  settingDescription: {
-    fontSize: 12,
-    lineHeight: 16,
   },
   unitOptions: {
     flexDirection: 'row',

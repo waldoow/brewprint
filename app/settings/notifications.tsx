@@ -6,11 +6,12 @@ import {
   Switch,
 } from 'react-native';
 import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
+import { ProfessionalContainer } from '@/components/ui/professional/Container';
+import { ProfessionalHeader } from '@/components/ui/professional/Header';
+import { ProfessionalCard } from '@/components/ui/professional/Card';
+import { ProfessionalText } from '@/components/ui/professional/Text';
+import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
@@ -36,7 +37,7 @@ const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
 
 export default function NotificationsScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -89,23 +90,33 @@ export default function NotificationsScreen() {
 
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Notifications" onBack={() => router.back()} />
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Notifications"
+          subtitle="Configure your notification preferences"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
+        />
         <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
+          <ProfessionalText variant="body" color="secondary">
             Loading notification settings...
-          </ThemedText>
+          </ProfessionalText>
         </View>
-      </ThemedView>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Notifications" 
-        onBack={() => router.back()}
-        loading={saving}
+    <ProfessionalContainer scrollable>
+      <ProfessionalHeader
+        title="Notifications"
+        subtitle="Configure your notification preferences"
+        action={{
+          title: "Back",
+          onPress: () => router.back(),
+        }}
       />
 
       <ScrollView 
@@ -114,203 +125,194 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Info Banner */}
-        <View style={styles.infoBanner}>
-          <ThemedText type="caption" style={[styles.infoText, { color: colors.textSecondary }]}>
+        <ProfessionalCard variant="outlined" style={styles.infoBanner}>
+          <ProfessionalText variant="body" color="secondary" style={styles.infoText}>
             💡 Notification features are coming soon. Configure your preferences here and we&apos;ll enable them when ready.
-          </ThemedText>
-        </View>
+          </ProfessionalText>
+        </ProfessionalCard>
 
         {/* Brewing Notifications */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+            <ProfessionalText variant="h4" weight="semibold">
               Brewing Notifications
-            </ThemedText>
-            <ThemedBadge variant="secondary" size="sm">Coming Soon</ThemedBadge>
+            </ProfessionalText>
+            <View style={styles.comingSoonBadge}>
+              <ProfessionalText variant="caption" color="secondary">
+                Coming Soon
+              </ProfessionalText>
+            </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Brewing Reminders
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Get reminded when it&apos;s time to start your next brew
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.brewingReminders}
               onValueChange={(value) => updateSetting('brewingReminders', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.brewingReminders ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.brewingReminders ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true} // Disabled until feature is implemented
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Daily Brew Reminders
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Daily reminder to log your coffee brewing sessions
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.dailyBrewReminders}
               onValueChange={(value) => updateSetting('dailyBrewReminders', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.dailyBrewReminders ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.dailyBrewReminders ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true}
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Grinding Reminders
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Reminders to grind beans fresh before brewing
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.grindingReminders}
               onValueChange={(value) => updateSetting('grindingReminders', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.grindingReminders ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.grindingReminders ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Inventory Notifications */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+            <ProfessionalText variant="h4" weight="semibold">
               Inventory Alerts
-            </ThemedText>
-            <ThemedBadge variant="secondary" size="sm">Coming Soon</ThemedBadge>
+            </ProfessionalText>
+            <View style={styles.comingSoonBadge}>
+              <ProfessionalText variant="caption" color="secondary">
+                Coming Soon
+              </ProfessionalText>
+            </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Bean Expiration Alerts
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Get notified when your coffee beans are getting stale
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.beanExpirationAlerts}
               onValueChange={(value) => updateSetting('beanExpirationAlerts', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.beanExpirationAlerts ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.beanExpirationAlerts ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Progress Notifications */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+            <ProfessionalText variant="h4" weight="semibold">
               Progress & Reports
-            </ThemedText>
-            <ThemedBadge variant="secondary" size="sm">Coming Soon</ThemedBadge>
+            </ProfessionalText>
+            <View style={styles.comingSoonBadge}>
+              <ProfessionalText variant="caption" color="secondary">
+                Coming Soon
+              </ProfessionalText>
+            </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Weekly Reports
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Weekly summary of your brewing activities and improvements
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.weeklyReports}
               onValueChange={(value) => updateSetting('weeklyReports', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.weeklyReports ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.weeklyReports ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true}
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="medium">
                 Achievement Notifications
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Get notified when you reach brewing milestones
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.achievementNotifications}
               onValueChange={(value) => updateSetting('achievementNotifications', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.achievementNotifications ? '#fff' : colors.text}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={settings.achievementNotifications ? theme.colors.surface : theme.colors.textSecondary}
               disabled={true}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   infoBanner: {
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    padding: 16,
-    borderRadius: 12,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   infoText: {
-    fontSize: 13,
-    lineHeight: 18,
     textAlign: 'center',
   },
   section: {
-    padding: 20,
-    borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+  },
+  comingSoonBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(107, 114, 128, 0.1)',
+    borderRadius: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
-  },
-  sectionTitle: {
-    fontWeight: '600',
   },
   settingRow: {
     flexDirection: 'row',
@@ -321,14 +323,6 @@ const styles = StyleSheet.create({
   settingInfo: {
     flex: 1,
     marginRight: 12,
-  },
-  settingLabel: {
-    marginBottom: 2,
-    fontSize: 14,
-  },
-  settingDescription: {
-    fontSize: 12,
-    lineHeight: 16,
   },
   bottomSpacing: {
     height: 20,

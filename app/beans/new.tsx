@@ -1,5 +1,5 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
 import { BeanForm } from "@/forms/BeanForm";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -19,22 +19,19 @@ export default function NewBeanScreen() {
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
+    <ProfessionalContainer>
+      <ProfessionalHeader
         title="Add New Bean"
         subtitle="Coffee inventory management"
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Back"
+        action={{
+          title: "Cancel",
+          onPress: handleCancel,
+        }}
       />
 
       <BeanForm onSuccess={handleSuccess} onCancel={handleCancel} />
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+const styles = StyleSheet.create({});

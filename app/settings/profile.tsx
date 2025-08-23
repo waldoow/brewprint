@@ -1,24 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  View,
-  Alert,
-  Switch,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedInput } from '@/components/ui/ThemedInput';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useAuth } from '@/context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
-import { toast } from 'sonner-native';
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { ProfessionalInput } from "@/components/ui/professional/Input";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { getTheme } from "@/constants/ProfessionalDesign";
+import { useAuth } from "@/context/AuthContext";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { toast } from "sonner-native";
 
 interface ProfileSettings {
   displayName: string;
@@ -28,7 +22,7 @@ interface ProfileSettings {
 }
 
 const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
-  displayName: '',
+  displayName: "",
   autoSync: true,
   syncOnCellular: false,
   backupBeforeSync: true,
@@ -36,10 +30,12 @@ const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
 
 export default function ProfileSyncScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? "light");
   const { user } = useAuth();
 
-  const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_PROFILE_SETTINGS);
+  const [settings, setSettings] = useState<ProfileSettings>(
+    DEFAULT_PROFILE_SETTINGS
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -49,7 +45,7 @@ export default function ProfileSyncScreen() {
 
   const loadProfileSettings = async () => {
     try {
-      const stored = await AsyncStorage.getItem('profile_settings');
+      const stored = await AsyncStorage.getItem("profile_settings");
       if (stored) {
         const parsed = JSON.parse(stored);
         setSettings({ ...DEFAULT_PROFILE_SETTINGS, ...parsed });
@@ -57,12 +53,12 @@ export default function ProfileSyncScreen() {
         // Initialize with user email as display name
         const initialSettings = {
           ...DEFAULT_PROFILE_SETTINGS,
-          displayName: user.email.split('@')[0],
+          displayName: user.email.split("@")[0],
         };
         setSettings(initialSettings);
       }
     } catch (error) {
-      console.error('Failed to load profile settings:', error);
+      console.error("Failed to load profile settings:", error);
     } finally {
       setLoading(false);
     }
@@ -71,14 +67,17 @@ export default function ProfileSyncScreen() {
   const saveProfileSettings = async (newSettings: ProfileSettings) => {
     try {
       setSaving(true);
-      await AsyncStorage.setItem('profile_settings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem(
+        "profile_settings",
+        JSON.stringify(newSettings)
+      );
       setSettings(newSettings);
-      
+
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      toast.success('Profile settings updated');
+      toast.success("Profile settings updated");
     } catch (error) {
-      console.error('Failed to save profile settings:', error);
-      toast.error('Failed to save settings');
+      console.error("Failed to save profile settings:", error);
+      toast.error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -94,16 +93,16 @@ export default function ProfileSyncScreen() {
 
   const handleForceSync = () => {
     Alert.alert(
-      'Sync Data',
-      'This will sync your local data with the cloud. This may take a few moments.',
+      "Sync Data",
+      "This will sync your local data with the cloud. This may take a few moments.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sync Now', 
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sync Now",
           onPress: () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            toast.success('Sync completed (simulated)');
-          }
+            toast.success("Sync completed (simulated)");
+          },
         },
       ]
     );
@@ -111,191 +110,262 @@ export default function ProfileSyncScreen() {
 
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Profile & Sync" onBack={() => router.back()} />
+      <ProfessionalContainer>
+        <ProfessionalHeader
+          title="Profile & Sync"
+          action={{
+            title: "Back",
+            onPress: () => router.back(),
+          }}
+        />
         <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
+          <ProfessionalText variant="body" color="secondary">
             Loading profile settings...
-          </ThemedText>
+          </ProfessionalText>
         </View>
-      </ThemedView>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Profile & Sync" 
-        onBack={() => router.back()}
-        loading={saving}
+    <ProfessionalContainer scrollable>
+      <ProfessionalHeader
+        title="Profile & Sync"
+        subtitle="Account settings and data synchronization"
+        action={{
+          title: "Back",
+          onPress: () => router.back(),
+        }}
       />
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Profile Information */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText
+            variant="h4"
+            weight="semibold"
+            style={styles.sectionTitle}
+          >
             Profile Information
-          </ThemedText>
+          </ProfessionalText>
 
           <View style={styles.profileField}>
-            <ThemedText type="defaultSemiBold" style={[styles.fieldLabel, { color: colors.text }]}>
+            <ProfessionalText
+              variant="body"
+              weight="semibold"
+              style={styles.fieldLabel}
+            >
               Email Address
-            </ThemedText>
-            <View style={[styles.emailContainer, { backgroundColor: colors.surface }]}>
-              <ThemedText style={[styles.emailText, { color: colors.text }]}>
-                {user?.email || 'Not available'}
-              </ThemedText>
-              <ThemedBadge variant="success" size="sm">Verified</ThemedBadge>
+            </ProfessionalText>
+            <View
+              style={[
+                styles.emailContainer,
+                { backgroundColor: theme.colors.surface },
+              ]}
+            >
+              <ProfessionalText variant="body" style={styles.emailText}>
+                {user?.email || "Not available"}
+              </ProfessionalText>
+              <View style={styles.verifiedBadge}>
+                <ProfessionalText variant="caption" color="secondary">
+                  Verified
+                </ProfessionalText>
+              </View>
             </View>
           </View>
 
           <View style={styles.profileField}>
-            <ThemedInput
+            <ProfessionalInput
               label="Display Name"
               value={settings.displayName}
-              onChangeText={(value) => updateSetting('displayName', value)}
+              onChangeText={(value) => updateSetting("displayName", value)}
               placeholder="Your display name"
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Sync Settings */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+            <ProfessionalText variant="h4" weight="semibold">
               Sync Settings
-            </ThemedText>
-            <ThemedBadge variant="secondary" size="sm">Coming Soon</ThemedBadge>
+            </ProfessionalText>
+            <View style={styles.comingSoonBadge}>
+              <ProfessionalText variant="caption" color="secondary">
+                Coming Soon
+              </ProfessionalText>
+            </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="semibold">
                 Automatic Sync
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Automatically sync your data when changes are made
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.autoSync}
-              onValueChange={(value) => updateSetting('autoSync', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.autoSync ? '#fff' : colors.text}
+              onValueChange={(value) => updateSetting("autoSync", value)}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                settings.autoSync
+                  ? theme.colors.surface
+                  : theme.colors.textSecondary
+              }
               disabled={true} // Disabled until sync is implemented
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="semibold">
                 Sync on Cellular
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Allow syncing when using cellular data (may use data)
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.syncOnCellular}
-              onValueChange={(value) => updateSetting('syncOnCellular', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.syncOnCellular ? '#fff' : colors.text}
+              onValueChange={(value) => updateSetting("syncOnCellular", value)}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                settings.syncOnCellular
+                  ? theme.colors.surface
+                  : theme.colors.textSecondary
+              }
               disabled={true}
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
+              <ProfessionalText variant="body" weight="semibold">
                 Backup Before Sync
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 Create a backup before syncing changes
-              </ThemedText>
+              </ProfessionalText>
             </View>
             <Switch
               value={settings.backupBeforeSync}
-              onValueChange={(value) => updateSetting('backupBeforeSync', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.backupBeforeSync ? '#fff' : colors.text}
+              onValueChange={(value) =>
+                updateSetting("backupBeforeSync", value)
+              }
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              thumbColor={
+                settings.backupBeforeSync
+                  ? theme.colors.surface
+                  : theme.colors.textSecondary
+              }
               disabled={true}
             />
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Sync Actions */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText
+            variant="h4"
+            weight="semibold"
+            style={styles.sectionTitle}
+          >
             Sync Actions
-          </ThemedText>
+          </ProfessionalText>
 
           <View style={styles.syncStatus}>
-            <ThemedText type="caption" style={[styles.statusText, { color: colors.textSecondary }]}>
+            <ProfessionalText
+              variant="caption"
+              color="secondary"
+              style={styles.statusText}
+            >
               Last sync: Never (sync feature coming soon)
-            </ThemedText>
+            </ProfessionalText>
           </View>
 
-          <ThemedButton
+          <ProfessionalButton
             title="Sync Now"
             onPress={handleForceSync}
-            variant="secondary"
-            size="default"
+            variant="outline"
             disabled={true} // Disabled until sync is implemented
-            style={styles.syncButton}
+            fullWidth
           />
 
           <View style={styles.infoBox}>
-            <ThemedText type="caption" style={[styles.infoText, { color: colors.textSecondary }]}>
-              💡 Cloud sync functionality is coming soon. Your data is currently stored locally and backed up securely on your device.
-            </ThemedText>
+            <ProfessionalText
+              variant="caption"
+              color="secondary"
+              style={styles.infoText}
+            >
+              💡 Cloud sync functionality is coming soon. Your data is currently
+              stored locally and backed up securely on your device.
+            </ProfessionalText>
           </View>
-        </View>
+        </ProfessionalCard>
 
         {/* Account Actions */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <ProfessionalCard variant="default" style={styles.section}>
+          <ProfessionalText
+            variant="h4"
+            weight="semibold"
+            style={styles.sectionTitle}
+          >
             Account Actions
-          </ThemedText>
+          </ProfessionalText>
 
           <View style={styles.actionGrid}>
-            <ThemedButton
+            <ProfessionalButton
               title="Change Password"
+              onPress={() => {}}
               variant="outline"
-              size="default"
               disabled={true} // TODO: Implement password change
-              style={styles.actionButton}
+              fullWidth
             />
 
-            <ThemedButton
+            <ProfessionalButton
               title="Delete Account"
               variant="destructive"
-              size="default"
+              onPress={() => {}}
               disabled={true} // TODO: Implement account deletion
-              style={styles.actionButton}
+              fullWidth
             />
           </View>
 
           <View style={styles.warningBox}>
-            <ThemedText type="caption" style={[styles.warningText, { color: colors.textSecondary }]}>
-              Account management features are coming soon. For now, you can manage your account through the authentication system.
-            </ThemedText>
+            <ProfessionalText
+              variant="caption"
+              color="secondary"
+              style={styles.warningText}
+            >
+              Account management features are coming soon. For now, you can
+              manage your account through the authentication system.
+            </ProfessionalText>
           </View>
-        </View>
+        </ProfessionalCard>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
   },
@@ -305,27 +375,31 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   section: {
-    padding: 20,
-    borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+  },
+  comingSoonBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "rgba(107, 114, 128, 0.1)",
+    borderRadius: 4,
+  },
+  verifiedBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "rgba(5, 150, 105, 0.1)",
+    borderRadius: 4,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 16,
   },
   sectionTitle: {
-    fontWeight: '600',
     marginBottom: 16,
   },
   profileField: {
@@ -333,77 +407,53 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     marginBottom: 8,
-    fontSize: 14,
   },
   emailContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 12,
     borderRadius: 8,
   },
-  emailText: {
-    fontSize: 14,
-  },
   settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   settingInfo: {
     flex: 1,
     marginRight: 12,
   },
-  settingLabel: {
-    marginBottom: 2,
-    fontSize: 14,
-  },
-  settingDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
   syncStatus: {
     marginBottom: 16,
   },
   statusText: {
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  syncButton: {
-    alignSelf: 'stretch',
-    marginBottom: 16,
+    textAlign: "center",
   },
   infoBox: {
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    backgroundColor: "rgba(139, 92, 246, 0.1)",
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.2)',
+    borderColor: "rgba(139, 92, 246, 0.2)",
   },
   infoText: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   actionGrid: {
     gap: 12,
     marginBottom: 16,
   },
-  actionButton: {
-    alignSelf: 'stretch',
-  },
   warningBox: {
-    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+    backgroundColor: "rgba(255, 193, 7, 0.1)",
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 193, 7, 0.2)',
+    borderColor: "rgba(255, 193, 7, 0.2)",
   },
   warningText: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   bottomSpacing: {
     height: 20,

@@ -5,18 +5,13 @@ import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
 import {
   Form,
   FormControl,
@@ -25,7 +20,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
-import { Colors } from "@/constants/Colors";
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalInput } from "@/components/ui/professional/Input";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { getTheme } from "@/constants/ProfessionalDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // Zod schema for forgot password validation
@@ -88,133 +88,140 @@ export default function ForgotPassword({
     }
   };
 
+  const theme = getTheme(colorScheme ?? "light");
+
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedView style={styles.content}>
-              {/* Header */}
-              <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                  {emailSent ? "Check Your Email" : "Forgot Password"}
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  {emailSent
-                    ? `We've sent password reset instructions to your email address.`
-                    : "Enter your email address and we'll send you instructions to reset your password."}
-                </ThemedText>
-              </ThemedView>
+    <ProfessionalContainer scrollable>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.header}>
+            <ProfessionalText
+              variant="h1"
+              weight="semibold"
+              style={styles.title}
+            >
+              {emailSent ? "Check Your Email" : "Forgot Password"}
+            </ProfessionalText>
+            <ProfessionalText
+              variant="body"
+              color="secondary"
+              style={styles.subtitle}
+            >
+              {emailSent
+                ? `We've sent password reset instructions to your email address.`
+                : "Enter your email address and we'll send you instructions to reset your password."}
+            </ProfessionalText>
+          </View>
 
-              {/* Form */}
-              <Form {...form}>
-                <ThemedView style={styles.form}>
-                  {!emailSent ? (
-                    <>
-                      {/* Email Input */}
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <ThemedInput
-                                type="email"
-                                placeholder="Enter your email"
-                                value={field.value}
-                                onChangeText={field.onChange}
-                                onBlur={field.onBlur}
-                                editable={!isLoading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+          {/* Form Card */}
+          <ProfessionalCard variant="default" style={styles.formCard}>
+            <Form {...form}>
+              <View style={styles.form}>
+                {!emailSent ? (
+                  <>
+                    {/* Email Input */}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            <ProfessionalText variant="label" weight="medium">
+                              Email
+                            </ProfessionalText>
+                          </FormLabel>
+                          <FormControl>
+                            <ProfessionalInput
+                              type="email"
+                              placeholder="Enter your email"
+                              value={field.value}
+                              onChangeText={field.onChange}
+                              onBlur={field.onBlur}
+                              editable={!isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                      {/* Reset Password Button */}
-                      <ThemedButton
-                        title={
-                          isLoading ? "Sending..." : "Send Reset Instructions"
-                        }
-                        onPress={form.handleSubmit(onSubmit)}
-                        disabled={isLoading}
-                        loading={isLoading}
-                        style={styles.resetButton}
-                      />
-                    </>
-                  ) : (
-                  <ThemedView style={styles.emailSentContainer}>
+                    {/* Reset Password Button */}
+                    <ProfessionalButton
+                      title="Send Reset Instructions"
+                      onPress={form.handleSubmit(onSubmit)}
+                      disabled={isLoading}
+                      loading={isLoading}
+                      style={styles.resetButton}
+                    />
+                  </>
+                ) : (
+                  <View style={styles.emailSentContainer}>
                     {/* Success Message */}
-                    <ThemedView style={styles.successMessage}>
-                      <ThemedText style={styles.checkEmailText}>📧</ThemedText>
-                      <ThemedText style={styles.instructionsText}>
+                    <View style={styles.successMessage}>
+                      <ProfessionalText
+                        variant="h2"
+                        style={styles.checkEmailText}
+                      >
+                        📧
+                      </ProfessionalText>
+                      <ProfessionalText
+                        variant="body"
+                        color="secondary"
+                        style={styles.instructionsText}
+                      >
                         If an account with that email exists, you&apos;ll
                         receive password reset instructions shortly.
-                      </ThemedText>
-                    </ThemedView>
+                      </ProfessionalText>
+                    </View>
 
                     {/* Resend Email Button */}
-                    <ThemedButton
-                      variant="outline"
+                    <ProfessionalButton
+                      variant="secondary"
                       title="Resend Email"
                       onPress={handleResendEmail}
                       disabled={isLoading}
                       loading={isLoading}
                       style={styles.resendButton}
                     />
-                  </ThemedView>
-                  )}
+                  </View>
+                )}
+              </View>
+            </Form>
+          </ProfessionalCard>
 
-                  {/* Back to Sign In Link */}
-                  <ThemedView style={styles.backToSignInContainer}>
-                  <TouchableOpacity
-                    onPress={onNavigateToSignIn}
-                    disabled={isLoading}
-                    style={styles.backToSignInButton}
-                  >
-                    <ArrowLeft
-                      size={16}
-                      color={Colors[colorScheme ?? "light"].tint}
-                    />
-                    <ThemedText type="link" style={styles.backToSignInText}>
-                      Back to Sign In
-                    </ThemedText>
-                    </TouchableOpacity>
-                  </ThemedView>
-                </ThemedView>
-              </Form>
-            </ThemedView>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+          {/* Back to Sign In Link */}
+          <View style={styles.backToSignInContainer}>
+            <TouchableOpacity
+              onPress={onNavigateToSignIn}
+              disabled={isLoading}
+              style={styles.backToSignInButton}
+            >
+              <ArrowLeft size={16} color={theme.colors.gray[600]} />
+              <ProfessionalText
+                variant="body"
+                color="secondary"
+                style={styles.backToSignInText}
+              >
+                Back to Sign In
+              </ProfessionalText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
   keyboardView: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    minHeight: "100%",
-  },
   content: {
+    flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
@@ -228,21 +235,19 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: "center",
-    opacity: 0.7,
-    lineHeight: 22,
+    lineHeight: 24,
+  },
+  formCard: {
+    marginBottom: 32,
   },
   form: {
     width: "100%",
   },
-  inputContainer: {
-    marginBottom: 24,
-  },
   resetButton: {
-    marginBottom: 32,
+    marginTop: 8,
   },
   emailSentContainer: {
     alignItems: "center",
-    marginBottom: 32,
   },
   successMessage: {
     alignItems: "center",
@@ -255,14 +260,14 @@ const styles = StyleSheet.create({
   },
   instructionsText: {
     textAlign: "center",
-    opacity: 0.8,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   resendButton: {
     marginBottom: 16,
   },
   backToSignInContainer: {
     alignItems: "center",
+    marginTop: 24,
   },
   backToSignInButton: {
     flexDirection: "row",
@@ -270,6 +275,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   backToSignInText: {
-    fontSize: 14,
+    fontSize: 16,
   },
 });

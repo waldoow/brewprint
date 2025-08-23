@@ -1,10 +1,11 @@
 // app/brewing/[id].tsx
 import { TimerDisplay } from "@/components/brewing/TimerDisplay";
-import { Header } from "@/components/ui/Header";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { Colors } from "@/constants/Colors";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { getTheme } from "@/constants/ProfessionalDesign";
 import { useBrewprint } from "@/hooks/useBrewprint";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useTimer } from "@/hooks/useTimer";
@@ -24,7 +25,7 @@ import { toast } from "sonner-native";
 export default function BrewingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "dark"];
+  const theme = getTheme(colorScheme ?? 'light');
 
   const { brewprint, loading, error } = useBrewprint(id);
 
@@ -99,42 +100,55 @@ export default function BrewingScreen() {
 
   if (loading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <ThemedText style={[styles.loadingText, { color: colors.textSecondary }]}>
-          Loading brewprint...
-        </ThemedText>
-      </ThemedView>
+      <ProfessionalContainer>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ProfessionalText variant="body" color="secondary" style={styles.loadingText}>
+            Loading brewprint...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
     );
   }
 
   if (error || !brewprint) {
     return (
-      <ThemedView style={styles.errorContainer}>
-        <ThemedText style={[styles.errorText, { color: colors.error }]}>
-          {error || 'Brewprint not found'}
-        </ThemedText>
-        <ThemedButton
-          title="Go Back"
-          onPress={() => router.back()}
-          variant="outline"
-          style={styles.backButton}
-        />
-      </ThemedView>
+      <ProfessionalContainer>
+        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
+          <ProfessionalText 
+            variant="h4" 
+            weight="semibold" 
+            style={{ textAlign: 'center', marginBottom: 8 }}
+          >
+            Brewprint Not Found
+          </ProfessionalText>
+          <ProfessionalText 
+            variant="body" 
+            color="secondary" 
+            style={{ textAlign: 'center', marginBottom: 24 }}
+          >
+            {error || 'The requested brewprint could not be found.'}
+          </ProfessionalText>
+          <ProfessionalButton
+            title="Go Back"
+            onPress={() => router.back()}
+            variant="primary"
+            fullWidth
+          />
+        </ProfessionalCard>
+      </ProfessionalContainer>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header
-        title="BREWING SESSION"
+    <ProfessionalContainer>
+      <ProfessionalHeader
+        title="Brewing Session"
         subtitle={`${brewprint.name} • ${brewprint.method} extraction protocol`}
-        onBackPress={() => router.back()}
-        rightAction={{
-          icon: "info",
-          onPress: () => console.log("Show brewing tips"),
+        action={{
+          title: "Back",
+          onPress: () => router.back(),
         }}
-        showTopSpacing={true}
       />
 
       <ScrollView
@@ -148,32 +162,32 @@ export default function BrewingScreen() {
           }}
         >
           {/* Recipe Info */}
-          <View style={[styles.infoCard, { backgroundColor: colors.cardBackground }]}>
-            <ThemedText style={[styles.recipeName, { color: colors.text }]}>
+          <ProfessionalCard variant="default" style={styles.infoCard}>
+            <ProfessionalText variant="h3" weight="semibold" style={styles.recipeName}>
               {brewprint.name}
-            </ThemedText>
-            <ThemedText style={[styles.recipeMethod, { color: colors.textSecondary }]}>
+            </ProfessionalText>
+            <ProfessionalText variant="body" color="secondary" style={styles.recipeMethod}>
               {brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')}
               {brewprint.description && ` • ${brewprint.description}`}
-            </ThemedText>
+            </ProfessionalText>
             
             <View style={styles.quickParams}>
-              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+              <ProfessionalText variant="caption" color="secondary">
                 {brewprint.parameters.coffee_grams}g coffee
-              </ThemedText>
-              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 {brewprint.parameters.water_grams}ml water
-              </ThemedText>
-              <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+              </ProfessionalText>
+              <ProfessionalText variant="caption" color="secondary">
                 {brewprint.parameters.water_temp}°C
-              </ThemedText>
+              </ProfessionalText>
               {brewprint.parameters.ratio && (
-                <ThemedText style={[styles.param, { color: colors.textSecondary }]}>
+                <ProfessionalText variant="caption" color="secondary">
                   {brewprint.parameters.ratio} ratio
-                </ThemedText>
+                </ProfessionalText>
               )}
             </View>
-          </View>
+          </ProfessionalCard>
 
           {/* Timer Section */}
           <TimerDisplay
@@ -184,82 +198,83 @@ export default function BrewingScreen() {
 
           {/* Current Step Display */}
           {isBrewingStarted && !isBrewingComplete && getCurrentStep() && (
-            <View style={[styles.currentStepCard, { backgroundColor: colors.cardBackground }]}>
+            <ProfessionalCard variant="default" style={styles.currentStepCard}>
               <View style={styles.stepHeader}>
-                <ThemedText style={[styles.stepNumber, { color: colors.primary }]}>
+                <ProfessionalText variant="caption" color="secondary" style={styles.stepNumber}>
                   Step {currentStepIndex + 1} of {brewprint.steps.length}
-                </ThemedText>
-                <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
+                </ProfessionalText>
+                <ProfessionalText variant="h3" weight="semibold">
                   {getCurrentStep()?.title}
-                </ThemedText>
+                </ProfessionalText>
               </View>
               
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ProfessionalText variant="body" color="secondary" style={styles.stepDescription}>
                 {getCurrentStep()?.description}
-              </ThemedText>
+              </ProfessionalText>
               
               <View style={styles.stepDetails}>
-                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                <ProfessionalText variant="caption" color="secondary">
                   Duration: {getCurrentStep()?.duration}s
-                </ThemedText>
-                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                </ProfessionalText>
+                <ProfessionalText variant="caption" color="secondary">
                   Water: {getCurrentStep()?.water_amount}g
-                </ThemedText>
-                <ThemedText style={[styles.stepDetail, { color: colors.textSecondary }]}>
+                </ProfessionalText>
+                <ProfessionalText variant="caption" color="secondary">
                   Technique: {getCurrentStep()?.technique}
-                </ThemedText>
+                </ProfessionalText>
               </View>
-            </View>
+            </ProfessionalCard>
           )}
 
           {/* All Steps Overview (when not brewing) */}
           {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
-            <View style={[styles.stepsOverview, { backgroundColor: colors.cardBackground }]}>
-              <ThemedText style={[styles.stepsTitle, { color: colors.text }]}>
+            <ProfessionalCard variant="default" style={styles.stepsOverview}>
+              <ProfessionalText variant="h4" weight="semibold" style={styles.stepsTitle}>
                 Brewing Steps ({brewprint.steps.length} steps)
-              </ThemedText>
+              </ProfessionalText>
               
               {brewprint.steps.map((step, index) => (
                 <View key={step.id} style={styles.stepPreview}>
                   <View style={styles.stepPreviewHeader}>
-                    <ThemedText style={[styles.stepPreviewNumber, { color: colors.primary }]}>
+                    <ProfessionalText variant="caption" weight="bold" style={styles.stepPreviewNumber}>
                       {index + 1}
-                    </ThemedText>
-                    <ThemedText style={[styles.stepPreviewTitle, { color: colors.text }]}>
+                    </ProfessionalText>
+                    <ProfessionalText variant="body" weight="medium" style={styles.stepPreviewTitle}>
                       {step.title}
-                    </ThemedText>
-                    <ThemedText style={[styles.stepPreviewTime, { color: colors.textSecondary }]}>
+                    </ProfessionalText>
+                    <ProfessionalText variant="caption" color="secondary">
                       {step.duration}s
-                    </ThemedText>
+                    </ProfessionalText>
                   </View>
-                  <ThemedText style={[styles.stepPreviewDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+                  <ProfessionalText variant="caption" color="secondary" style={styles.stepPreviewDesc} numberOfLines={2}>
                     {step.description} • {step.water_amount}g water • {step.technique}
-                  </ThemedText>
+                  </ProfessionalText>
                 </View>
               ))}
-            </View>
+            </ProfessionalCard>
           )}
 
           {/* Action Panel */}
-          <View style={[styles.actionPanel, { backgroundColor: colors.cardBackground }]}>
+          <ProfessionalCard variant="default" style={styles.actionPanel}>
             {!isBrewingStarted ? (
-              <ThemedButton
+              <ProfessionalButton
                 title="Start Brewing"
                 onPress={handleStartBrewing}
-                variant="default"
-                size="lg"
-                style={styles.primaryAction}
+                variant="primary"
+                size="large"
+                fullWidth
               />
             ) : isBrewingComplete ? (
               <>
-                <ThemedButton
+                <ProfessionalButton
                   title="View Results"
                   onPress={() => router.push(`/brewing/${id}/results`)}
-                  variant="default"
-                  size="lg"
+                  variant="primary"
+                  size="large"
+                  fullWidth
                   style={styles.primaryAction}
                 />
-                <ThemedButton
+                <ProfessionalButton
                   title="Brew Again"
                   onPress={() => {
                     setIsBrewingStarted(false);
@@ -268,32 +283,33 @@ export default function BrewingScreen() {
                     resetTimer();
                   }}
                   variant="outline"
-                  size="lg"
-                  style={styles.secondaryAction}
+                  size="large"
+                  fullWidth
                 />
               </>
             ) : (
               <>
-                <ThemedButton
+                <ProfessionalButton
                   title={currentStepIndex < (brewprint.steps?.length || 0) - 1 ? "Next Step" : "Complete Brewing"}
                   onPress={handleNextStep}
-                  variant="default"
-                  size="lg"
+                  variant="primary"
+                  size="large"
+                  fullWidth
                   style={styles.primaryAction}
                 />
-                <ThemedButton
+                <ProfessionalButton
                   title={isRunning ? "Pause Timer" : "Resume Timer"}
                   onPress={isRunning ? pauseTimer : startTimer}
                   variant="outline"
-                  size="lg"
-                  style={styles.secondaryAction}
+                  size="large"
+                  fullWidth
                 />
               </>
             )}
-          </View>
+          </ProfessionalCard>
         </Animated.View>
       </ScrollView>
-    </ThemedView>
+    </ProfessionalContainer>
   );
 }
 

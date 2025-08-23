@@ -1,32 +1,25 @@
-import { Header } from "@/components/ui/Header";
-import { SearchBar } from "@/components/ui/SearchBar";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import React, { useEffect, useMemo, useState } from 'react';
+import { RefreshControl, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { ProfessionalContainer } from '@/components/ui/professional/Container';
+import { ProfessionalHeader } from '@/components/ui/professional/Header';
+import { ProfessionalCard } from '@/components/ui/professional/Card';
+import { ProfessionalText } from '@/components/ui/professional/Text';
+import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import {
   FoldersService,
   TagsService,
   type Folder,
   type Tag,
-} from "@/lib/services/folders";
-import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { toast } from "sonner-native";
+} from '@/lib/services/folders';
+import { toast } from 'sonner-native';
 
 export default function FoldersScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "dark"];
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [folders, setFolders] = useState<Folder[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,18 +40,14 @@ export default function FoldersScreen() {
       if (foldersResult.success && foldersResult.data) {
         setFolders(foldersResult.data);
       } else {
-        console.error("Failed to load folders:", foldersResult.error);
-        toast.error("Failed to load folders");
+        toast.error('Failed to load folders');
       }
 
       if (tagsResult.success && tagsResult.data) {
         setTags(tagsResult.data);
-      } else {
-        console.error("Failed to load tags:", tagsResult.error);
       }
     } catch (error) {
-      console.error("Failed to load organization data:", error);
-      toast.error("Failed to load organization data");
+      toast.error('Failed to load organization data');
     } finally {
       setLoading(false);
     }
@@ -70,26 +59,10 @@ export default function FoldersScreen() {
     setRefreshing(false);
   };
 
-  // Filter folders and tags for advanced display
-  const filteredData = useMemo(() => {
-    let filteredFolders = folders;
-    let filteredTags = tags;
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filteredFolders = filteredFolders.filter(
-        (folder) =>
-          folder.name.toLowerCase().includes(query) ||
-          folder.description?.toLowerCase().includes(query)
-      );
-      filteredTags = filteredTags.filter((tag) =>
-        tag.name.toLowerCase().includes(query)
-      );
-    }
-
+  // Sort folders and tags for display
+  const organizedData = useMemo(() => {
     // Sort folders by usage (default first, then by recipe count, then by name)
-    const sortedFolders = filteredFolders.sort((a, b) => {
+    const sortedFolders = folders.sort((a, b) => {
       if (a.is_default !== b.is_default) {
         return a.is_default ? -1 : 1;
       }
@@ -100,7 +73,7 @@ export default function FoldersScreen() {
     });
 
     // Sort tags by usage count
-    const sortedTags = filteredTags.sort((a, b) => {
+    const sortedTags = tags.sort((a, b) => {
       if (a.usage_count !== b.usage_count) {
         return b.usage_count - a.usage_count;
       }
@@ -108,426 +81,229 @@ export default function FoldersScreen() {
     });
 
     return { folders: sortedFolders, tags: sortedTags };
-  }, [folders, tags, searchQuery]);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleFilterPress = () => {
-    // TODO: Implement filter functionality
-    console.log("Filter organization pressed");
-  };
+  }, [folders, tags]);
 
   const handleCreateFolder = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('Create folder - feature coming soon');
-    // TODO: Implement folder creation
+    toast.success('Folder creation coming soon');
   };
 
   const handleFolderPress = (folderId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('Folder details - feature coming soon', folderId);
-    // TODO: Implement folder details view
+    toast.success('Folder details coming soon');
   };
 
   const handleTagPress = (tagName: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('Tag view - feature coming soon', tagName);
-    // TODO: Implement tag filtering view
+    toast.success('Tag filtering coming soon');
   };
 
+  if (loading) {
+    return (
+      <ProfessionalContainer>
+        <ProfessionalHeader title="Organization" />
+        <View style={styles.loadingContainer}>
+          <ProfessionalText variant="body" color="secondary">
+            Loading organization data...
+          </ProfessionalText>
+        </View>
+      </ProfessionalContainer>
+    );
+  }
+
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      {/* Scheduler-style Header for Organization */}
-      <Header
+    <ProfessionalContainer 
+      scrollable 
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={theme.colors.primary}
+        />
+      }
+    >
+      <ProfessionalHeader
         title="Organization"
-        subtitle={`${filteredData.folders.length} folder${
-          filteredData.folders.length === 1 ? "" : "s"
-        } • ${filteredData.tags.length} tag${
-          filteredData.tags.length === 1 ? "" : "s"
-        }`}
-        showBackButton={false}
-        showMenuButton={true}
-        showProfileAvatar={true}
-        showSearchButton={true}
-        onMenuPress={() => console.log("Menu pressed")}
-        onProfilePress={() => console.log("Profile pressed")}
-        onSearchPress={() => console.log("Search pressed")}
-        showTopSpacing={true}
-        rightAction={{
-          icon: "plus",
+        subtitle={`${organizedData.folders.length} folders • ${organizedData.tags.length} tags`}
+        action={{
+          title: 'New Folder',
           onPress: handleCreateFolder,
         }}
       />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
+      {/* Folders Section */}
+      <View style={styles.sectionHeader}>
+        <ProfessionalText variant="label" weight="semibold" color="secondary">
+          FOLDERS
+        </ProfessionalText>
+        <ProfessionalText variant="caption" color="tertiary">
+          {organizedData.folders.length}
+        </ProfessionalText>
+      </View>
+
+      {organizedData.folders.length === 0 ? (
+        <ProfessionalCard variant="outlined">
+          <ProfessionalText variant="body" color="secondary" style={{ textAlign: 'center' }}>
+            Create folders to organize your brewing recipes
+          </ProfessionalText>
+          <ProfessionalButton
+            title="Create Your First Folder"
+            onPress={handleCreateFolder}
+            variant="primary"
+            style={{ marginTop: 16 }}
+            fullWidth
           />
-        }
-      >
-        {/* Search Bar with Filter */}
-        <SearchBar
-          placeholder="Search folders and tags..."
-          onSearch={handleSearch}
-          onFilterPress={handleFilterPress}
-          style={styles.searchSection}
-        />
-
-        <ThemedView style={styles.organizationSection}>
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ThemedText style={{ color: colors.textSecondary }}>
-                Loading organization...
-              </ThemedText>
+        </ProfessionalCard>
+      ) : (
+        organizedData.folders.map((folder) => (
+          <ProfessionalCard
+            key={folder.id}
+            variant="default"
+            onPress={() => handleFolderPress(folder.id)}
+          >
+            <View style={styles.folderHeader}>
+              <View style={{ flex: 1 }}>
+                <View style={styles.folderTitleRow}>
+                  <ProfessionalText variant="h4" weight="semibold">
+                    {folder.name}
+                  </ProfessionalText>
+                  {folder.is_default && (
+                    <View style={styles.defaultBadge}>
+                      <ProfessionalText variant="caption" color="inverse">
+                        DEFAULT
+                      </ProfessionalText>
+                    </View>
+                  )}
+                </View>
+                {folder.description && (
+                  <ProfessionalText variant="caption" color="secondary" style={{ marginTop: 4 }}>
+                    {folder.description}
+                  </ProfessionalText>
+                )}
+              </View>
             </View>
-          ) : (
-            <>
-              {/* Folders Section */}
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                  <ThemedText
-                    type="subtitle"
-                    style={[styles.sectionTitle, { color: colors.text }]}
-                  >
-                    FOLDERS
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.sectionCount,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    {filteredData.folders.length}
-                  </ThemedText>
-                </View>
 
-                {filteredData.folders.length === 0 ? (
-                  <View style={styles.emptyContainer}>
-                    <ThemedText
-                      style={[
-                        styles.emptyText,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      {folders.length === 0
-                        ? "Create folders to organize your brewing recipes"
-                        : "No folders match your search criteria"}
-                    </ThemedText>
-                  </View>
-                ) : (
-                  <View style={styles.organizationGrid}>
-                    {filteredData.folders.map((folder) => (
-                      <TouchableOpacity
-                        key={folder.id}
-                        style={[
-                          styles.advancedFolderCard,
-                          {
-                            backgroundColor: colors.cardBackground,
-                            borderLeftColor: folder.color || colors.primary,
-                          },
-                        ]}
-                        onPress={() => handleFolderPress(folder.id)}
-                      >
-                        {/* Folder header */}
-                        <View style={styles.folderHeader}>
-                          <View style={styles.folderMain}>
-                            <ThemedText
-                              type="defaultSemiBold"
-                              style={[
-                                styles.folderName,
-                                { color: colors.text },
-                              ]}
-                            >
-                              {folder.name}
-                              {folder.is_default && (
-                                <ThemedText
-                                  style={[
-                                    styles.defaultIndicator,
-                                    { color: colors.primary },
-                                  ]}
-                                >
-                                  {" "}
-                                  • DEFAULT
-                                </ThemedText>
-                              )}
-                            </ThemedText>
-                            {folder.description && (
-                              <ThemedText
-                                style={[
-                                  styles.folderDescription,
-                                  { color: colors.textSecondary },
-                                ]}
-                              >
-                                {folder.description}
-                              </ThemedText>
-                            )}
-                          </View>
-                        </View>
-
-                        {/* Folder analytics */}
-                        <View style={styles.folderAnalytics}>
-                          <View style={styles.analyticsItem}>
-                            <ThemedText
-                              style={[
-                                styles.analyticsLabel,
-                                { color: colors.textSecondary },
-                              ]}
-                            >
-                              RECIPES
-                            </ThemedText>
-                            <ThemedText
-                              style={[
-                                styles.analyticsValue,
-                                { color: colors.text },
-                              ]}
-                            >
-                              {folder.brewprints_count || 0}
-                            </ThemedText>
-                          </View>
-
-                          <View style={styles.analyticsItem}>
-                            <ThemedText
-                              style={[
-                                styles.analyticsLabel,
-                                { color: colors.textSecondary },
-                              ]}
-                            >
-                              CREATED
-                            </ThemedText>
-                            <ThemedText
-                              style={[
-                                styles.analyticsValue,
-                                { color: colors.text },
-                              ]}
-                            >
-                              {new Date(folder.created_at).toLocaleDateString()}
-                            </ThemedText>
-                          </View>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
+            <View style={styles.folderStats}>
+              <View style={styles.statItem}>
+                <ProfessionalText variant="caption" color="secondary">
+                  Recipes
+                </ProfessionalText>
+                <ProfessionalText variant="caption" weight="medium">
+                  {folder.brewprints_count || 0}
+                </ProfessionalText>
               </View>
-
-              {/* Tags Section */}
-              <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                  <ThemedText
-                    type="subtitle"
-                    style={[styles.sectionTitle, { color: colors.text }]}
-                  >
-                    TAGS
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.sectionCount,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    {filteredData.tags.length}
-                  </ThemedText>
-                </View>
-
-                {filteredData.tags.length === 0 ? (
-                  <View style={styles.emptyContainer}>
-                    <ThemedText
-                      style={[
-                        styles.emptyText,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      {tags.length === 0
-                        ? "Tags will appear automatically as you create recipes"
-                        : "No tags match your search criteria"}
-                    </ThemedText>
-                  </View>
-                ) : (
-                  <View style={styles.tagsContainer}>
-                    {filteredData.tags.map((tag) => (
-                      <TouchableOpacity
-                        key={tag.id}
-                        style={[
-                          styles.tagCard,
-                          {
-                            backgroundColor: colors.cardBackgroundSecondary,
-                            borderColor: tag.color || colors.border,
-                          },
-                        ]}
-                        onPress={() => handleTagPress(tag.name)}
-                      >
-                        <ThemedText
-                          type="defaultSemiBold"
-                          style={[styles.tagName, { color: colors.text }]}
-                        >
-                          #{tag.name}
-                        </ThemedText>
-                        <ThemedText
-                          style={[
-                            styles.tagUsage,
-                            { color: colors.textSecondary },
-                          ]}
-                        >
-                          {tag.usage_count || 0} recipe
-                          {(tag.usage_count || 0) === 1 ? "" : "s"}
-                        </ThemedText>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
+              
+              <View style={styles.statItem}>
+                <ProfessionalText variant="caption" color="secondary">
+                  Created
+                </ProfessionalText>
+                <ProfessionalText variant="caption" weight="medium">
+                  {new Date(folder.created_at).toLocaleDateString()}
+                </ProfessionalText>
               </View>
-            </>
-          )}
-        </ThemedView>
-      </ScrollView>
-    </ThemedView>
+            </View>
+          </ProfessionalCard>
+        ))
+      )}
+
+      {/* Tags Section */}
+      <View style={[styles.sectionHeader, { marginTop: 32 }]}>
+        <ProfessionalText variant="label" weight="semibold" color="secondary">
+          TAGS
+        </ProfessionalText>
+        <ProfessionalText variant="caption" color="tertiary">
+          {organizedData.tags.length}
+        </ProfessionalText>
+      </View>
+
+      {organizedData.tags.length === 0 ? (
+        <ProfessionalCard variant="outlined">
+          <ProfessionalText variant="body" color="secondary" style={{ textAlign: 'center' }}>
+            Tags will appear automatically as you create recipes
+          </ProfessionalText>
+        </ProfessionalCard>
+      ) : (
+        <ProfessionalCard variant="outlined">
+          <View style={styles.tagsGrid}>
+            {organizedData.tags.map((tag) => (
+              <TouchableOpacity
+                key={tag.id}
+                style={[styles.tagChip, { backgroundColor: theme.colors.gray[100] }]}
+                onPress={() => handleTagPress(tag.name)}
+              >
+                <ProfessionalText variant="caption" weight="medium">
+                  #{tag.name}
+                </ProfessionalText>
+                <ProfessionalText variant="caption" color="secondary">
+                  {tag.usage_count || 0}
+                </ProfessionalText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ProfessionalCard>
+      )}
+    </ProfessionalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  searchSection: {
-    marginTop: 8,
-  },
-  organizationSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
+const styles = {
   loadingContainer: {
-    padding: 40,
-    alignItems: "center",
+    flex: 1,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    padding: 32,
   },
-
-  // Section styles
-  sectionContainer: {
-    marginBottom: 24,
-  },
+  
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
     marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-  },
-  sectionCount: {
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-
-  // Empty state
-  emptyContainer: {
-    padding: 24,
-    alignItems: "center",
-  },
-  emptyText: {
-    textAlign: "center",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-
-  // Organization grid
-  organizationGrid: {
-    gap: 12,
-  },
-
-  // Advanced folder card styles
-  advancedFolderCard: {
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
+  
   folderHeader: {
     marginBottom: 12,
   },
-  folderMain: {
-    flex: 1,
-  },
-  folderName: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  defaultIndicator: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  folderDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-
-  // Folder analytics
-  folderAnalytics: {
-    flexDirection: "row",
-    gap: 16,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
-  },
-  analyticsItem: {
-    flex: 1,
-  },
-  analyticsLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    marginBottom: 2,
-  },
-  analyticsValue: {
-    fontSize: 12,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-  },
-
-  // Tags container
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  
+  folderTitleRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
     gap: 8,
   },
-  tagCard: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    minWidth: 80,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 1,
-    elevation: 1,
+  
+  defaultBadge: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
-  tagName: {
-    fontSize: 13,
-    marginBottom: 2,
+  
+  folderStats: {
+    flexDirection: 'row' as const,
+    gap: 24,
+    paddingTop: 12,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(156, 163, 175, 0.2)',
   },
-  tagUsage: {
-    fontSize: 11,
-    fontVariant: ["tabular-nums"],
+  
+  statItem: {
+    flex: 1,
+    gap: 2,
   },
-});
+  
+  tagsGrid: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+  },
+  
+  tagChip: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+};

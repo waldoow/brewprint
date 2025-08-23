@@ -4,17 +4,17 @@ import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
+  View,
   StyleSheet,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { ProfessionalContainer } from "@/components/ui/professional/Container";
+import { ProfessionalCard } from "@/components/ui/professional/Card";
+import { ProfessionalText } from "@/components/ui/professional/Text";
+import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { ProfessionalInput } from "@/components/ui/professional/Input";
 import {
   Form,
   FormControl,
@@ -83,128 +83,121 @@ export default function SignIn({
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedView style={styles.content}>
-              {/* Header */}
-              <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                  Welcome Back
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  Sign in to your account to continue
-                </ThemedText>
-              </ThemedView>
+    <ProfessionalContainer scrollable>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.header}>
+            <ProfessionalText variant="h1" weight="semibold" style={styles.title}>
+              Welcome Back
+            </ProfessionalText>
+            <ProfessionalText variant="body" color="secondary" style={styles.subtitle}>
+              Sign in to your account to continue
+            </ProfessionalText>
+          </View>
 
-              {/* Form */}
-              <Form {...form}>
-                <ThemedView style={styles.form}>
-                  {/* Email Input */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="email"
-                            placeholder="Enter your email"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Enter your password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Forgot Password */}
-                  <ThemedButton
-                    variant="link"
-                    title="Forgot your password?"
-                    onPress={onForgotPassword}
-                    style={styles.forgotPassword}
-                  />
-
-                  {/* Sign In Button */}
-                  <ThemedButton
-                    title={isLoading ? "Signing In..." : "Sign In"}
-                    onPress={form.handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                    loading={isLoading}
-                    style={styles.signInButton}
-                  />
-                </ThemedView>
-              </Form>
-
-              {/* Sign Up Link */}
-              <ThemedView style={styles.signUpContainer}>
-                <ThemedText style={styles.signUpText}>
-                  Don&apos;t have an account?{" "}
-                </ThemedText>
-                <ThemedButton
-                  variant="link"
-                  title="Sign Up"
-                  onPress={onNavigateToSignUp}
+          {/* Form Card */}
+          <ProfessionalCard variant="default" style={styles.formCard}>
+            <Form {...form}>
+              <View style={styles.form}>
+                {/* Email Input */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Email
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          type="email"
+                          placeholder="Enter your email"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          editable={!isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </ThemedView>
-            </ThemedView>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+
+                {/* Password Input */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <ProfessionalText variant="label" weight="medium">
+                          Password
+                        </ProfessionalText>
+                      </FormLabel>
+                      <FormControl>
+                        <ProfessionalInput
+                          type="password"
+                          placeholder="Enter your password"
+                          value={field.value}
+                          onChangeText={field.onChange}
+                          onBlur={field.onBlur}
+                          editable={!isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Forgot Password */}
+                <ProfessionalButton
+                  variant="ghost"
+                  title="Forgot your password?"
+                  onPress={onForgotPassword}
+                  style={styles.forgotPassword}
+                />
+
+                {/* Sign In Button */}
+                <ProfessionalButton
+                  title="Sign In"
+                  onPress={form.handleSubmit(onSubmit)}
+                  disabled={isLoading}
+                  loading={isLoading}
+                  style={styles.signInButton}
+                />
+              </View>
+            </Form>
+          </ProfessionalCard>
+
+          {/* Sign Up Link */}
+          <View style={styles.signUpContainer}>
+            <ProfessionalText variant="body" color="secondary" style={styles.signUpText}>
+              Don&apos;t have an account?{" "}
+            </ProfessionalText>
+            <ProfessionalButton
+              variant="ghost"
+              title="Sign Up"
+              onPress={onNavigateToSignUp}
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </ProfessionalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
   keyboardView: {
     flex: 1,
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    minHeight: "100%",
-  },
   content: {
+    flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
@@ -218,34 +211,28 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     textAlign: "center",
-    opacity: 0.7,
+  },
+  formCard: {
+    marginBottom: 32,
   },
   form: {
     width: "100%",
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
   forgotPassword: {
     alignSelf: "flex-end",
+    marginTop: 8,
     marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
   },
   signInButton: {
-    marginBottom: 24,
+    marginTop: 8,
   },
   signUpContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 4,
   },
   signUpText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  signUpLink: {
-    fontSize: 14,
+    fontSize: 16,
   },
 });
