@@ -2,11 +2,12 @@ import React, { useCallback, useState } from 'react';
 import { RefreshControl, TouchableOpacity, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BrewprintsService, type Brewprint } from '@/lib/services';
@@ -114,19 +115,19 @@ export default function BrewprintsTab() {
 
   if (isLoading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader title="Brewing Recipes" />
+      <Container>
+        <PageHeader title="Brewing Recipes" />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading recipes...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer 
+    <Container 
       scrollable 
       refreshControl={
         <RefreshControl
@@ -136,19 +137,28 @@ export default function BrewprintsTab() {
         />
       }
     >
-      <ProfessionalHeader
-        title="Brewing Recipes"
+      <Section 
+        title="Your Recipe Collection"
         subtitle={`${filteredBrewprints.length} recipe${
           filteredBrewprints.length === 1 ? '' : 's'
-        } available`}
-        action={{
-          title: 'New Recipe',
-          onPress: handleNewBrewprint,
-        }}
-      />
+        } ready to brew`}
+        spacing="xl"
+      >
+        <Button
+          title="Create New Recipe"
+          variant="secondary"
+          size="lg"
+          fullWidth
+          onPress={handleNewBrewprint}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+        />
+      </Section>
 
-      {/* Status Filter Tabs */}
-      <ProfessionalCard variant="outlined" style={{ marginBottom: 16 }}>
+      <Section 
+        title="Filter by Status"
+        spacing="lg"
+      >
+        <Card variant="elevated" style={{ marginBottom: 16 }}>
         <View style={styles.tabContainer}>
           {[
             { key: 'all', label: `All (${brewprints.length})` },
@@ -169,60 +179,73 @@ export default function BrewprintsTab() {
                 setActiveTab(tab.key);
               }}
             >
-              <ProfessionalText
+              <Text
                 variant="caption"
                 weight="medium"
                 color={activeTab === tab.key ? 'inverse' : 'secondary'}
               >
                 {tab.label}
-              </ProfessionalText>
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
-      </ProfessionalCard>
+        </Card>
+      </Section>
 
       {filteredBrewprints.length === 0 ? (
-        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <ProfessionalText 
-            variant="h4" 
-            weight="semibold" 
-            style={{ textAlign: 'center', marginBottom: 8 }}
-          >
-            {getEmptyMessage().title}
-          </ProfessionalText>
-          <ProfessionalText 
-            variant="body" 
-            color="secondary" 
-            style={{ textAlign: 'center', marginBottom: 24 }}
-          >
-            {getEmptyMessage().description}
-          </ProfessionalText>
-          <ProfessionalButton
-            title="Create Your First Recipe"
-            onPress={handleNewBrewprint}
-            variant="primary"
-            fullWidth
-          />
-        </ProfessionalCard>
+        <Section 
+          title="Start Your Journey"
+          subtitle="Create your first recipe to begin brewing excellence"
+          variant="elevated"
+          spacing="xl"
+        >
+          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
+            <Text 
+              variant="2xl" 
+              weight="bold" 
+              style={{ textAlign: 'center', marginBottom: 12 }}
+            >
+              {getEmptyMessage().title}
+            </Text>
+            <Text 
+              variant="lg" 
+              color="secondary" 
+              style={{ textAlign: 'center', marginBottom: 32 }}
+            >
+              {getEmptyMessage().description}
+            </Text>
+            <Button
+              title="Create Your First Recipe"
+              onPress={handleNewBrewprint}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+          </Card>
+        </Section>
       ) : (
-        <>
+        <Section 
+          title="Your Brewing Arsenal"
+          subtitle="Perfected recipes ready for your next cup"
+          spacing="xl"
+        >
           {filteredBrewprints.map((brewprint) => (
-            <ProfessionalCard
+            <Card
               key={brewprint.id}
               variant="default"
               onPress={() => handleBrewprintPress(brewprint)}
             >
               <View style={styles.recipeHeader}>
                 <View style={{ flex: 1 }}>
-                  <ProfessionalText variant="h4" weight="semibold">
+                  <Text variant="h4" weight="semibold">
                     {brewprint.name}
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" color="secondary">
+                  </Text>
+                  <Text variant="caption" color="secondary">
                     {brewprint.method
                       ? brewprint.method.charAt(0).toUpperCase() +
                         brewprint.method.slice(1).replace('-', ' ')
                       : 'Unknown Method'}
-                  </ProfessionalText>
+                  </Text>
                 </View>
                 
                 <View
@@ -238,36 +261,36 @@ export default function BrewprintsTab() {
                     },
                   ]}
                 >
-                  <ProfessionalText variant="caption" color="inverse">
+                  <Text variant="caption" color="inverse">
                     {brewprint.status?.toUpperCase() || 'DRAFT'}
-                  </ProfessionalText>
+                  </Text>
                 </View>
               </View>
 
               <View style={styles.recipeParams}>
                 <View style={styles.paramRow}>
-                  <ProfessionalText variant="caption" color="secondary">
+                  <Text variant="caption" color="secondary">
                     Coffee Dose
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
+                  </Text>
+                  <Text variant="caption" weight="medium">
                     {brewprint.parameters?.coffee_grams || 'Unknown'}g
-                  </ProfessionalText>
+                  </Text>
                 </View>
                 
                 <View style={styles.paramRow}>
-                  <ProfessionalText variant="caption" color="secondary">
+                  <Text variant="caption" color="secondary">
                     Water Temp
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
+                  </Text>
+                  <Text variant="caption" weight="medium">
                     {brewprint.parameters?.water_temp || 'Unknown'}°C
-                  </ProfessionalText>
+                  </Text>
                 </View>
                 
                 <View style={styles.paramRow}>
-                  <ProfessionalText variant="caption" color="secondary">
+                  <Text variant="caption" color="secondary">
                     Brew Time
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
+                  </Text>
+                  <Text variant="caption" weight="medium">
                     {brewprint.parameters?.total_time
                       ? `${Math.floor(brewprint.parameters.total_time / 60)}:${(
                           brewprint.parameters.total_time % 60
@@ -275,25 +298,25 @@ export default function BrewprintsTab() {
                           .toString()
                           .padStart(2, '0')}`
                       : 'Unknown'}
-                  </ProfessionalText>
+                  </Text>
                 </View>
               </View>
 
               {brewprint.description && (
                 <View style={styles.descriptionContainer}>
-                  <ProfessionalText 
+                  <Text 
                     variant="caption" 
                     color="secondary"
                     style={{ lineHeight: 16 }}
                     numberOfLines={2}
                   >
                     {brewprint.description}
-                  </ProfessionalText>
+                  </Text>
                 </View>
               )}
 
               <View style={styles.actionRow}>
-                <ProfessionalButton
+                <Button
                   title="Start Brewing"
                   variant="primary"
                   size="sm"
@@ -304,7 +327,7 @@ export default function BrewprintsTab() {
                   style={{ flex: 1, marginRight: 8 }}
                 />
                 
-                <ProfessionalButton
+                <Button
                   title="Duplicate"
                   variant="secondary"
                   size="sm"
@@ -331,11 +354,11 @@ export default function BrewprintsTab() {
                   style={{ flex: 1, marginLeft: 8 }}
                 />
               </View>
-            </ProfessionalCard>
+            </Card>
           ))}
-        </>
+        </Section>
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

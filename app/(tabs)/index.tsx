@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalDataCard } from '@/components/ui/professional/DataCard';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { DataCard } from '@/components/ui/DataCard';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { useAuth } from '@/context/AuthContext';
 import { BeansService, type Bean } from '@/lib/services/beans';
 import { BrewprintsService, type Brewprint } from '@/lib/services';
@@ -58,195 +59,207 @@ export default function HomeScreen() {
   const perfectedRecipes = brewprints.filter(r => r.status === 'final').length;
   
   return (
-    <ProfessionalContainer 
+    <Container 
       scrollable 
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <ProfessionalHeader
-        title="Dashboard"
+      <Section 
+        title="Good Morning"
         subtitle={`Welcome back, ${user?.user_metadata?.username || 'Coffee Enthusiast'}`}
-        action={{
-          title: "New Recipe",
-          onPress: () => router.push('/brewprints/new'),
-        }}
-      />
-
-      {/* Brewing Overview */}
-      <ProfessionalDataCard
-        title="Brewing Overview"
-        subtitle="Your coffee brewing statistics"
-        data={[
-          {
-            label: 'Total Brews',
-            value: stats?.total_brews || 0,
-            change: { value: 5, direction: 'up' },
-          },
-          {
-            label: 'Average Rating',
-            value: stats?.average_rating || 0,
-            unit: '/5',
-          },
-          {
-            label: 'Success Rate',
-            value: stats?.success_rate || 0,
-            unit: '%',
-            change: { value: 3, direction: 'up' },
-          },
-        ]}
-        layout="horizontal"
-        variant="elevated"
-      />
-
-      {/* Inventory Status */}
-      <ProfessionalDataCard
-        title="Inventory Status"
-        subtitle="Current coffee bean stock levels"
-        data={[
-          {
-            label: 'Active Beans',
-            value: activeBeans,
-            unit: 'types',
-          },
-          {
-            label: 'Total Stock',
-            value: beans.reduce((sum, bean) => sum + (bean.current_stock || 0), 0),
-            unit: 'g',
-          },
-          {
-            label: 'Low Stock',
-            value: beans.filter(bean => (bean.current_stock || 0) < 100).length,
-            unit: 'types',
-          },
-        ]}
-        layout="horizontal"
-        variant="default"
-      />
-
-      {/* Recipe Development */}
-      <ProfessionalDataCard
-        title="Recipe Development"
-        subtitle="Recipe creation and refinement progress"
-        data={[
-          {
-            label: 'Total Recipes',
-            value: totalRecipes,
-          },
-          {
-            label: 'Perfected',
-            value: perfectedRecipes,
-            change: { value: 2, direction: 'up' },
-          },
-          {
-            label: 'In Development',
-            value: brewprints.filter(r => r.status === 'experimenting').length,
-          },
-          {
-            label: 'Success Rate',
-            value: totalRecipes > 0 ? Math.round((perfectedRecipes / totalRecipes) * 100) : 0,
-            unit: '%',
-          },
-        ]}
-        layout="grid"
-        variant="outlined"
-      />
-
-      {/* Quick Actions */}
-      <ProfessionalCard variant="elevated">
-        <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 12 }}>
-          Quick Actions
-        </ProfessionalText>
-        <ProfessionalText variant="body" color="secondary" style={{ marginBottom: 20 }}>
-          Start brewing or manage your coffee inventory
-        </ProfessionalText>
-        
-        <ProfessionalButton
-          title="Start New Brew"
-          onPress={() => router.push('/brewprints')}
+        spacing="xl"
+      >
+        <Button
+          title="Create New Recipe"
           variant="primary"
+          size="lg"
           fullWidth
-          style={{ marginBottom: 12 }}
+          onPress={() => router.push('/brewprints/new')}
         />
-        
-        <ProfessionalButton
-          title="Manage Beans"
-          onPress={() => router.push('/beans')}
-          variant="secondary"
-          fullWidth
-        />
-      </ProfessionalCard>
+      </Section>
 
-      {/* Recent Activity */}
-      {brewprints.length > 0 && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 12 }}>
-            Recent Recipes
-          </ProfessionalText>
-          <ProfessionalText variant="body" color="secondary" style={{ marginBottom: 16 }}>
-            Your latest brewing experiments
-          </ProfessionalText>
+      <Section 
+        title="Your Brewing Analytics"
+        subtitle="Track your coffee journey with detailed insights"
+        spacing="xl"
+      >
+        <DataCard
+          title="Brewing Overview"
+          subtitle="Your coffee brewing statistics"
+          data={[
+            {
+              label: 'Total Brews',
+              value: stats?.total_brews || 0,
+              change: { value: 5, direction: 'up' },
+            },
+            {
+              label: 'Average Rating',
+              value: stats?.average_rating || 0,
+              unit: '/5',
+            },
+            {
+              label: 'Success Rate',
+              value: stats?.success_rate || 0,
+              unit: '%',
+              change: { value: 3, direction: 'up' },
+            },
+          ]}
+          layout="horizontal"
+          variant="elevated"
+        />
+
+        <DataCard
+          title="Inventory Status"
+          subtitle="Current coffee bean stock levels"
+          data={[
+            {
+              label: 'Active Beans',
+              value: activeBeans,
+              unit: 'types',
+            },
+            {
+              label: 'Total Stock',
+              value: beans.reduce((sum, bean) => sum + (bean.current_stock || 0), 0),
+              unit: 'g',
+            },
+            {
+              label: 'Low Stock',
+              value: beans.filter(bean => (bean.current_stock || 0) < 100).length,
+              unit: 'types',
+            },
+          ]}
+          layout="horizontal"
+          variant="default"
+        />
+
+        <DataCard
+          title="Recipe Development"
+          subtitle="Recipe creation and refinement progress"
+          data={[
+            {
+              label: 'Total Recipes',
+              value: totalRecipes,
+            },
+            {
+              label: 'Perfected',
+              value: perfectedRecipes,
+              change: { value: 2, direction: 'up' },
+            },
+            {
+              label: 'In Development',
+              value: brewprints.filter(r => r.status === 'experimenting').length,
+            },
+            {
+              label: 'Success Rate',
+              value: totalRecipes > 0 ? Math.round((perfectedRecipes / totalRecipes) * 100) : 0,
+              unit: '%',
+            },
+          ]}
+          layout="grid"
+          variant="outlined"
+        />
+      </Section>
+
+      <Section 
+        title="Quick Actions"
+        subtitle="Jump into your brewing workflow"
+        variant="elevated"
+        spacing="xl"
+      >
+        <View style={{ gap: 16 }}>
+          <Button
+            title="Start New Brew"
+            onPress={() => router.push('/brewprints')}
+            variant="primary"
+            size="lg"
+            fullWidth
+          />
           
-          {brewprints.slice(0, 3).map((recipe, index) => (
-            <ProfessionalCard
-              key={recipe.id}
-              variant="outlined"
-              padding="md"
-              onPress={() => router.push(`/brewprints/${recipe.id}`)}
-              style={{ marginBottom: index < 2 ? 12 : 0 }}
-            >
-              <ProfessionalText variant="body" weight="semibold" style={{ marginBottom: 4 }}>
-                {recipe.name}
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary" style={{ marginBottom: 8 }}>
-                {recipe.method?.toUpperCase()} • {recipe.status?.toUpperCase()}
-              </ProfessionalText>
-              
-              {/* Brewing Parameters */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-                <View style={{ flex: 1 }}>
-                  <ProfessionalText variant="caption" color="tertiary">
-                    Coffee
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
-                    {recipe.parameters?.coffee_grams || 'Unknown'}g
-                  </ProfessionalText>
+          <Button
+            title="Manage Bean Inventory"
+            onPress={() => router.push('/beans')}
+            variant="secondary"
+            size="lg"
+            fullWidth
+          />
+        </View>
+      </Section>
+
+      {brewprints.length > 0 && (
+        <Section 
+          title="Recent Creations"
+          subtitle="Your latest brewing experiments and discoveries"
+          variant="elevated"
+          spacing="xl"
+        >
+          <View style={{ gap: 16 }}>
+            {brewprints.slice(0, 3).map((recipe, index) => (
+              <Card
+                key={recipe.id}
+                variant="elevated"
+                padding="lg"
+                onPress={() => router.push(`/brewprints/${recipe.id}`)}
+              >
+                <Text variant="xl" weight="bold" style={{ marginBottom: 4 }}>
+                  {recipe.name}
+                </Text>
+                <Text variant="body" color="secondary" style={{ marginBottom: 16 }}>
+                  {recipe.method?.toUpperCase()} • {recipe.status?.toUpperCase()}
+                </Text>
+                
+                {/* Brewing Parameters */}
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between',
+                  backgroundColor: '#F8F9FA',
+                  padding: 12,
+                  borderRadius: 8,
+                }}>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text variant="caption" color="tertiary">
+                      Coffee
+                    </Text>
+                    <Text variant="body" weight="semibold">
+                      {recipe.parameters?.coffee_grams || 'Unknown'}g
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text variant="caption" color="tertiary">
+                      Water
+                    </Text>
+                    <Text variant="body" weight="semibold">
+                      {recipe.parameters?.water_grams || 'Unknown'}g
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text variant="caption" color="tertiary">
+                      Time
+                    </Text>
+                    <Text variant="body" weight="semibold">
+                      {recipe.parameters?.total_time
+                        ? `${Math.floor(recipe.parameters.total_time / 60)}:${(
+                            recipe.parameters.total_time % 60
+                          )
+                            .toString()
+                            .padStart(2, '0')}`
+                        : 'Unknown'}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text variant="caption" color="tertiary">
+                      Temp
+                    </Text>
+                    <Text variant="body" weight="semibold">
+                      {recipe.parameters?.water_temp || 'Unknown'}°C
+                    </Text>
+                  </View>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <ProfessionalText variant="caption" color="tertiary">
-                    Water
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
-                    {recipe.parameters?.water_grams || 'Unknown'}g
-                  </ProfessionalText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <ProfessionalText variant="caption" color="tertiary">
-                    Time
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
-                    {recipe.parameters?.total_time
-                      ? `${Math.floor(recipe.parameters.total_time / 60)}:${(
-                          recipe.parameters.total_time % 60
-                        )
-                          .toString()
-                          .padStart(2, '0')}`
-                      : 'Unknown'}
-                  </ProfessionalText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <ProfessionalText variant="caption" color="tertiary">
-                    Temp
-                  </ProfessionalText>
-                  <ProfessionalText variant="caption" weight="medium">
-                    {recipe.parameters?.water_temp || 'Unknown'}°C
-                  </ProfessionalText>
-                </View>
-              </View>
-            </ProfessionalCard>
-          ))}
-        </ProfessionalCard>
+              </Card>
+            ))}
+          </View>
+        </Section>
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }

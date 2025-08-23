@@ -155,22 +155,22 @@ Label: 12px, Medium - Form labels, metadata
 ```
 
 #### Layout Principles
-- **Clean Containers**: ProfessionalContainer with minimal styling
+- **Clean Containers**: Container with minimal styling
 - **16px Standard Spacing**: Consistent padding throughout all screens
 - **Minimal Shadows**: Subtle effects only where necessary for hierarchy
-- **Card-Based Architecture**: ProfessionalCard with 8px border radius
+- **Card-Based Architecture**: Card with 8px border radius
 - **Generous White Space**: Emphasis on clarity through spacing
 
 ### Professional Component System
 
 #### Core Professional Components
 
-- **ProfessionalContainer** - Clean, minimal full-screen containers with optional scrolling
-- **ProfessionalHeader** - Consistent headers with title + subtitle + single action button
-- **ProfessionalCard** - Primary content containers with clean styling
-- **ProfessionalText** - Typography system with proper hierarchy and weights
-- **ProfessionalButton** - Clean button variants (primary, outline, ghost, destructive)
-- **ProfessionalInput** - Minimal form inputs with integrated validation
+- **Container** - Clean, minimal full-screen containers with optional scrolling
+- **PageHeader** - Consistent headers with title + subtitle + single action button
+- **Card** - Primary content containers with clean styling
+- **Text** - Typography system with proper hierarchy and weights
+- **Button** - Clean button variants (primary, outline, ghost, destructive)
+- **Input** - Minimal form inputs with integrated validation
 
 #### Data Presentation Strategy
 
@@ -191,37 +191,37 @@ Label: 12px, Medium - Form labels, metadata
 
 The component library follows the professional minimalist design system with emphasis on functionality and data clarity:
 
-### `/components/ui/professional/` - Professional Design Components
+### `/components/ui/` - Professional Design Components
 
 #### Core Professional Components
 
-- **ProfessionalContainer** - Clean, minimal containers with optional scrolling
+- **Container** - Clean, minimal containers with optional scrolling
   - Zero decorative elements
   - Consistent 16px padding
   - Light/dark theme support
 
-- **ProfessionalHeader** - Consistent header pattern across all screens
+- **PageHeader** - Consistent header pattern across all screens
   - Title + subtitle + single action button
   - Clean typography hierarchy
   - No decorative elements
 
-- **ProfessionalCard** - Primary content containers
+- **Card** - Primary content containers
   - Minimal 8px border radius
   - Subtle shadows only where needed
   - Consistent spacing and hierarchy
 
-- **ProfessionalText** - Professional typography system
+- **Text** - Professional typography system
   - 7 variants: h1, h2, h3, h4, body, caption, label
   - 4 weights: normal, medium, semibold, bold
   - 4 color variants: primary, secondary, tertiary, inverse
 
-- **ProfessionalButton** - Clean button system
+- **Button** - Clean button system
   - 4 variants: primary, outline, ghost, destructive
   - 3 sizes: default, large, small
   - Loading states with spinner + text
   - Haptic feedback integration
 
-- **ProfessionalInput** - Minimal form inputs
+- **Input** - Minimal form inputs
   - Integrated validation display
   - Support for text, email, password, number types
   - Clean error states with minimal red accents
@@ -260,12 +260,12 @@ export const SPACING = {
 
 ```typescript
 // Professional design system imports
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
-import { ProfessionalInput } from '@/components/ui/professional/Input';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { getTheme } from '@/constants/ProfessionalDesign';
 
 // Example professional screen implementation
@@ -274,8 +274,8 @@ const MyScreen = () => {
   const theme = getTheme(colorScheme ?? 'light');
   
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <PageHeader
         title="Bean Library"
         subtitle="Coffee bean inventory and tracking"
         action={{
@@ -284,31 +284,31 @@ const MyScreen = () => {
         }}
       />
       
-      <ProfessionalCard variant="default">
-        <ProfessionalText variant="h3" weight="semibold">
+      <Card variant="default">
+        <Text variant="h3" weight="semibold">
           Ethiopian Yirgacheffe
-        </ProfessionalText>
-        <ProfessionalText variant="body" color="secondary">
+        </Text>
+        <Text variant="body" color="secondary">
           Light roast - Floral and citrus notes
-        </ProfessionalText>
+        </Text>
         
         <View style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
-          <ProfessionalText variant="caption" color="secondary">
+          <Text variant="caption" color="secondary">
             Weight: 250g
-          </ProfessionalText>
-          <ProfessionalText variant="caption" color="secondary">
+          </Text>
+          <Text variant="caption" color="secondary">
             Roast Date: 2024-01-15
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalCard>
+      </Card>
       
-      <ProfessionalButton
+      <Button
         title="Add New Bean"
         variant="primary"
         fullWidth
         onPress={handleAddBean}
       />
-    </ProfessionalContainer>
+    </Container>
   );
 };
 ```
@@ -421,9 +421,9 @@ const MyScreen = () => {
 
 #### Professional Interface Standards
 
-- **Header Design**: Use ProfessionalHeader with title + subtitle + single action pattern
-- **Card Layout**: Use ProfessionalCard for all content containers with minimal styling
-- **Form Design**: Use ProfessionalInput with integrated validation, single-column layouts
+- **Header Design**: Use PageHeader with title + subtitle + single action pattern
+- **Card Layout**: Use Card for all content containers with minimal styling
+- **Form Design**: Use Input with integrated validation, single-column layouts
 - **Button Hierarchy**: Primary for main actions, outline for secondary, ghost for tertiary
 - **Information Display**: Use horizontal label-value pairs for efficient space usage
 - **Typography**: Follow strict hierarchy - h1-h4 for headers, body for content, caption for secondary info
@@ -432,7 +432,7 @@ const MyScreen = () => {
 
 - **Authentication**: Always use `useAuth()` hook for authentication state, never access Supabase client directly in components
 - **Error Handling**: Centralize toast notifications in parent components, avoid duplicate error messages
-- **Loading States**: Use ProfessionalButton's built-in loading prop for consistent UX
+- **Loading States**: Use Button's built-in loading prop for consistent UX
 - **Component Styling**: Follow professional design with 16px standard padding and minimal shadows
 - **Coffee Context**: Use precise coffee terminology (weights in grams, temperatures in Celsius, times in seconds)
 - **Data Presentation**: Prioritize clarity and scannability for coffee brewing parameters
@@ -457,7 +457,7 @@ Currently in **Professional Design System Implementation Complete Phase**:
 
 #### ✅ **Professional Design System Complete**
 - ✅ **Complete professional minimalist design system with black/white/gray palette**
-- ✅ **ProfessionalContainer, ProfessionalHeader, ProfessionalCard, ProfessionalText, ProfessionalButton, ProfessionalInput components**
+- ✅ **Container, PageHeader, Card, Text, Button, Input components**
 - ✅ **Professional design tokens in ProfessionalDesign.ts**
 - ✅ **All 39 screens updated to professional design system (Home, Auth, Forms, Details, Brewing, Settings)**
 - ✅ **Consistent professional typography hierarchy and spacing**

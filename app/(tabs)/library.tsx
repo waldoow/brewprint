@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshControl, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BeansService, type Bean } from '@/lib/services/beans';
@@ -119,19 +120,19 @@ export default function LibraryScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader title="Equipment Library" />
+      <Container>
+        <PageHeader title="Equipment Library" />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading inventory...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer 
+    <Container 
       scrollable 
       refreshControl={
         <RefreshControl
@@ -141,78 +142,92 @@ export default function LibraryScreen() {
         />
       }
     >
-      <ProfessionalHeader
+      <Section 
         title="Equipment Library"
-        subtitle={`${currentData.length} ${activeTab}`}
-        action={{
-          title: `Add ${activeTab === 'beans' ? 'Bean' : activeTab === 'brewers' ? 'Brewer' : 'Grinder'}`,
-          onPress: handleAddItem,
-        }}
-      />
+        subtitle={`Manage your coffee brewing arsenal with ${currentData.length} ${activeTab} available`}
+        spacing="xl"
+      >
+        <Button
+          title={`Add New ${activeTab === 'beans' ? 'Bean' : activeTab === 'brewers' ? 'Brewer' : 'Grinder'}`}
+          variant="secondary"
+          size="lg"
+          fullWidth
+          onPress={handleAddItem}
+        />
+      </Section>
 
-      {/* Category Tabs */}
-      <ProfessionalCard variant="outlined" style={{ marginBottom: 16 }}>
-        <View style={styles.tabContainer}>
-          {[
-            { key: 'beans', label: `Beans (${inventoryData.beans.length})` },
-            { key: 'brewers', label: `Brewers (${inventoryData.brewers.length})` },
-            { key: 'grinders', label: `Grinders (${inventoryData.grinders.length})` },
-          ].map((tab) => (
-            <TouchableOpacity
-              key={tab.key}
-              style={[
-                styles.tab,
-                activeTab === tab.key && {
-                  backgroundColor: theme.colors.primary,
-                },
-              ]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setActiveTab(tab.key as 'beans' | 'brewers' | 'grinders');
-              }}
-            >
-              <ProfessionalText
-                variant="caption"
-                weight="medium"
-                color={activeTab === tab.key ? 'inverse' : 'secondary'}
+      <Section 
+        title="Browse Categories"
+        subtitle="Switch between different types of equipment"
+        spacing="lg"
+      >
+        <Card variant="default" style={{ marginBottom: 16 }}>
+          <View style={styles.tabContainer}>
+            {[
+              { key: 'beans', label: `Beans (${inventoryData.beans.length})` },
+              { key: 'brewers', label: `Brewers (${inventoryData.brewers.length})` },
+              { key: 'grinders', label: `Grinders (${inventoryData.grinders.length})` },
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                style={[
+                  styles.tab,
+                  activeTab === tab.key && {
+                    backgroundColor: theme.colors.gray[900],
+                  },
+                ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setActiveTab(tab.key as 'beans' | 'brewers' | 'grinders');
+                }}
               >
-                {tab.label}
-              </ProfessionalText>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ProfessionalCard>
+                <Text
+                  variant="caption"
+                  weight="medium"
+                  color={activeTab === tab.key ? 'inverse' : 'secondary'}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Card>
+      </Section>
 
       {currentData.length === 0 ? (
-        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <ProfessionalText 
-            variant="h4" 
-            weight="semibold" 
-            style={{ textAlign: 'center', marginBottom: 8 }}
-          >
-            No {activeTab}
-          </ProfessionalText>
-          <ProfessionalText 
-            variant="body" 
-            color="secondary" 
-            style={{ textAlign: 'center', marginBottom: 24 }}
-          >
-            {activeTab === 'beans' 
-              ? 'Add your first coffee beans to begin tracking freshness and optimization'
-              : activeTab === 'brewers'
-              ? 'Add your first brewing equipment to begin tracking brewing parameters'
-              : 'Add your first grinder to begin tracking grind profiles and consistency'
-            }
-          </ProfessionalText>
-          <ProfessionalButton
-            title={`Add First ${activeTab === 'beans' ? 'Bean' : activeTab === 'brewers' ? 'Brewer' : 'Grinder'}`}
-            onPress={handleAddItem}
-            variant="primary"
-            fullWidth
-          />
-        </ProfessionalCard>
+        <Section 
+          title={`No ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Found`}
+          subtitle={activeTab === 'beans' 
+            ? 'Add your first coffee beans to begin tracking freshness and optimization'
+            : activeTab === 'brewers'
+            ? 'Add your first brewing equipment to begin tracking brewing parameters'
+            : 'Add your first grinder to begin tracking grind profiles and consistency'
+          }
+          spacing="xl"
+        >
+          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
+            <Text 
+              variant="2xl" 
+              weight="bold" 
+              style={{ textAlign: 'center', marginBottom: 12 }}
+            >
+              {activeTab === 'beans' ? '☕' : activeTab === 'brewers' ? '🫖' : '⚙️'}
+            </Text>
+            <Button
+              title={`Add Your First ${activeTab === 'beans' ? 'Bean' : activeTab === 'brewers' ? 'Brewer' : 'Grinder'}`}
+              onPress={handleAddItem}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+          </Card>
+        </Section>
       ) : (
-        <>
+        <Section 
+          title={`Your ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Collection`}
+          subtitle={`${currentData.length} item${currentData.length === 1 ? '' : 's'} in your brewing arsenal`}
+          spacing="xl"
+        >
           {activeTab === 'beans' ? (
             inventoryData.beans.map((bean) => {
               const freshnessDays = bean.roast_date ? 
@@ -229,122 +244,122 @@ export default function LibraryScreen() {
                 freshnessStatus === 'stale' ? theme.colors.error : theme.colors.gray[400];
 
               return (
-                <ProfessionalCard
+                <Card
                   key={bean.id}
                   variant="default"
                   onPress={() => handleBeanPress(bean.id)}
                 >
                   <View style={styles.itemHeader}>
                     <View style={{ flex: 1 }}>
-                      <ProfessionalText variant="h4" weight="semibold">
+                      <Text variant="h4" weight="semibold">
                         {bean.name}
-                      </ProfessionalText>
-                      <ProfessionalText variant="caption" color="secondary">
+                      </Text>
+                      <Text variant="caption" color="secondary">
                         {bean.supplier || 'Independent Roaster'}
-                      </ProfessionalText>
+                      </Text>
                     </View>
                     
                     <View style={styles.itemStatus}>
                       <View style={[styles.statusBadge, { backgroundColor: freshnessColor }]}>
-                        <ProfessionalText variant="caption" color="inverse">
+                        <Text variant="caption" color="inverse">
                           {freshnessStatus.toUpperCase()}
-                        </ProfessionalText>
+                        </Text>
                       </View>
-                      <ProfessionalText variant="body" weight="semibold" style={{ marginTop: 4 }}>
+                      <Text variant="body" weight="semibold" style={{ marginTop: 4 }}>
                         {bean.remaining_grams || 0}g
-                      </ProfessionalText>
+                      </Text>
                     </View>
                   </View>
 
                   <View style={styles.itemDetails}>
-                    <ProfessionalText variant="caption" color="secondary">
+                    <Text variant="caption" color="secondary">
                       {bean.origin || 'Unknown Origin'} • {bean.roast_level ? bean.roast_level.charAt(0).toUpperCase() + bean.roast_level.slice(1).replace('-', ' ') : 'Unknown Roast'}
-                    </ProfessionalText>
+                    </Text>
                     {freshnessDays !== null && (
-                      <ProfessionalText variant="caption" color="secondary">
+                      <Text variant="caption" color="secondary">
                         {freshnessDays} days post-roast
-                      </ProfessionalText>
+                      </Text>
                     )}
                   </View>
-                </ProfessionalCard>
+                </Card>
               );
             })
           ) : activeTab === 'brewers' ? (
             inventoryData.brewers.map((brewer) => (
-              <ProfessionalCard
+              <Card
                 key={brewer.id}
                 variant="default"
                 onPress={() => handleBrewerPress(brewer.id)}
               >
                 <View style={styles.itemHeader}>
                   <View style={{ flex: 1 }}>
-                    <ProfessionalText variant="h4" weight="semibold">
+                    <Text variant="h4" weight="semibold">
                       {brewer.name}
-                    </ProfessionalText>
-                    <ProfessionalText variant="caption" color="secondary">
+                    </Text>
+                    <Text variant="caption" color="secondary">
                       {brewer.brand ? `${brewer.brand}${brewer.model ? ` ${brewer.model}` : ''}` : brewer.type.toUpperCase()}
-                    </ProfessionalText>
+                    </Text>
                   </View>
                   
                   <View style={[styles.statusBadge, { backgroundColor: theme.colors.success }]}>
-                    <ProfessionalText variant="caption" color="inverse">
+                    <Text variant="caption" color="inverse">
                       ACTIVE
-                    </ProfessionalText>
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.itemDetails}>
-                  <ProfessionalText variant="caption" color="secondary">
+                  <Text variant="caption" color="secondary">
                     {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')} • {brewer.material || 'Standard'}
-                  </ProfessionalText>
+                  </Text>
                   {brewer.capacity_ml && (
-                    <ProfessionalText variant="caption" color="secondary">
+                    <Text variant="caption" color="secondary">
                       {brewer.capacity_ml}ml capacity
-                    </ProfessionalText>
+                    </Text>
                   )}
                 </View>
-              </ProfessionalCard>
+              </Card>
             ))
           ) : (
             inventoryData.grinders.map((grinder) => (
-              <ProfessionalCard
+              <Card
                 key={grinder.id}
                 variant="default"
                 onPress={() => handleGrinderPress(grinder.id)}
               >
                 <View style={styles.itemHeader}>
                   <View style={{ flex: 1 }}>
-                    <ProfessionalText variant="h4" weight="semibold">
+                    <Text variant="h4" weight="semibold">
                       {grinder.name}
-                    </ProfessionalText>
-                    <ProfessionalText variant="caption" color="secondary">
+                    </Text>
+                    <Text variant="caption" color="secondary">
                       {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()}
-                    </ProfessionalText>
+                    </Text>
                   </View>
                   
                   <View style={[styles.statusBadge, { backgroundColor: theme.colors.success }]}>
-                    <ProfessionalText variant="caption" color="inverse">
+                    <Text variant="caption" color="inverse">
                       ACTIVE
-                    </ProfessionalText>
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.itemDetails}>
-                  <ProfessionalText variant="caption" color="secondary">
+                  <Text variant="caption" color="secondary">
                     {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')} • {grinder.burr_material || 'Steel'}
-                  </ProfessionalText>
+                  </Text>
                   {grinder.burr_size && (
-                    <ProfessionalText variant="caption" color="secondary">
+                    <Text variant="caption" color="secondary">
                       {grinder.burr_size}mm burr set
-                    </ProfessionalText>
+                    </Text>
                   )}
                 </View>
-              </ProfessionalCard>
+              </Card>
             ))
           )}
-        </>
+        </Section>
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

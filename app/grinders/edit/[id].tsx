@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
 
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Text } from "@/components/ui/Text";
 import { GrinderForm } from "@/forms/GrinderForm";
 import { GrindersService } from "@/lib/services/grinders";
 
@@ -49,8 +49,8 @@ export default function EditGrinderScreen() {
 
   if (isLoading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Loading..."
           action={{
             title: "Back",
@@ -58,18 +58,18 @@ export default function EditGrinderScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading grinder details...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   if (!grinderData) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Not Found"
           action={{
             title: "Back",
@@ -77,17 +77,17 @@ export default function EditGrinderScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Grinder not found
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="Edit Grinder"
         subtitle="Update grinding equipment"
         action={{
@@ -101,7 +101,7 @@ export default function EditGrinderScreen() {
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

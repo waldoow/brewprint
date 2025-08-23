@@ -1,19 +1,10 @@
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedCollapsible } from "@/components/ui/ThemedCollapsible";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
+// Professional UI Components
+import { Container } from "@/components/ui/Container";
+import { Section } from "@/components/ui/Section";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import {
   BeansService,
   BrewersService,
@@ -23,9 +14,12 @@ import {
   type BrewStep,
 } from "@/lib/services";
 import React, { useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Alert, StyleSheet } from "react-native";
-// No external UUID dependency needed
+import { useFieldArray, useForm } from "react-hook-form";
+import { Alert, View } from "react-native";
+import { toast } from "sonner-native";
+import { useAuth } from "@/context/AuthContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 interface BrewprintFormProps {
   onSuccess: (brewprint: any) => void;
@@ -69,9 +63,9 @@ interface FormData {
 }
 
 const difficultyOptions = [
-  { label: "Facile", value: "1" },
-  { label: "Intermédiaire", value: "2" },
-  { label: "Avancé", value: "3" },
+  { label: "Easy", value: "1" },
+  { label: "Intermediate", value: "2" },
+  { label: "Advanced", value: "3" },
 ];
 
 const methodOptions = [
@@ -88,30 +82,69 @@ const methodOptions = [
 ];
 
 const techniqueOptions = [
-  { label: "Versement circulaire", value: "circular" },
-  { label: "Versement au centre", value: "center-pour" },
-  { label: "Agiter", value: "agitate" },
-  { label: "Versement spirale", value: "spiral" },
+  { label: "Circular Pour", value: "circular" },
+  { label: "Center Pour", value: "center-pour" },
+  { label: "Agitate", value: "agitate" },
+  { label: "Spiral Pour", value: "spiral" },
   { label: "Bloom", value: "bloom" },
   { label: "Immersion", value: "immersion" },
 ];
+
+// Validation schema
+const brewprintFormSchema = z.object({
+  name: z.string().min(1, "Brewprint name is required"),
+  description: z.string().optional(),
+  method: z.string().min(1, "Method is required"),
+  brewer_id: z.string().min(1, "Brewer is required"),
+  bean_id: z.string().min(1, "Bean is required"),
+  grinder_id: z.string().optional(),
+  difficulty: z.string().min(1, "Difficulty is required"),
+  coffee_grams: z.string().min(1, "Coffee amount is required"),
+  water_grams: z.string().min(1, "Water amount is required"),
+  water_temp: z.string().min(1, "Water temperature is required"),
+  grind_setting: z.string().optional(),
+  bloom_time: z.string().optional(),
+  total_time: z.string().optional(),
+  target_tds: z.string().optional(),
+  target_extraction: z.string().optional(),
+  target_strength: z.string().optional(),
+  target_time: z.string().optional(),
+  steps: z.array(z.object({
+    title: z.string().min(1, "Step title is required"),
+    description: z.string().min(1, "Step description is required"),
+    duration: z.string().min(1, "Duration is required"),
+    water_amount: z.string().min(1, "Water amount is required"),
+    technique: z.string().min(1, "Technique is required"),
+    temperature: z.string().optional(),
+  })),
+});
 
 export function BrewprintForm({
   onSuccess,
   onCancel,
   initialData,
 }: BrewprintFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [brewers, setBrewers] = useState<{ label: string; value: string }[]>(
     []
   );
   const [beans, setBeans] = useState<{ label: string; value: string }[]>([]);
   const [grinders, setGrinders] = useState<{ label: string; value: string }[]>([]);
   const [selectedGrinder, setSelectedGrinder] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize form first
-  const form = useForm<FormData>({
+  // Initialize form with validation
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm<FormData>({
+    resolver: zodResolver(brewprintFormSchema),
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
@@ -142,7 +175,7 @@ export function BrewprintForm({
       })) || [
         {
           title: "Bloom",
-          description: "Versement initial pour dégazer le café",
+          description: "Initial pour to degas the coffee",
           duration: "30",
           water_amount: "50",
           technique: "circular",
@@ -157,13 +190,13 @@ export function BrewprintForm({
     append: appendStep,
     remove: removeStep,
   } = useFieldArray({
-    control: form.control,
+    control,
     name: "steps",
   });
 
-  const watchedCoffeeGrams = form.watch("coffee_grams");
-  const watchedWaterGrams = form.watch("water_grams");
-  const watchedGrinderId = form.watch("grinder_id");
+  const watchedCoffeeGrams = watch("coffee_grams");
+  const watchedWaterGrams = watch("water_grams");
+  const watchedGrinderId = watch("grinder_id");
 
   // Load brewers, beans, and grinders
   useEffect(() => {
@@ -220,8 +253,8 @@ export function BrewprintForm({
             setSelectedGrinder(result.data);
             
             // Auto-populate grind setting if grinder has a default and current setting is empty
-            if (result.data.default_setting && !form.getValues("grind_setting")) {
-              form.setValue("grind_setting", result.data.default_setting.toString());
+            if (result.data.default_setting && !getValues("grind_setting")) {
+              setValue("grind_setting", result.data.default_setting.toString());
             }
           }
         } catch (error) {
@@ -233,7 +266,7 @@ export function BrewprintForm({
     };
 
     loadGrinderDetails();
-  }, [watchedGrinderId, form]);
+  }, [watchedGrinderId, setValue, getValues]);
 
   // Calculate ratio automatically
   const calculateRatio = () => {
@@ -247,9 +280,14 @@ export function BrewprintForm({
   };
 
   const onSubmit = async (data: FormData) => {
-    try {
-      setIsSubmitting(true);
+    if (!user?.id) {
+      toast.error("User not authenticated");
+      return;
+    }
 
+    setIsLoading(true);
+
+    try {
       // Convert form data to BrewprintInput format
       const brewprintData: BrewprintInput = {
         name: data.name,
@@ -300,17 +338,18 @@ export function BrewprintForm({
       const result = await BrewprintsService.createBrewprint(brewprintData);
 
       if (result.success && result.data) {
+        toast.success("Brewprint created successfully!");
+        reset();
         onSuccess(result.data);
       } else {
-        Alert.alert(
-          "Erreur",
-          result.error || "Une erreur inconnue s'est produite"
-        );
+        console.error("Error creating brewprint:", result.error);
+        toast.error(result.error || "Failed to create brewprint. Please try again.");
       }
     } catch (error) {
-      Alert.alert("Erreur", "Impossible de créer la recette");
+      console.error("Error creating brewprint:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -325,645 +364,408 @@ export function BrewprintForm({
     });
   };
 
+  const handleCancel = () => {
+    reset();
+    onCancel();
+  };
+
   if (isLoading) {
     return (
-      <ThemedScrollView style={styles.container}>
-        <ThemedView
-          style={[
-            styles.form,
-            { alignItems: "center", justifyContent: "center", flex: 1 },
-          ]}
-        >
-          <ThemedText>Chargement des données...</ThemedText>
-        </ThemedView>
-      </ThemedScrollView>
+      <Container>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
+          <Text variant="body" color="secondary">
+            Loading brewprint data...
+          </Text>
+        </View>
+      </Container>
     );
   }
 
   return (
-    <ThemedScrollView style={styles.container}>
-      <Form {...form}>
-        <ThemedView style={styles.form}>
-          {/* Basic Info Section - Always Visible */}
-          <ThemedView noBackground>
-            <FormField
-              control={form.control}
-              name="name"
-              rules={{ required: "Le nom est requis" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom de la recette</FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      placeholder="Ma recette V60"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+    <Container scrollable>
+      <Section
+        title="Basic Information"
+        subtitle="Recipe details and brewing method"
+        spacing="xl"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Recipe Name"
+              placeholder="My V60 Recipe"
+              value={watch("name")}
+              onChangeText={(value) => setValue("name", value)}
+              error={errors.name?.message}
+              required
             />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optionnel)</FormLabel>
-                  <FormControl>
-                    <ThemedTextArea
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      placeholder="Description de cette recette..."
-                      numberOfLines={3}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <Input
+              label="Description"
+              placeholder="Description of this recipe..."
+              multiline
+              numberOfLines={3}
+              value={watch("description")}
+              onChangeText={(value) => setValue("description", value)}
+              error={errors.description?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="brewer_id"
-              rules={{ required: "Le brewer est requis" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Brewer</FormLabel>
-                  <FormControl>
-                    <ThemedSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={brewers}
-                      placeholder="Sélectionner un brewer"
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Brewing Method *
+              </Text>
+              <View style={styles.selectOptions}>
+                {methodOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("method") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("method", option.value)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
 
-            <FormField
-              control={form.control}
-              name="bean_id"
-              rules={{ required: "Le café est requis" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Café</FormLabel>
-                  <FormControl>
-                    <ThemedSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={beans}
-                      placeholder="Sélectionner un café"
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Difficulty *
+              </Text>
+              <View style={styles.selectOptions}>
+                {difficultyOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("difficulty") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("difficulty", option.value)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </Card>
+      </Section>
 
-            <FormField
-              control={form.control}
-              name="grinder_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Grinder (optionnel)</FormLabel>
-                  <FormControl>
-                    <ThemedSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={grinders}
-                      placeholder="Sélectionner un grinder"
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Section
+        title="Equipment Selection"
+        subtitle="Choose your brewing equipment"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Brewer *
+              </Text>
+              <View style={styles.selectOptions}>
+                {brewers.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("brewer_id") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("brewer_id", option.value)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
 
-            <FormField
-              control={form.control}
-              name="difficulty"
-              rules={{ required: "La difficulté est requise" }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Niveau de difficulté</FormLabel>
-                  <FormControl>
-                    <ThemedSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={difficultyOptions}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </ThemedView>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Coffee Bean *
+              </Text>
+              <View style={styles.selectOptions}>
+                {beans.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("bean_id") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("bean_id", option.value)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
 
-          {/* Parameters Section - Always Visible */}
-          <ThemedView noBackground style={styles.section}>
-            <FormField
-              control={form.control}
-              name="coffee_grams"
-              rules={{
-                required: "La quantité de café est requise",
-                pattern: {
-                  value: /^\d+(\.\d+)?$/,
-                  message: "Veuillez entrer un nombre valide",
-                },
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Café (g)</FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      keyboardType="numeric"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Grinder (Optional)
+              </Text>
+              <View style={styles.selectOptions}>
+                {grinders.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("grinder_id") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("grinder_id", option.value)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </Card>
+      </Section>
 
-            <FormField
-              control={form.control}
-              name="water_grams"
-              rules={{
-                required: "La quantité d'eau est requise",
-                pattern: {
-                  value: /^\d+(\.\d+)?$/,
-                  message: "Veuillez entrer un nombre valide",
-                },
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Eau (g)</FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      keyboardType="numeric"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Section
+        title="Recipe Parameters"
+        subtitle="Brewing ratios and temperatures"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.row}>
+              <Input
+                label="Coffee (g)"
+                placeholder="20"
+                type="number"
+                value={watch("coffee_grams")}
+                onChangeText={(value) => setValue("coffee_grams", value)}
+                error={errors.coffee_grams?.message}
+                style={{ flex: 1, marginRight: 8 }}
+                required
+              />
 
-            <FormField
-              control={form.control}
-              name="water_temp"
-              rules={{
-                required: "La température est requise",
-                pattern: {
-                  value: /^\d+(\.\d+)?$/,
-                  message: "Veuillez entrer un nombre valide",
-                },
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Température (°C)</FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      keyboardType="numeric"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <Input
+                label="Water (g)"
+                placeholder="320"
+                type="number"
+                value={watch("water_grams")}
+                onChangeText={(value) => setValue("water_grams", value)}
+                error={errors.water_grams?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+                required
+              />
+            </View>
 
-            <FormField
-              control={form.control}
-              name="grind_setting"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Réglage mouture 
-                    {selectedGrinder && ` (${selectedGrinder.name})`}
-                  </FormLabel>
-                  <FormControl>
-                    <ThemedInput
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      keyboardType="numeric"
-                      placeholder={
-                        selectedGrinder?.default_setting?.toString() || 
-                        selectedGrinder?.setting_range?.min?.toString() ||
-                        "15"
-                      }
-                    />
-                  </FormControl>
-                  {selectedGrinder?.setting_range && (
-                    <ThemedText style={styles.helperText}>
-                      Range: {selectedGrinder.setting_range.min}-{selectedGrinder.setting_range.max}
-                      {selectedGrinder.default_setting && ` • Default: ${selectedGrinder.default_setting}`}
-                    </ThemedText>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </ThemedView>
+            {calculateRatio() && (
+              <View style={{ alignItems: 'center', marginVertical: 8 }}>
+                <Text variant="body" weight="semibold">
+                  Ratio: {calculateRatio()}
+                </Text>
+              </View>
+            )}
 
-          {calculateRatio() && (
-            <ThemedText style={styles.ratioText}>
-              Ratio: {calculateRatio()}
-            </ThemedText>
-          )}
+            <View style={styles.row}>
+              <Input
+                label="Water Temp (°C)"
+                placeholder="92"
+                type="number"
+                value={watch("water_temp")}
+                onChangeText={(value) => setValue("water_temp", value)}
+                error={errors.water_temp?.message}
+                style={{ flex: 1, marginRight: 8 }}
+                required
+              />
 
-          {/* Steps Section - Always Visible */}
-          <ThemedView noBackground style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>
-              Étapes de préparation
-            </ThemedText>
+              <Input
+                label="Grind Setting"
+                placeholder="15"
+                type="number"
+                value={watch("grind_setting")}
+                onChangeText={(value) => setValue("grind_setting", value)}
+                error={errors.grind_setting?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
+
+            <View style={styles.row}>
+              <Input
+                label="Bloom Time (s)"
+                placeholder="30"
+                type="number"
+                value={watch("bloom_time")}
+                onChangeText={(value) => setValue("bloom_time", value)}
+                error={errors.bloom_time?.message}
+                style={{ flex: 1, marginRight: 8 }}
+              />
+
+              <Input
+                label="Total Time (s)"
+                placeholder="240"
+                type="number"
+                value={watch("total_time")}
+                onChangeText={(value) => setValue("total_time", value)}
+                error={errors.total_time?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Brewing Steps"
+        subtitle="Step-by-step brewing instructions"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
             {stepFields.map((field, index) => (
-              <ThemedView key={field.id} style={styles.stepCard}>
-                <ThemedView noBackground style={styles.stepHeader}>
-                  <ThemedText style={styles.stepNumber}>
-                    Étape {index + 1}
-                  </ThemedText>
+              <View key={field.id} style={styles.stepCard}>
+                <View style={styles.stepHeader}>
+                  <Text variant="body" weight="semibold">
+                    Step {index + 1}
+                  </Text>
                   {stepFields.length > 1 && (
-                    <ThemedButton
-                      title="Supprimer"
-                      variant="destructive"
+                    <Button
+                      title="Remove"
+                      variant="secondary"
                       size="sm"
                       onPress={() => removeStep(index)}
                     />
                   )}
-                </ThemedView>
+                </View>
 
-                <Controller
-                  control={form.control}
-                  name={`steps.${index}.title`}
-                  rules={{ required: "Le titre est requis" }}
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label="Titre de l'étape"
-                      value={value}
-                      onChangeText={onChange}
-                      error={
-                        form.formState.errors.steps?.[index]?.title?.message
-                      }
-                      placeholder="Bloom, Premier versement, etc."
-                    />
-                  )}
+                <Input
+                  label="Title"
+                  placeholder="Bloom"
+                  value={watch(`steps.${index}.title`)}
+                  onChangeText={(value) => setValue(`steps.${index}.title`, value)}
+                  error={errors.steps?.[index]?.title?.message}
+                  required
                 />
 
-                <Controller
-                  control={form.control}
-                  name={`steps.${index}.technique`}
-                  rules={{ required: "La technique est requise" }}
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedSelect
-                      label="Technique"
-                      value={value}
-                      onValueChange={onChange}
-                      options={techniqueOptions}
-                      error={
-                        form.formState.errors.steps?.[index]?.technique?.message
-                      }
-                    />
-                  )}
+                <Input
+                  label="Description"
+                  placeholder="Initial pour to degas the coffee"
+                  multiline
+                  numberOfLines={2}
+                  value={watch(`steps.${index}.description`)}
+                  onChangeText={(value) => setValue(`steps.${index}.description`, value)}
+                  error={errors.steps?.[index]?.description?.message}
+                  required
                 />
 
-                <Controller
-                  control={form.control}
-                  name={`steps.${index}.description`}
-                  rules={{ required: "La description est requise" }}
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedTextArea
-                      label="Description"
-                      value={value}
-                      onChangeText={onChange}
-                      error={
-                        form.formState.errors.steps?.[index]?.description
-                          ?.message
-                      }
-                      placeholder="Décrivez cette étape..."
-                      numberOfLines={2}
-                    />
-                  )}
-                />
-
-                <ThemedView noBackground style={styles.row}>
-                  <Controller
-                    control={form.control}
-                    name={`steps.${index}.duration`}
-                    rules={{
-                      required: "La durée est requise",
-                      pattern: {
-                        value: /^\d+(\.\d+)?$/,
-                        message: "Nombre valide requis",
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <ThemedInput
-                        label="Durée (s)"
-                        value={value}
-                        onChangeText={onChange}
-                        error={
-                          form.formState.errors.steps?.[index]?.duration
-                            ?.message
-                        }
-                        keyboardType="numeric"
-                        containerStyle={styles.halfWidth}
-                      />
-                    )}
+                <View style={styles.row}>
+                  <Input
+                    label="Duration (s)"
+                    placeholder="30"
+                    type="number"
+                    value={watch(`steps.${index}.duration`)}
+                    onChangeText={(value) => setValue(`steps.${index}.duration`, value)}
+                    error={errors.steps?.[index]?.duration?.message}
+                    style={{ flex: 1, marginRight: 8 }}
+                    required
                   />
 
-                  <Controller
-                    control={form.control}
-                    name={`steps.${index}.water_amount`}
-                    rules={{
-                      required: "La quantité d'eau est requise",
-                      pattern: {
-                        value: /^\d+(\.\d+)?$/,
-                        message: "Nombre valide requis",
-                      },
-                    }}
-                    render={({ field: { onChange, value } }) => (
-                      <ThemedInput
-                        label="Eau (g)"
-                        value={value}
-                        onChangeText={onChange}
-                        error={
-                          form.formState.errors.steps?.[index]?.water_amount
-                            ?.message
-                        }
-                        keyboardType="numeric"
-                        containerStyle={styles.halfWidth}
-                      />
-                    )}
+                  <Input
+                    label="Water (g)"
+                    placeholder="50"
+                    type="number"
+                    value={watch(`steps.${index}.water_amount`)}
+                    onChangeText={(value) => setValue(`steps.${index}.water_amount`, value)}
+                    error={errors.steps?.[index]?.water_amount?.message}
+                    style={{ flex: 1, marginLeft: 8 }}
+                    required
                   />
-                </ThemedView>
-              </ThemedView>
+                </View>
+
+                <View style={styles.selectField}>
+                  <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                    Technique *
+                  </Text>
+                  <View style={styles.selectOptions}>
+                    {techniqueOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        title={option.label}
+                        variant={watch(`steps.${index}.technique`) === option.value ? "primary" : "secondary"}
+                        size="sm"
+                        onPress={() => setValue(`steps.${index}.technique`, option.value)}
+                        style={styles.smallOptionButton}
+                      />
+                    ))}
+                  </View>
+                </View>
+              </View>
             ))}
 
-            <ThemedButton
-              title="Ajouter une étape"
-              variant="outline"
+            <Button
+              title="Add Step"
+              variant="secondary"
               onPress={addStep}
+              style={{ marginTop: 8 }}
             />
-          </ThemedView>
+          </View>
+        </Card>
+      </Section>
 
-          {/* Advanced Optional Fields - Collapsible */}
-          <ThemedCollapsible title="Options avancées">
-            <ThemedView noBackground style={styles.section}>
-              {/* Optional Brewing Parameters */}
-
-              <FormField
-                control={form.control}
-                name="bloom_time"
-                render={({ field }) => (
-                  <FormItem style={styles.thirdWidth}>
-                    <FormLabel>Temps de bloom (s)</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        keyboardType="numeric"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="total_time"
-                render={({ field }) => (
-                  <FormItem style={styles.thirdWidth}>
-                    <FormLabel>Temps total (s)</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        keyboardType="numeric"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Target Metrics */}
-              <ThemedText style={styles.subSectionTitle}>
-                Objectifs de mesures
-              </ThemedText>
-              <ThemedView noBackground style={styles.row}>
-                <Controller
-                  control={form.control}
-                  name="target_tds"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label="TDS cible (%)"
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                      containerStyle={styles.halfWidth}
-                    />
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="target_extraction"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label="Extraction cible (%)"
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                      containerStyle={styles.halfWidth}
-                    />
-                  )}
-                />
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.row}>
-                <Controller
-                  control={form.control}
-                  name="target_strength"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label="Force cible (mg/ml)"
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                      containerStyle={styles.halfWidth}
-                    />
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="target_time"
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label="Temps cible (s)"
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                      containerStyle={styles.halfWidth}
-                    />
-                  )}
-                />
-              </ThemedView>
-
-              {/* Step-specific temperatures */}
-              <ThemedText style={styles.subSectionTitle}>
-                Températures spécifiques par étape
-              </ThemedText>
-              {stepFields.map((field, index) => (
-                <Controller
-                  key={field.id}
-                  control={form.control}
-                  name={`steps.${index}.temperature`}
-                  render={({ field: { onChange, value } }) => (
-                    <ThemedInput
-                      label={`Température étape ${index + 1} (°C)`}
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                    />
-                  )}
-                />
-              ))}
-            </ThemedView>
-          </ThemedCollapsible>
-
-          {/* Action Buttons */}
-          <ThemedView noBackground style={styles.actions}>
-            <ThemedButton
-              title="Annuler"
-              variant="outline"
-              onPress={onCancel}
-              style={styles.actionButton}
-            />
-
-            <ThemedButton
-              title={initialData ? "Dupliquer la recette" : "Créer la recette"}
-              onPress={form.handleSubmit(onSubmit)}
-              loading={isSubmitting}
-              style={styles.actionButton}
-            />
-          </ThemedView>
-        </ThemedView>
-      </Form>
-    </ThemedScrollView>
+      <Section
+        title="Actions"
+        subtitle="Save or cancel your changes"
+        spacing="xl"
+      >
+        <View style={styles.actions}>
+          <Button
+            title={initialData ? "Duplicate Recipe" : "Create Recipe"}
+            onPress={handleSubmit(onSubmit)}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            disabled={isLoading}
+          />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onPress={handleCancel}
+            disabled={isLoading}
+          />
+        </View>
+      </Section>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  // Professional Coffee Form Design
-  container: {
-    flex: 1,
-  },
-  form: {
-    paddingBottom: 20, // Reduced from 40 to 20
-  },
-  section: {
-    gap: 10, // Reduced from 20 to 10
-    paddingTop: 6, // Reduced from 12 to 6
+const styles = {
+  fieldGroup: {
+    gap: 16,
   },
   row: {
-    flexDirection: "row",
-    gap: 8, // Reduced from 16 to 8
-    width: "100%",
+    flexDirection: 'row' as const,
   },
-  halfWidth: {
-    flex: 1,
-    minWidth: 0,
+  selectField: {
+    gap: 8,
   },
-  thirdWidth: {
-    flex: 1,
+  selectLabel: {
+    marginBottom: 4,
   },
-
-  // Professional Coffee Ratio Display
-  ratioText: {
-    fontSize: 15, // Slightly larger
-    fontWeight: "600",
-    textAlign: "center",
-    opacity: 0.85, // Higher opacity for better readability
-    marginTop: -4, // Adjusted positioning
-    marginBottom: 6, // Reduced from 12 to 6
-    letterSpacing: 0.2,
+  selectOptions: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
   },
-
-  // Professional Step Card Design
+  optionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  smallOptionButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
   stepCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.03)", // Slightly more visible
-    borderRadius: 12, // More rounded for modern look
-    padding: 10, // Reduced from 20 to 10
-    gap: 8, // Reduced from 16 to 8
-    marginBottom: 8, // Reduced from 16 to 8
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    padding: 16,
+    borderRadius: 8,
+    gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)", // Subtle border
+    borderColor: '#E1E5E9',
   },
   stepHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 2, // Reduced from 4 to 2
-  },
-  stepNumber: {
-    fontSize: 15, // Slightly larger
-    fontWeight: "600",
-    letterSpacing: 0.1,
-  },
-
-  // Professional Section Titles
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
-    letterSpacing: 0.2,
-  },
-  subSectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 8,
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
-    letterSpacing: 0.1,
-    opacity: 0.9,
   },
-
-  // Professional Action Button Layout
   actions: {
-    flexDirection: "row",
-    gap: 8, // Reduced from 16 to 8
-    marginTop: 16, // Reduced from 32 to 16
-    paddingHorizontal: 4, // Added horizontal padding
+    gap: 12,
   },
-  actionButton: {
-    flex: 1,
-  },
-
-  // Helper text for grind settings
-  helperText: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginTop: 4,
-    lineHeight: 16,
-  },
-});
+};

@@ -1,10 +1,11 @@
 import React from 'react';
 import { router } from 'expo-router';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { useAuth } from '@/context/AuthContext';
 import { Alert } from 'react-native';
 
@@ -85,72 +86,57 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
-        title="Settings"
-        subtitle="Manage your account and preferences"
+    <Container scrollable>
+      <Section 
+        title="Account Settings"
+        subtitle={`Manage your preferences, ${user?.user_metadata?.username || 'Coffee Enthusiast'}`}
+        spacing="xl"
       />
 
       {settingsSections.map((section, sectionIndex) => (
-        <ProfessionalCard key={sectionIndex} variant="default">
-          <ProfessionalText 
-            variant="h4" 
-            weight="semibold" 
-            style={{ marginBottom: 16 }}
-          >
-            {section.title}
-          </ProfessionalText>
-
+        <Section
+          key={sectionIndex}
+          title={section.title}
+          variant="default"
+          spacing="lg"
+        >
           {section.items.map((item, itemIndex) => (
-            <ProfessionalCard
+            <Card
               key={itemIndex}
-              variant="outlined"
-              padding="sm"
+              variant="default"
               onPress={item.onPress}
               style={{ 
-                marginBottom: itemIndex < section.items.length - 1 ? 8 : 0,
-                backgroundColor: 'transparent',
+                marginBottom: itemIndex < section.items.length - 1 ? 12 : 0,
               }}
             >
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 {item.label}
-              </ProfessionalText>
-              <ProfessionalText 
+              </Text>
+              <Text 
                 variant="caption" 
                 color="secondary"
-                style={{ marginTop: 2 }}
+                style={{ marginTop: 4 }}
               >
                 {item.value}
-              </ProfessionalText>
-            </ProfessionalCard>
+              </Text>
+            </Card>
           ))}
-        </ProfessionalCard>
+        </Section>
       ))}
 
-      {/* Sign Out */}
-      <ProfessionalCard variant="outlined">
-        <ProfessionalText 
-          variant="h4" 
-          weight="semibold" 
-          style={{ marginBottom: 12 }}
-        >
-          Account Actions
-        </ProfessionalText>
-        <ProfessionalText 
-          variant="body" 
-          color="secondary" 
-          style={{ marginBottom: 20 }}
-        >
-          Manage your account session
-        </ProfessionalText>
-        
-        <ProfessionalButton
+      <Section 
+        title="Account Actions"
+        subtitle="Manage your account session and data"
+        spacing="xl"
+      >
+        <Button
           title="Sign Out"
           onPress={handleSignOut}
-          variant="destructive"
+          variant="secondary"
+          size="lg"
           fullWidth
         />
-      </ProfessionalCard>
-    </ProfessionalContainer>
+      </Section>
+    </Container>
   );
 }

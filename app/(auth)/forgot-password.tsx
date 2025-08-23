@@ -20,11 +20,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
-import { ProfessionalButton } from "@/components/ui/professional/Button";
-import { ProfessionalCard } from "@/components/ui/professional/Card";
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalInput } from "@/components/ui/professional/Input";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Container } from "@/components/ui/Container";
+import { Input } from "@/components/ui/Input";
+import { Text } from "@/components/ui/Text";
+import { Section } from "@/components/ui/Section";
 import { getTheme } from "@/constants/ProfessionalDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -91,34 +92,28 @@ export default function ForgotPassword({
   const theme = getTheme(colorScheme ?? "light");
 
   return (
-    <ProfessionalContainer scrollable>
+    <Container scrollable>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <ProfessionalText
-              variant="h1"
-              weight="semibold"
-              style={styles.title}
-            >
-              {emailSent ? "Check Your Email" : "Forgot Password"}
-            </ProfessionalText>
-            <ProfessionalText
-              variant="body"
-              color="secondary"
-              style={styles.subtitle}
-            >
-              {emailSent
-                ? `We've sent password reset instructions to your email address.`
-                : "Enter your email address and we'll send you instructions to reset your password."}
-            </ProfessionalText>
-          </View>
+          <Section 
+            title={emailSent ? "Check Your Email" : "Password Recovery"}
+            subtitle={emailSent
+              ? "We've sent password reset instructions to your email address"
+              : "Enter your email to reset your password and get back to brewing"}
+            variant="accent"
+            spacing="xl"
+            style={{ marginBottom: 32 }}
+          />
 
-          {/* Form Card */}
-          <ProfessionalCard variant="default" style={styles.formCard}>
+          <Section 
+            title={emailSent ? "Email Sent" : "Reset Password"}
+            variant="elevated"
+            spacing="lg"
+          >
+            <Card variant="elevated" style={styles.formCard}>
             <Form {...form}>
               <View style={styles.form}>
                 {!emailSent ? (
@@ -130,12 +125,12 @@ export default function ForgotPassword({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            <ProfessionalText variant="label" weight="medium">
+                            <Text variant="label" weight="medium">
                               Email
-                            </ProfessionalText>
+                            </Text>
                           </FormLabel>
                           <FormControl>
-                            <ProfessionalInput
+                            <Input
                               type="email"
                               placeholder="Enter your email"
                               value={field.value}
@@ -150,7 +145,7 @@ export default function ForgotPassword({
                     />
 
                     {/* Reset Password Button */}
-                    <ProfessionalButton
+                    <Button
                       title="Send Reset Instructions"
                       onPress={form.handleSubmit(onSubmit)}
                       disabled={isLoading}
@@ -162,26 +157,25 @@ export default function ForgotPassword({
                   <View style={styles.emailSentContainer}>
                     {/* Success Message */}
                     <View style={styles.successMessage}>
-                      <ProfessionalText
-                        variant="h2"
+                      <Text
+                        variant="3xl"
                         style={styles.checkEmailText}
                       >
                         📧
-                      </ProfessionalText>
-                      <ProfessionalText
+                      </Text>
+                      <Text
                         variant="body"
                         color="secondary"
                         style={styles.instructionsText}
                       >
-                        If an account with that email exists, you&apos;ll
-                        receive password reset instructions shortly.
-                      </ProfessionalText>
+                        If an account with that email exists, you'll receive password reset instructions shortly.
+                      </Text>
                     </View>
 
                     {/* Resend Email Button */}
-                    <ProfessionalButton
-                      variant="secondary"
+                    <Button
                       title="Resend Email"
+                      variant="secondary"
                       onPress={handleResendEmail}
                       disabled={isLoading}
                       loading={isLoading}
@@ -191,28 +185,27 @@ export default function ForgotPassword({
                 )}
               </View>
             </Form>
-          </ProfessionalCard>
+            </Card>
+          </Section>
 
-          {/* Back to Sign In Link */}
-          <View style={styles.backToSignInContainer}>
-            <TouchableOpacity
+          <Section 
+            title="Ready to Sign In?"
+            subtitle="Return to the sign-in page when you're ready"
+            variant="accent"
+            spacing="lg"
+          >
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
+              title="Back to Sign In"
               onPress={onNavigateToSignIn}
-              disabled={isLoading}
-              style={styles.backToSignInButton}
-            >
-              <ArrowLeft size={16} color={theme.colors.gray[600]} />
-              <ProfessionalText
-                variant="body"
-                color="secondary"
-                style={styles.backToSignInText}
-              >
-                Back to Sign In
-              </ProfessionalText>
-            </TouchableOpacity>
-          </View>
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+            />
+          </Section>
         </View>
       </KeyboardAvoidingView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

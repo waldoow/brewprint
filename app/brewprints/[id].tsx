@@ -1,8 +1,9 @@
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { BrewprintsService, type Brewprint } from "@/lib/services";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -331,8 +332,8 @@ Créé avec Brewprint ☕
 
   if (isLoading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Loading..."
           action={{
             title: "Back",
@@ -340,18 +341,18 @@ Créé avec Brewprint ☕
           }}
         />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading recipe...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   if (!brewprint) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Error"
           action={{
             title: "Back",
@@ -359,27 +360,38 @@ Créé avec Brewprint ☕
           }}
         />
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Recipe not found
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <Section 
         title={brewprint.name}
-        subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version}`}
-        action={{
-          title: "Actions",
-          onPress: showActionSheet,
-        }}
-      />
+        subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version} • Ready to brew`}
+        variant="accent"
+        spacing="xl"
+      >
+        <Button
+          title="Recipe Actions"
+          variant="secondary"
+          size="lg"
+          fullWidth
+          onPress={showActionSheet}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+        />
+      </Section>
 
-      {/* Status and Actions */}
-      <ProfessionalCard variant="elevated" style={{ marginBottom: theme.spacing.lg }}>
+      <Section 
+        title="Recipe Status"
+        subtitle="Current state and quick actions"
+        spacing="lg"
+      >
+        <Card variant="elevated" style={{ marginBottom: theme.spacing.lg }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
           <View style={{
             backgroundColor: brewprint.status === 'final'
@@ -391,187 +403,193 @@ Créé avec Brewprint ☕
             paddingVertical: 4,
             borderRadius: 12,
           }}>
-            <ProfessionalText variant="caption" color="inverse">
+            <Text variant="caption" color="inverse">
               {brewprint.status === 'final'
                 ? 'FINAL'
                 : brewprint.status === 'archived'
                 ? 'ARCHIVED'
                 : 'EXPERIMENT'}
-            </ProfessionalText>
+            </Text>
           </View>
           {typeof brewprint.rating === 'number' && (
-            <ProfessionalText variant="body" weight="semibold">
+            <Text variant="body" weight="semibold">
               {brewprint.rating}/5 ★
-            </ProfessionalText>
+            </Text>
           )}
         </View>
         
         <View style={{ flexDirection: 'row', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
-          <ProfessionalButton
+          <Button
             title="Start Brewing"
             variant="primary"
             onPress={handleStartBrewing}
             style={{ flex: 1 }}
           />
-          <ProfessionalButton
+          <Button
             title="Share"
             variant="secondary"
             onPress={handleShare}
             style={{ flex: 1 }}
           />
         </View>
-      </ProfessionalCard>
+      </Card>
 
       {/* Parameters */}
-      <ProfessionalCard variant="default">
-        <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: theme.spacing.md }}>
+      <Card variant="default">
+        <Text variant="h4" weight="semibold" style={{ marginBottom: theme.spacing.md }}>
           Parameters
-        </ProfessionalText>
+        </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.md }}>
           <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
             <Coffee size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
-            <ProfessionalText variant="caption" color="tertiary">
+            <Text variant="caption" color="tertiary">
               Coffee
-            </ProfessionalText>
-            <ProfessionalText variant="body" weight="semibold">
+            </Text>
+            <Text variant="body" weight="semibold">
               {brewprint.parameters.coffee_grams}g
-            </ProfessionalText>
+            </Text>
           </View>
 
           <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
             <Droplets size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
-            <ProfessionalText variant="caption" color="tertiary">
+            <Text variant="caption" color="tertiary">
               Water
-            </ProfessionalText>
-            <ProfessionalText variant="body" weight="semibold">
+            </Text>
+            <Text variant="body" weight="semibold">
               {brewprint.parameters.water_grams}g
-            </ProfessionalText>
+            </Text>
           </View>
 
           <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
-            <ProfessionalText variant="caption" color="tertiary">
+            <Text variant="caption" color="tertiary">
               Ratio
-            </ProfessionalText>
-            <ProfessionalText variant="body" weight="semibold">
+            </Text>
+            <Text variant="body" weight="semibold">
               1:{(
                 brewprint.parameters.water_grams /
                 brewprint.parameters.coffee_grams
               ).toFixed(1)}
-            </ProfessionalText>
+            </Text>
           </View>
 
           <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
             <Thermometer size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
-            <ProfessionalText variant="caption" color="tertiary">
+            <Text variant="caption" color="tertiary">
               Temperature
-            </ProfessionalText>
-            <ProfessionalText variant="body" weight="semibold">
+            </Text>
+            <Text variant="body" weight="semibold">
               {brewprint.parameters.water_temp}°C
-            </ProfessionalText>
+            </Text>
           </View>
 
           {brewprint.parameters.grind_setting && (
             <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
               <SlidersHorizontal size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
-              <ProfessionalText variant="caption" color="tertiary">
+              <Text variant="caption" color="tertiary">
                 Grind
-              </ProfessionalText>
-              <ProfessionalText variant="body" weight="semibold">
+              </Text>
+              <Text variant="body" weight="semibold">
                 {brewprint.parameters.grind_setting}
-              </ProfessionalText>
+              </Text>
             </View>
           )}
 
           {brewprint.parameters.total_time && (
             <View style={{ width: '48%', backgroundColor: theme.colors.surface, padding: theme.spacing.md, borderRadius: theme.radius.md, borderWidth: 1, borderColor: theme.colors.borderSubtle }}>
               <TimerIcon size={18} color={theme.colors.gray[500]} style={{ marginBottom: theme.spacing.xs }} />
-              <ProfessionalText variant="caption" color="tertiary">
+              <Text variant="caption" color="tertiary">
                 Time
-              </ProfessionalText>
-              <ProfessionalText variant="body" weight="semibold">
+              </Text>
+              <Text variant="body" weight="semibold">
                 {Math.floor(brewprint.parameters.total_time / 60)}:
                 {String(brewprint.parameters.total_time % 60).padStart(
                   2,
                   "0"
                 )}
-              </ProfessionalText>
+              </Text>
             </View>
           )}
         </View>
-      </ProfessionalCard>
+      </Card>
+
+      </Section>
 
       {/* Steps */}
       {brewprint.steps && brewprint.steps.length > 0 && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: theme.spacing.md }}>
-            Brewing Steps
-          </ProfessionalText>
-          <View style={{ gap: theme.spacing.lg }}>
-            {brewprint.steps.map((step, index) => (
-              <View key={index} style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-                <View style={{ alignItems: 'center' }}>
-                  <View style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 12,
-                    backgroundColor: theme.colors.gray[900],
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <ProfessionalText variant="caption" color="inverse">
-                      {index + 1}
-                    </ProfessionalText>
-                  </View>
-                  {index < brewprint.steps.length - 1 && (
+        <Section
+          title="Brewing Steps"
+          subtitle="Step-by-step brewing instructions"
+          variant="elevated"
+          spacing="lg"
+        >
+          <Card variant="elevated">
+            <View style={{ gap: theme.spacing.lg }}>
+              {brewprint.steps.map((step, index) => (
+                <View key={index} style={{ flexDirection: 'row', gap: theme.spacing.md }}>
+                  <View style={{ alignItems: 'center' }}>
                     <View style={{
-                      width: 2,
-                      flex: 1,
-                      backgroundColor: theme.colors.borderSubtle,
-                      marginTop: theme.spacing.xs,
-                      marginBottom: theme.spacing.sm,
-                    }} />
-                  )}
-                </View>
-
-                <View style={{ flex: 1, paddingBottom: theme.spacing.md }}>
-                  <ProfessionalText variant="body">
-                    {step.description}
-                  </ProfessionalText>
-                  {(step.duration || step.water_amount) && (
-                    <View style={{ flexDirection: 'row', gap: theme.spacing.sm, marginTop: theme.spacing.xs }}>
-                      {step.duration && (
-                        <View style={{
-                          backgroundColor: theme.colors.surface,
-                          paddingHorizontal: theme.spacing.sm,
-                          paddingVertical: 2,
-                          borderRadius: 4,
-                        }}>
-                          <ProfessionalText variant="caption" color="secondary">
-                            {step.duration}s
-                          </ProfessionalText>
-                        </View>
-                      )}
-                      {step.water_amount && (
-                        <View style={{
-                          backgroundColor: theme.colors.surface,
-                          paddingHorizontal: theme.spacing.sm,
-                          paddingVertical: 2,
-                          borderRadius: 4,
-                        }}>
-                          <ProfessionalText variant="caption" color="secondary">
-                            {step.water_amount}g
-                          </ProfessionalText>
-                        </View>
-                      )}
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: theme.colors.gray[900],
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Text variant="caption" color="inverse">
+                        {index + 1}
+                      </Text>
                     </View>
-                  )}
+                    {index < brewprint.steps.length - 1 && (
+                      <View style={{
+                        width: 2,
+                        flex: 1,
+                        backgroundColor: theme.colors.borderSubtle,
+                        marginTop: theme.spacing.xs,
+                        marginBottom: theme.spacing.sm,
+                      }} />
+                    )}
+                  </View>
+
+                  <View style={{ flex: 1, paddingBottom: theme.spacing.md }}>
+                    <Text variant="body">
+                      {step.description}
+                    </Text>
+                    {(step.duration || step.water_amount) && (
+                      <View style={{ flexDirection: 'row', gap: theme.spacing.sm, marginTop: theme.spacing.xs }}>
+                        {step.duration && (
+                          <View style={{
+                            backgroundColor: theme.colors.surface,
+                            paddingHorizontal: theme.spacing.sm,
+                            paddingVertical: 2,
+                            borderRadius: 4,
+                          }}>
+                            <Text variant="caption" color="secondary">
+                              {step.duration}s
+                            </Text>
+                          </View>
+                        )}
+                        {step.water_amount && (
+                          <View style={{
+                            backgroundColor: theme.colors.surface,
+                            paddingHorizontal: theme.spacing.sm,
+                            paddingVertical: 2,
+                            borderRadius: 4,
+                          }}>
+                            <Text variant="caption" color="secondary">
+                              {step.water_amount}g
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        </ProfessionalCard>
+              ))}
+            </View>
+          </Card>
+        </Section>
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

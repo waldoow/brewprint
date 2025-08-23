@@ -2,29 +2,18 @@ import { useAuth } from "@/context/AuthContext";
 import { GrindersService, type GrinderInput, type GrinderSetting, type SettingRange } from "@/lib/services/grinders";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { StyleSheet } from "react-native";
+import { useForm } from "react-hook-form";
+import { View } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-// UI Components
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedCheckBox } from "@/components/ui/ThemedCheckBox";
-import { ThemedCollapsible } from "@/components/ui/ThemedCollapsible";
-import { SheetHeader } from "@/components/ui/SheetHeader";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
+// Professional UI Components
+import { Container } from "@/components/ui/Container";
+import { Section } from "@/components/ui/Section";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 // Grinder form validation schema
 const grinderFormSchema = z.object({
@@ -61,18 +50,18 @@ interface GrinderFormProps {
 }
 
 // Dropdown options
-const typeOptions: SelectOption[] = [
+const typeOptions = [
   { label: "Electric", value: "electric" },
   { label: "Manual", value: "manual" },
 ];
 
-const burrTypeOptions: SelectOption[] = [
+const burrTypeOptions = [
   { label: "Conical", value: "conical" },
   { label: "Flat", value: "flat" },
   { label: "Ghost", value: "ghost" },
 ];
 
-const burrMaterialOptions: SelectOption[] = [
+const burrMaterialOptions = [
   { label: "Steel", value: "steel" },
   { label: "Ceramic", value: "ceramic" },
   { label: "Titanium Coated", value: "titanium-coated" },
@@ -83,11 +72,11 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   const [isLoading, setIsLoading] = React.useState(false);
 
   const {
-    control,
+    register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    setValue,
     watch,
+    setValue,
+    formState: { errors },
     reset,
   } = useForm<GrinderFormData>({
     resolver: zodResolver(grinderFormSchema),
@@ -170,346 +159,271 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   };
 
   return (
-    <ThemedView noBackground style={styles.container}>
-      <SheetHeader
-        title="Add New Grinder"
-        subtitle="Coffee grinding equipment"
-        onClose={handleCancel}
-        showCloseButton={true}
-      />
-
-      <ThemedScrollView
-        paddingVertical={0}
-        paddingHorizontal={0}
-        style={styles.scrollView}
+    <Container scrollable>
+      <Section
+        title="Basic Information"
+        subtitle="Essential grinding equipment details"
+        spacing="xl"
       >
-        <ThemedView style={styles.form} noBackground>
-          {/* Basic Information Section */}
-          <ThemedCollapsible
-            title="Basic Information"
-            subtitle="Essential grinder details"
-            defaultOpen={true}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Grinder Name *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.name?.message}
-                  placeholder="Morning Grinder"
-                />
-              )}
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Grinder Name"
+              placeholder="Morning Grinder"
+              value={watch("name")}
+              onChangeText={(value) => setValue("name", value)}
+              error={errors.name?.message}
+              required
             />
 
-            <Controller
-              control={control}
-              name="brand"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Brand *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.brand?.message}
-                  placeholder="Baratza"
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="model"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Model *"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.model?.message}
-                  placeholder="Encore"
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="type"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Type *"
-                  options={typeOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.type?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="is_default"
-              render={({ field: { onChange, value } }) => (
-                <ThemedCheckBox
-                  label="Set as default grinder"
-                  value={value || false}
-                  onValueChange={onChange}
-                />
-              )}
-            />
-          </ThemedCollapsible>
-
-          {/* Technical Specifications */}
-          <ThemedCollapsible
-            title="Technical Specifications"
-            subtitle="Burr and grinding details (optional)"
-            defaultOpen={false}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="burr_type"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Burr Type"
-                  options={burrTypeOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.burr_type?.message}
-                  placeholder="Select burr type"
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="burr_material"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Burr Material"
-                  options={burrMaterialOptions}
-                  value={value}
-                  onValueChange={onChange}
-                  error={errors.burr_material?.message}
-                  placeholder="Select burr material"
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="microns_per_step"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Microns per Step"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.microns_per_step?.message}
-                  placeholder="20"
-                  type="number"
-                />
-              )}
-            />
-          </ThemedCollapsible>
-
-          {/* Settings Configuration */}
-          <ThemedCollapsible
-            title="Settings Configuration"
-            subtitle="Grind settings and calibration"
-            defaultOpen={false}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="default_setting"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Default Setting"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.default_setting?.message}
-                  placeholder="15"
-                  type="number"
-                />
-              )}
-            />
-
-            <ThemedView style={styles.settingRangeRow} noBackground>
-              <Controller
-                control={control}
-                name="setting_range_min"
-                render={({ field: { onChange, value } }) => (
-                  <ThemedInput
-                    label="Min Setting"
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.setting_range_min?.message}
-                    placeholder="1"
-                    type="number"
-                    style={styles.settingRangeInput}
-                  />
-                )}
+            <View style={styles.row}>
+              <Input
+                label="Brand"
+                placeholder="Baratza"
+                value={watch("brand")}
+                onChangeText={(value) => setValue("brand", value)}
+                error={errors.brand?.message}
+                style={{ flex: 1, marginRight: 8 }}
+                required
               />
 
-              <Controller
-                control={control}
-                name="setting_range_max"
-                render={({ field: { onChange, value } }) => (
-                  <ThemedInput
-                    label="Max Setting"
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.setting_range_max?.message}
-                    placeholder="40"
-                    type="number"
-                    style={styles.settingRangeInput}
-                  />
-                )}
+              <Input
+                label="Model"
+                placeholder="Encore"
+                value={watch("model")}
+                onChangeText={(value) => setValue("model", value)}
+                error={errors.model?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+                required
               />
-            </ThemedView>
+            </View>
 
-            <Controller
-              control={control}
-              name="setting_range_increment"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Setting Increment"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.setting_range_increment?.message}
-                  placeholder="1"
-                  type="number"
-                />
-              )}
-            />
-          </ThemedCollapsible>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Grinder Type *
+              </Text>
+              <View style={styles.selectOptions}>
+                {typeOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("type") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("type", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </Card>
+      </Section>
 
-          {/* Maintenance Schedule */}
-          <ThemedCollapsible
-            title="Maintenance Schedule"
-            subtitle="Cleaning and maintenance tracking"
-            defaultOpen={false}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="last_cleaned"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Last Cleaned"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.last_cleaned?.message}
-                  placeholder="YYYY-MM-DD"
-                />
-              )}
+      <Section
+        title="Technical Specifications"
+        subtitle="Burr and grinding characteristics"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Burr Type
+              </Text>
+              <View style={styles.selectOptions}>
+                {burrTypeOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("burr_type") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("burr_type", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Burr Material
+              </Text>
+              <View style={styles.selectOptions}>
+                {burrMaterialOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("burr_material") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("burr_material", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <Input
+              label="Microns per Step"
+              placeholder="20"
+              type="number"
+              value={watch("microns_per_step")}
+              onChangeText={(value) => setValue("microns_per_step", value)}
+              error={errors.microns_per_step?.message}
+            />
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Settings Configuration"
+        subtitle="Grind settings and calibration"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Default Setting"
+              placeholder="15"
+              type="number"
+              value={watch("default_setting")}
+              onChangeText={(value) => setValue("default_setting", value)}
+              error={errors.default_setting?.message}
             />
 
-            <Controller
-              control={control}
-              name="cleaning_frequency"
-              render={({ field: { onChange, value } }) => (
-                <ThemedInput
-                  label="Cleaning Frequency (days)"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.cleaning_frequency?.message}
-                  placeholder="30"
-                  type="number"
-                />
-              )}
-            />
-          </ThemedCollapsible>
+            <View style={styles.row}>
+              <Input
+                label="Min Setting"
+                placeholder="1"
+                type="number"
+                value={watch("setting_range_min")}
+                onChangeText={(value) => setValue("setting_range_min", value)}
+                error={errors.setting_range_min?.message}
+                style={{ flex: 1, marginRight: 8 }}
+              />
 
-          {/* Notes Section */}
-          <ThemedCollapsible
-            title="Notes"
-            subtitle="Additional information"
-            defaultOpen={false}
-            variant="ghost"
-            showBorder={false}
-            noPadding={true}
-            noBackground={true}
-          >
-            <Controller
-              control={control}
-              name="notes"
-              render={({ field: { onChange, value } }) => (
-                <ThemedTextArea
-                  label="Notes"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.notes?.message}
-                  placeholder="Any additional notes about this grinder..."
-                />
-              )}
-            />
-          </ThemedCollapsible>
+              <Input
+                label="Max Setting"
+                placeholder="40"
+                type="number"
+                value={watch("setting_range_max")}
+                onChangeText={(value) => setValue("setting_range_max", value)}
+                error={errors.setting_range_max?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
 
-          {/* Form Actions */}
-          <ThemedView style={styles.actions} noBackground>
-            <ThemedButton
-              title="Add Grinder"
-              onPress={handleSubmit(onSubmit)}
-              style={styles.submitButton}
-              loading={isLoading}
-              disabled={isLoading}
+            <Input
+              label="Setting Increment"
+              placeholder="1"
+              type="number"
+              value={watch("setting_range_increment")}
+              onChangeText={(value) => setValue("setting_range_increment", value)}
+              error={errors.setting_range_increment?.message}
             />
-            <ThemedButton
-              title="Cancel"
-              variant="outline"
-              onPress={handleCancel}
-              style={styles.cancelButton}
-              disabled={isLoading}
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Maintenance Schedule"
+        subtitle="Cleaning and maintenance tracking"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Last Cleaned"
+              placeholder="YYYY-MM-DD"
+              type="date"
+              value={watch("last_cleaned")}
+              onChangeText={(value) => setValue("last_cleaned", value)}
+              error={errors.last_cleaned?.message}
             />
-          </ThemedView>
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+
+            <Input
+              label="Cleaning Frequency (days)"
+              placeholder="30"
+              type="number"
+              value={watch("cleaning_frequency")}
+              onChangeText={(value) => setValue("cleaning_frequency", value)}
+              error={errors.cleaning_frequency?.message}
+            />
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Additional Details"
+        subtitle="Optional notes and settings"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Notes"
+              placeholder="Any additional notes about this grinder..."
+              multiline
+              numberOfLines={3}
+              value={watch("notes")}
+              onChangeText={(value) => setValue("notes", value)}
+              error={errors.notes?.message}
+            />
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Actions"
+        subtitle="Save or cancel your changes"
+        spacing="xl"
+      >
+        <View style={styles.actions}>
+          <Button
+            title="Add Grinder"
+            onPress={handleSubmit(onSubmit)}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            disabled={isLoading}
+          />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onPress={handleCancel}
+            disabled={isLoading}
+          />
+        </View>
+      </Section>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+const styles = {
+  fieldGroup: {
+    gap: 16,
   },
-  scrollView: {
-    flex: 1,
+  row: {
+    flexDirection: 'row' as const,
   },
-  form: {
-    padding: 8, // Reduced from 16 to 8
-    gap: 8, // Reduced from 16 to 8
+  selectField: {
+    gap: 8,
   },
-  settingRangeRow: {
-    flexDirection: "row",
-    gap: 6, // Reduced from 12 to 6
+  selectLabel: {
+    marginBottom: 4,
   },
-  settingRangeInput: {
-    flex: 1,
+  selectOptions: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+  },
+  optionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   actions: {
-    flexDirection: "column",
-    gap: 6, // Reduced from 12 to 6
-    marginTop: 12, // Reduced from 24 to 12
-    marginBottom: 16, // Reduced from 32 to 16
+    gap: 12,
   },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 1,
-  },
-});
+};

@@ -1,7 +1,7 @@
-import { ProfessionalCard } from "@/components/ui/professional/Card";
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Card } from "@/components/ui/Card";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Text } from "@/components/ui/Text";
 import { getTheme } from "@/constants/ProfessionalDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import * as Haptics from "expo-haptics";
@@ -98,8 +98,8 @@ export default function AboutScreen() {
   };
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <PageHeader
         title="About"
         subtitle="App information and support"
         action={{
@@ -114,71 +114,71 @@ export default function AboutScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* App Info */}
-        <ProfessionalCard variant="default" style={styles.section}>
+        <Card variant="default" style={styles.section}>
           <View style={styles.appHeader}>
-            <ProfessionalText variant="h1" weight="bold" style={styles.appName}>
+            <Text variant="h1" weight="bold" style={styles.appName}>
               Brewprint
-            </ProfessionalText>
+            </Text>
             <View style={styles.versionBadge}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 v{APP_VERSION}
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
 
-          <ProfessionalText
+          <Text
             variant="body"
             color="secondary"
             style={styles.tagline}
           >
             Your complete coffee recipe tracker for perfecting every brew
-          </ProfessionalText>
+          </Text>
 
           <View style={styles.versionInfo}>
             <View style={styles.versionItem}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 Version
-              </ProfessionalText>
-              <ProfessionalText variant="body" weight="semibold">
+              </Text>
+              <Text variant="body" weight="semibold">
                 {APP_VERSION}
-              </ProfessionalText>
+              </Text>
             </View>
 
             <View style={styles.versionItem}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 Build
-              </ProfessionalText>
-              <ProfessionalText variant="body" weight="semibold">
+              </Text>
+              <Text variant="body" weight="semibold">
                 {BUILD_NUMBER}
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Features */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText
+        <Card variant="default" style={styles.section}>
+          <Text
             variant="h4"
             weight="semibold"
             style={styles.sectionTitle}
           >
             What&apos;s Included
-          </ProfessionalText>
+          </Text>
 
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
               <View style={styles.featureIcon}>
-                <ProfessionalText style={styles.featureIconText}>
+                <Text style={styles.featureIconText}>
                   ☕
-                </ProfessionalText>
+                </Text>
               </View>
               <View style={styles.featureContent}>
-                <ProfessionalText variant="body" weight="semibold">
+                <Text variant="body" weight="semibold">
                   Recipe Management
-                </ProfessionalText>
-                <ProfessionalText variant="caption" color="secondary">
+                </Text>
+                <Text variant="caption" color="secondary">
                   Create, edit, and perfect your coffee brewing recipes
-                </ProfessionalText>
+                </Text>
               </View>
             </View>
 
@@ -266,7 +266,7 @@ export default function AboutScreen() {
               </View>
             </View>
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Support & Links */}
         <View
@@ -355,7 +355,7 @@ export default function AboutScreen() {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

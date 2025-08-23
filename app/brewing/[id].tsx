@@ -1,10 +1,10 @@
 // app/brewing/[id].tsx
 import { TimerDisplay } from "@/components/brewing/TimerDisplay";
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalCard } from "@/components/ui/professional/Card";
-import { ProfessionalText } from "@/components/ui/professional/Text";
-import { ProfessionalButton } from "@/components/ui/professional/Button";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
 import { getTheme } from "@/constants/ProfessionalDesign";
 import { useBrewprint } from "@/hooks/useBrewprint";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -17,7 +17,6 @@ import {
   ActivityIndicator,
   Animated,
   ScrollView,
-  StyleSheet,
   View,
 } from "react-native";
 import { toast } from "sonner-native";
@@ -100,51 +99,51 @@ export default function BrewingScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
+      <Container>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <ProfessionalText variant="body" color="secondary" style={styles.loadingText}>
+          <Text variant="body" color="secondary" style={styles.loadingText}>
             Loading brewprint...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   if (error || !brewprint) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <ProfessionalText 
+      <Container>
+        <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
+          <Text 
             variant="h4" 
             weight="semibold" 
             style={{ textAlign: 'center', marginBottom: 8 }}
           >
             Brewprint Not Found
-          </ProfessionalText>
-          <ProfessionalText 
+          </Text>
+          <Text 
             variant="body" 
             color="secondary" 
             style={{ textAlign: 'center', marginBottom: 24 }}
           >
             {error || 'The requested brewprint could not be found.'}
-          </ProfessionalText>
-          <ProfessionalButton
+          </Text>
+          <Button
             title="Go Back"
             onPress={() => router.back()}
             variant="primary"
             fullWidth
           />
-        </ProfessionalCard>
-      </ProfessionalContainer>
+        </Card>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="Brewing Session"
-        subtitle={`${brewprint.name} • ${brewprint.method} extraction protocol`}
+        subtitle={`${brewprint.name} • ${brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')}`}
         action={{
           title: "Back",
           onPress: () => router.back(),
@@ -161,33 +160,52 @@ export default function BrewingScreen() {
             transform: [{ translateY: slideAnim }],
           }}
         >
-          {/* Recipe Info */}
-          <ProfessionalCard variant="default" style={styles.infoCard}>
-            <ProfessionalText variant="h3" weight="semibold" style={styles.recipeName}>
+          {/* Recipe Parameters */}
+          <Card variant="default" style={styles.parametersCard}>
+            <Text variant="h3" weight="semibold" style={styles.recipeName}>
               {brewprint.name}
-            </ProfessionalText>
-            <ProfessionalText variant="body" color="secondary" style={styles.recipeMethod}>
-              {brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')}
-              {brewprint.description && ` • ${brewprint.description}`}
-            </ProfessionalText>
+            </Text>
+            {brewprint.description && (
+              <Text variant="body" color="secondary" style={styles.recipeDescription}>
+                {brewprint.description}
+              </Text>
+            )}
             
-            <View style={styles.quickParams}>
-              <ProfessionalText variant="caption" color="secondary">
-                {brewprint.parameters.coffee_grams}g coffee
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
-                {brewprint.parameters.water_grams}ml water
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
-                {brewprint.parameters.water_temp}°C
-              </ProfessionalText>
-              {brewprint.parameters.ratio && (
-                <ProfessionalText variant="caption" color="secondary">
-                  {brewprint.parameters.ratio} ratio
-                </ProfessionalText>
-              )}
+            <View style={styles.parameterGrid}>
+              <View style={styles.parameterItem}>
+                <Text variant="h4" weight="semibold">
+                  {brewprint.parameters.coffee_grams}g
+                </Text>
+                <Text variant="caption" color="secondary">
+                  Coffee
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text variant="h4" weight="semibold">
+                  {brewprint.parameters.water_grams}ml
+                </Text>
+                <Text variant="caption" color="secondary">
+                  Water
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text variant="h4" weight="semibold">
+                  {brewprint.parameters.water_temp}°C
+                </Text>
+                <Text variant="caption" color="secondary">
+                  Temperature
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text variant="h4" weight="semibold">
+                  1:{Math.round((brewprint.parameters.water_grams / brewprint.parameters.coffee_grams) * 10) / 10}
+                </Text>
+                <Text variant="caption" color="secondary">
+                  Ratio
+                </Text>
+              </View>
             </View>
-          </ProfessionalCard>
+          </Card>
 
           {/* Timer Section */}
           <TimerDisplay
@@ -198,83 +216,113 @@ export default function BrewingScreen() {
 
           {/* Current Step Display */}
           {isBrewingStarted && !isBrewingComplete && getCurrentStep() && (
-            <ProfessionalCard variant="default" style={styles.currentStepCard}>
-              <View style={styles.stepHeader}>
-                <ProfessionalText variant="caption" color="secondary" style={styles.stepNumber}>
-                  Step {currentStepIndex + 1} of {brewprint.steps.length}
-                </ProfessionalText>
-                <ProfessionalText variant="h3" weight="semibold">
+            <Card variant="default" style={styles.currentStepCard}>
+              <View style={styles.currentStepHeader}>
+                <View style={styles.stepProgressIndicator}>
+                  <Text variant="caption" weight="semibold" style={styles.stepProgress}>
+                    {currentStepIndex + 1}/{brewprint.steps.length}
+                  </Text>
+                </View>
+                <Text variant="h2" weight="semibold" style={styles.currentStepTitle}>
                   {getCurrentStep()?.title}
-                </ProfessionalText>
+                </Text>
               </View>
               
-              <ProfessionalText variant="body" color="secondary" style={styles.stepDescription}>
+              <Text variant="body" style={styles.currentStepDescription}>
                 {getCurrentStep()?.description}
-              </ProfessionalText>
+              </Text>
               
-              <View style={styles.stepDetails}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Duration: {getCurrentStep()?.duration}s
-                </ProfessionalText>
-                <ProfessionalText variant="caption" color="secondary">
-                  Water: {getCurrentStep()?.water_amount}g
-                </ProfessionalText>
-                <ProfessionalText variant="caption" color="secondary">
-                  Technique: {getCurrentStep()?.technique}
-                </ProfessionalText>
+              <View style={styles.currentStepDetails}>
+                <View style={styles.stepDetailItem}>
+                  <Text variant="h4" weight="semibold">
+                    {getCurrentStep()?.duration}s
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    Duration
+                  </Text>
+                </View>
+                <View style={styles.stepDetailItem}>
+                  <Text variant="h4" weight="semibold">
+                    {getCurrentStep()?.water_amount}g
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    Water
+                  </Text>
+                </View>
+                <View style={styles.stepDetailItem}>
+                  <Text variant="body" weight="medium" style={styles.techniqueText}>
+                    {getCurrentStep()?.technique.replace('-', ' ').split(' ').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    Technique
+                  </Text>
+                </View>
               </View>
-            </ProfessionalCard>
+            </Card>
           )}
 
           {/* All Steps Overview (when not brewing) */}
           {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
-            <ProfessionalCard variant="default" style={styles.stepsOverview}>
-              <ProfessionalText variant="h4" weight="semibold" style={styles.stepsTitle}>
-                Brewing Steps ({brewprint.steps.length} steps)
-              </ProfessionalText>
+            <Card variant="default" style={styles.stepsOverview}>
+              <View style={styles.stepsHeader}>
+                <Text variant="h3" weight="semibold">
+                  Brewing Process
+                </Text>
+                <View style={styles.stepCountBadge}>
+                  <Text variant="caption" weight="medium" style={styles.stepCountText}>
+                    {brewprint.steps.length} steps
+                  </Text>
+                </View>
+              </View>
               
               {brewprint.steps.map((step, index) => (
                 <View key={step.id} style={styles.stepPreview}>
-                  <View style={styles.stepPreviewHeader}>
-                    <ProfessionalText variant="caption" weight="bold" style={styles.stepPreviewNumber}>
-                      {index + 1}
-                    </ProfessionalText>
-                    <ProfessionalText variant="body" weight="medium" style={styles.stepPreviewTitle}>
-                      {step.title}
-                    </ProfessionalText>
-                    <ProfessionalText variant="caption" color="secondary">
-                      {step.duration}s
-                    </ProfessionalText>
+                  <View style={styles.stepPreviewLeft}>
+                    <View style={styles.stepNumber}>
+                      <Text variant="caption" weight="semibold" style={styles.stepNumberText}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <View style={styles.stepPreviewContent}>
+                      <Text variant="body" weight="semibold" style={styles.stepPreviewTitle}>
+                        {step.title}
+                      </Text>
+                      <Text variant="caption" color="secondary" style={styles.stepPreviewDesc}>
+                        {step.description}
+                      </Text>
+                      <View style={styles.stepPreviewMeta}>
+                        <Text variant="caption" color="secondary">
+                          {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                  <ProfessionalText variant="caption" color="secondary" style={styles.stepPreviewDesc} numberOfLines={2}>
-                    {step.description} • {step.water_amount}g water • {step.technique}
-                  </ProfessionalText>
                 </View>
               ))}
-            </ProfessionalCard>
+            </Card>
           )}
 
           {/* Action Panel */}
-          <ProfessionalCard variant="default" style={styles.actionPanel}>
+          <View style={styles.actionPanel}>
             {!isBrewingStarted ? (
-              <ProfessionalButton
-                title="Start Brewing"
+              <Button
+                title="Start Brewing Session"
                 onPress={handleStartBrewing}
                 variant="primary"
-                size="large"
+                size="lg"
                 fullWidth
               />
             ) : isBrewingComplete ? (
-              <>
-                <ProfessionalButton
+              <View style={styles.actionGroup}>
+                <Button
                   title="View Results"
                   onPress={() => router.push(`/brewing/${id}/results`)}
                   variant="primary"
-                  size="large"
+                  size="lg"
                   fullWidth
-                  style={styles.primaryAction}
                 />
-                <ProfessionalButton
+                <Button
                   title="Brew Again"
                   onPress={() => {
                     setIsBrewingStarted(false);
@@ -282,177 +330,185 @@ export default function BrewingScreen() {
                     setCurrentStepIndex(-1);
                     resetTimer();
                   }}
-                  variant="outline"
-                  size="large"
+                  variant="secondary"
+                  size="lg"
                   fullWidth
                 />
-              </>
+              </View>
             ) : (
-              <>
-                <ProfessionalButton
+              <View style={styles.actionGroup}>
+                <Button
                   title={currentStepIndex < (brewprint.steps?.length || 0) - 1 ? "Next Step" : "Complete Brewing"}
                   onPress={handleNextStep}
                   variant="primary"
-                  size="large"
+                  size="lg"
                   fullWidth
-                  style={styles.primaryAction}
                 />
-                <ProfessionalButton
+                <Button
                   title={isRunning ? "Pause Timer" : "Resume Timer"}
                   onPress={isRunning ? pauseTimer : startTimer}
-                  variant="outline"
-                  size="large"
+                  variant="secondary"
+                  size="lg"
                   fullWidth
                 />
-              </>
+              </View>
             )}
-          </ProfessionalCard>
+          </View>
         </Animated.View>
       </ScrollView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+const styles = {
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
     gap: 16,
-  },
-  loadingText: {
-    fontSize: 14,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-    padding: 24,
-  },
-  errorText: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  backButton: {
-    paddingHorizontal: 24,
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 100,
   },
 
-  // Minimalist Cards
-  infoCard: {
-    padding: 16,
-    borderRadius: 8,
+  // Recipe Parameters Card
+  parametersCard: {
     marginBottom: 16,
   },
   recipeName: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  recipeMethod: {
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  quickParams: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  param: {
-    fontSize: 12,
-  },
-
-  // Action Panel
-  actionPanel: {
-    padding: 16,
-    borderRadius: 8,
+  recipeDescription: {
     marginBottom: 16,
+    lineHeight: 20,
+  },
+  parameterGrid: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
     gap: 12,
   },
-  primaryAction: {
-    alignSelf: "stretch",
-  },
-  secondaryAction: {
-    alignSelf: "stretch",
+  parameterItem: {
+    flex: 1,
+    alignItems: 'center' as const,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
 
-  // Current Step Card
+  // Current Step Card (Enhanced)
   currentStepCard: {
-    padding: 16,
-    borderRadius: 8,
+    marginBottom: 16,
+    padding: 20,
+  },
+  currentStepHeader: {
+    alignItems: 'center' as const,
     marginBottom: 16,
   },
-  stepHeader: {
+  stepProgressIndicator: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     marginBottom: 12,
   },
-  stepNumber: {
+  stepProgress: {
     fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 4,
   },
-  stepTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+  currentStepTitle: {
+    textAlign: 'center' as const,
+    fontSize: 24,
   },
-  stepDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
+  currentStepDescription: {
+    textAlign: 'center' as const,
+    lineHeight: 22,
+    marginBottom: 20,
+    fontSize: 16,
   },
-  stepDetails: {
-    flexDirection: "row",
+  currentStepDetails: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-around' as const,
     gap: 16,
   },
-  stepDetail: {
-    fontSize: 12,
-    fontWeight: "500",
+  stepDetailItem: {
+    flex: 1,
+    alignItems: 'center' as const,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  techniqueText: {
+    textAlign: 'center' as const,
+    fontSize: 14,
   },
 
-  // Steps Overview
+  // Steps Overview (Improved)
   stepsOverview: {
-    padding: 16,
-    borderRadius: 8,
     marginBottom: 16,
   },
-  stepsTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 16,
+  stepsHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    marginBottom: 20,
+  },
+  stepCountBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  stepCountText: {
+    fontSize: 12,
   },
   stepPreview: {
-    paddingVertical: 12,
+    marginBottom: 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    borderBottomColor: '#F0F0F0',
   },
-  stepPreviewHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-    gap: 8,
+  stepPreviewLeft: {
+    flexDirection: 'row' as const,
+    gap: 12,
   },
-  stepPreviewNumber: {
+  stepNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    borderWidth: 1,
+    borderColor: '#E1E5E9',
+  },
+  stepNumberText: {
     fontSize: 12,
-    fontWeight: "700",
-    minWidth: 20,
+  },
+  stepPreviewContent: {
+    flex: 1,
+    gap: 4,
   },
   stepPreviewTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    flex: 1,
-  },
-  stepPreviewTime: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 16,
+    lineHeight: 20,
   },
   stepPreviewDesc: {
-    fontSize: 12,
-    lineHeight: 16,
-    marginLeft: 28,
+    lineHeight: 18,
+    marginBottom: 4,
   },
-});
+  stepPreviewMeta: {
+    marginTop: 4,
+  },
+
+  // Action Panel (Cleaner)
+  actionPanel: {
+    gap: 12,
+  },
+  actionGroup: {
+    gap: 12,
+  },
+};

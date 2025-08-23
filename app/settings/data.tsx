@@ -1,5 +1,5 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getTheme } from "@/constants/ProfessionalDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ExportService } from "@/lib/services/export";
@@ -197,8 +197,8 @@ export default function DataPrivacyScreen() {
   };
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <PageHeader
         title="Data & Privacy"
         subtitle="Export and manage your coffee data"
         action={{
@@ -481,7 +481,7 @@ export default function DataPrivacyScreen() {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

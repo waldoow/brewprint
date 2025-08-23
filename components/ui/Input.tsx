@@ -12,9 +12,9 @@ import { Eye, EyeOff } from 'lucide-react-native';
 
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ProfessionalText } from './Text';
+import { Text } from './Text';
 
-export type ProfessionalInputProps = TextInputProps & {
+export type InputProps = TextInputProps & {
   label?: string;
   error?: string;
   type?: 'text' | 'email' | 'password' | 'number';
@@ -23,7 +23,7 @@ export type ProfessionalInputProps = TextInputProps & {
   containerStyle?: ViewStyle;
 };
 
-export const ProfessionalInput = forwardRef<TextInput, ProfessionalInputProps>(({
+export const Input = forwardRef<TextInput, InputProps>(({
   label,
   error,
   type = 'text',
@@ -107,9 +107,9 @@ export const ProfessionalInput = forwardRef<TextInput, ProfessionalInputProps>((
   return (
     <View style={[styles.container, containerStyle]}>
       {label && (
-        <ProfessionalText variant="label" weight="medium" style={styles.label}>
+        <Text variant="label" weight="medium" style={styles.label}>
           {label}
-        </ProfessionalText>
+        </Text>
       )}
       <View style={styles.inputContainer}>
         <TextInput
@@ -132,15 +132,15 @@ export const ProfessionalInput = forwardRef<TextInput, ProfessionalInputProps>((
         )}
       </View>
       {error && (
-        <ProfessionalText variant="caption" color="error" style={styles.error}>
+        <Text variant="caption" style={[styles.error, { color: theme.colors.error }]}>
           {error}
-        </ProfessionalText>
+        </Text>
       )}
     </View>
   );
 });
 
-ProfessionalInput.displayName = 'ProfessionalInput';
+Input.displayName = 'Input';
 
 const styles = StyleSheet.create({
   container: {

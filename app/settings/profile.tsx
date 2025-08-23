@@ -1,9 +1,10 @@
-import { ProfessionalButton } from "@/components/ui/professional/Button";
-import { ProfessionalCard } from "@/components/ui/professional/Card";
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalInput } from "@/components/ui/professional/Input";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Input } from "@/components/ui/Input";
+import { Text } from "@/components/ui/Text";
+import { Section } from "@/components/ui/Section";
 import { getTheme } from "@/constants/ProfessionalDesign";
 import { useAuth } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -11,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, View } from "react-native";
+import { Alert, StyleSheet, Switch, View } from "react-native";
 import { toast } from "sonner-native";
 
 interface ProfileSettings {
@@ -110,8 +111,8 @@ export default function ProfileSyncScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Profile & Sync"
           action={{
             title: "Back",
@@ -119,96 +120,89 @@ export default function ProfileSyncScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading profile settings...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <Section 
         title="Profile & Sync"
         subtitle="Account settings and data synchronization"
-        action={{
-          title: "Back",
-          onPress: () => router.back(),
-        }}
+        spacing="xl"
       />
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <Section
+        title="Profile Information"
+        subtitle="Email address and display preferences"
+        spacing="lg"
       >
-        {/* Profile Information */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText
-            variant="h4"
-            weight="semibold"
-            style={styles.sectionTitle}
-          >
-            Profile Information
-          </ProfessionalText>
-
+        <Card variant="default">
           <View style={styles.profileField}>
-            <ProfessionalText
+            <Text
               variant="body"
               weight="semibold"
               style={styles.fieldLabel}
             >
               Email Address
-            </ProfessionalText>
+            </Text>
             <View
               style={[
                 styles.emailContainer,
-                { backgroundColor: theme.colors.surface },
+                { backgroundColor: theme.colors.gray[100] },
               ]}
             >
-              <ProfessionalText variant="body" style={styles.emailText}>
+              <Text variant="body">
                 {user?.email || "Not available"}
-              </ProfessionalText>
+              </Text>
               <View style={styles.verifiedBadge}>
-                <ProfessionalText variant="caption" color="secondary">
+                <Text variant="caption" color="inverse">
                   Verified
-                </ProfessionalText>
+                </Text>
               </View>
             </View>
           </View>
 
           <View style={styles.profileField}>
-            <ProfessionalInput
+            <Input
               label="Display Name"
               value={settings.displayName}
               onChangeText={(value) => updateSetting("displayName", value)}
               placeholder="Your display name"
             />
           </View>
-        </ProfessionalCard>
+        </Card>
+      </Section>
 
-        {/* Sync Settings */}
-        <ProfessionalCard variant="default" style={styles.section}>
+      <Section
+        title="Sync Settings"
+        subtitle="Automatic synchronization preferences"
+        spacing="lg"
+      >
+        <Card variant="default">
           <View style={styles.sectionHeader}>
-            <ProfessionalText variant="h4" weight="semibold">
-              Sync Settings
-            </ProfessionalText>
+            <Text variant="h4" weight="semibold">
+              Sync Controls
+            </Text>
             <View style={styles.comingSoonBadge}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="inverse">
                 Coming Soon
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="semibold">
+              <Text variant="body" weight="semibold">
                 Automatic Sync
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Automatically sync your data when changes are made
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.autoSync}
@@ -228,12 +222,12 @@ export default function ProfileSyncScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="semibold">
+              <Text variant="body" weight="semibold">
                 Sync on Cellular
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Allow syncing when using cellular data (may use data)
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.syncOnCellular}
@@ -253,12 +247,12 @@ export default function ProfileSyncScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="semibold">
+              <Text variant="body" weight="semibold">
                 Backup Before Sync
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Create a backup before syncing changes
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.backupBeforeSync}
@@ -277,29 +271,27 @@ export default function ProfileSyncScreen() {
               disabled={true}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
+      </Section>
 
-        {/* Sync Actions */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText
-            variant="h4"
-            weight="semibold"
-            style={styles.sectionTitle}
-          >
-            Sync Actions
-          </ProfessionalText>
+      <Section
+        title="Sync Actions"
+        subtitle="Manual sync controls and status"
+        spacing="lg"
+      >
+        <Card variant="default">
 
           <View style={styles.syncStatus}>
-            <ProfessionalText
+            <Text
               variant="caption"
               color="secondary"
               style={styles.statusText}
             >
               Last sync: Never (sync feature coming soon)
-            </ProfessionalText>
+            </Text>
           </View>
 
-          <ProfessionalButton
+          <Button
             title="Sync Now"
             onPress={handleForceSync}
             variant="outline"
@@ -308,29 +300,27 @@ export default function ProfileSyncScreen() {
           />
 
           <View style={styles.infoBox}>
-            <ProfessionalText
+            <Text
               variant="caption"
               color="secondary"
               style={styles.infoText}
             >
               💡 Cloud sync functionality is coming soon. Your data is currently
               stored locally and backed up securely on your device.
-            </ProfessionalText>
+            </Text>
           </View>
-        </ProfessionalCard>
+        </Card>
+      </Section>
 
-        {/* Account Actions */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText
-            variant="h4"
-            weight="semibold"
-            style={styles.sectionTitle}
-          >
-            Account Actions
-          </ProfessionalText>
+      <Section
+        title="Account Actions"
+        subtitle="Manage your account security and data"
+        spacing="lg"
+      >
+        <Card variant="default">
 
           <View style={styles.actionGrid}>
-            <ProfessionalButton
+            <Button
               title="Change Password"
               onPress={() => {}}
               variant="outline"
@@ -338,7 +328,7 @@ export default function ProfileSyncScreen() {
               fullWidth
             />
 
-            <ProfessionalButton
+            <Button
               title="Delete Account"
               variant="destructive"
               onPress={() => {}}
@@ -348,58 +338,44 @@ export default function ProfileSyncScreen() {
           </View>
 
           <View style={styles.warningBox}>
-            <ProfessionalText
+            <Text
               variant="caption"
               color="secondary"
               style={styles.warningText}
             >
               Account management features are coming soon. For now, you can
               manage your account through the authentication system.
-            </ProfessionalText>
+            </Text>
           </View>
-        </ProfessionalCard>
-
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </ProfessionalContainer>
+        </Card>
+      </Section>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  section: {
-    marginBottom: 16,
+    padding: 32,
   },
   comingSoonBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: "rgba(107, 114, 128, 0.1)",
+    backgroundColor: "#6B7280",
     borderRadius: 4,
   },
   verifiedBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: "rgba(5, 150, 105, 0.1)",
+    backgroundColor: "#059669",
     borderRadius: 4,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sectionTitle: {
     marginBottom: 16,
   },
   profileField: {
@@ -454,8 +430,5 @@ const styles = StyleSheet.create({
   },
   warningText: {
     textAlign: "center",
-  },
-  bottomSpacing: {
-    height: 20,
   },
 });

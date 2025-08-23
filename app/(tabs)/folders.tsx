@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { RefreshControl, TouchableOpacity, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import {
@@ -100,19 +101,19 @@ export default function FoldersScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader title="Organization" />
+      <Container>
+        <PageHeader title="Organization" />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading organization data...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer 
+    <Container 
       scrollable 
       refreshControl={
         <RefreshControl
@@ -122,127 +123,146 @@ export default function FoldersScreen() {
         />
       }
     >
-      <ProfessionalHeader
-        title="Organization"
-        subtitle={`${organizedData.folders.length} folders • ${organizedData.tags.length} tags`}
-        action={{
-          title: 'New Folder',
-          onPress: handleCreateFolder,
-        }}
-      />
+      <Section 
+        title="Recipe Organization"
+        subtitle={`Organize your brewing recipes with ${organizedData.folders.length} folders and ${organizedData.tags.length} tags`}
+        spacing="xl"
+      >
+        <Button
+          title="Create New Folder"
+          variant="secondary"
+          size="lg"
+          fullWidth
+          onPress={handleCreateFolder}
+        />
+      </Section>
 
-      {/* Folders Section */}
-      <View style={styles.sectionHeader}>
-        <ProfessionalText variant="label" weight="semibold" color="secondary">
-          FOLDERS
-        </ProfessionalText>
-        <ProfessionalText variant="caption" color="tertiary">
-          {organizedData.folders.length}
-        </ProfessionalText>
-      </View>
-
-      {organizedData.folders.length === 0 ? (
-        <ProfessionalCard variant="outlined">
-          <ProfessionalText variant="body" color="secondary" style={{ textAlign: 'center' }}>
-            Create folders to organize your brewing recipes
-          </ProfessionalText>
-          <ProfessionalButton
-            title="Create Your First Folder"
-            onPress={handleCreateFolder}
-            variant="primary"
-            style={{ marginTop: 16 }}
-            fullWidth
-          />
-        </ProfessionalCard>
-      ) : (
-        organizedData.folders.map((folder) => (
-          <ProfessionalCard
-            key={folder.id}
-            variant="default"
-            onPress={() => handleFolderPress(folder.id)}
-          >
-            <View style={styles.folderHeader}>
-              <View style={{ flex: 1 }}>
-                <View style={styles.folderTitleRow}>
-                  <ProfessionalText variant="h4" weight="semibold">
-                    {folder.name}
-                  </ProfessionalText>
-                  {folder.is_default && (
-                    <View style={styles.defaultBadge}>
-                      <ProfessionalText variant="caption" color="inverse">
-                        DEFAULT
-                      </ProfessionalText>
-                    </View>
+      <Section
+        title={`Recipe Folders`}
+        subtitle={`${organizedData.folders.length} folder${organizedData.folders.length === 1 ? '' : 's'} for organizing your recipes`}
+        spacing="lg"
+      >
+        {organizedData.folders.length === 0 ? (
+          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
+            <Text 
+              variant="2xl" 
+              weight="bold" 
+              style={{ textAlign: 'center', marginBottom: 12 }}
+            >
+              📁
+            </Text>
+            <Text 
+              variant="lg" 
+              color="secondary" 
+              style={{ textAlign: 'center', marginBottom: 32 }}
+            >
+              Create folders to organize your brewing recipes by style, beans, or methods
+            </Text>
+            <Button
+              title="Create Your First Folder"
+              onPress={handleCreateFolder}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+          </Card>
+        ) : (
+          organizedData.folders.map((folder) => (
+            <Card
+              key={folder.id}
+              variant="default"
+              onPress={() => handleFolderPress(folder.id)}
+            >
+              <View style={styles.folderHeader}>
+                <View style={{ flex: 1 }}>
+                  <View style={styles.folderTitleRow}>
+                    <Text variant="h4" weight="semibold">
+                      {folder.name}
+                    </Text>
+                    {folder.is_default && (
+                      <View style={styles.defaultBadge}>
+                        <Text variant="caption" color="inverse">
+                          DEFAULT
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  {folder.description && (
+                    <Text variant="caption" color="secondary" style={{ marginTop: 4 }}>
+                      {folder.description}
+                    </Text>
                   )}
                 </View>
-                {folder.description && (
-                  <ProfessionalText variant="caption" color="secondary" style={{ marginTop: 4 }}>
-                    {folder.description}
-                  </ProfessionalText>
-                )}
               </View>
+
+              <View style={styles.folderStats}>
+                <View style={styles.statItem}>
+                  <Text variant="caption" color="secondary">
+                    Recipes
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {folder.brewprints_count || 0}
+                  </Text>
+                </View>
+                
+                <View style={styles.statItem}>
+                  <Text variant="caption" color="secondary">
+                    Created
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {new Date(folder.created_at).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+          ))
+        )}
+      </Section>
+
+      <Section
+        title="Popular Tags"
+        subtitle={`${organizedData.tags.length} tag${organizedData.tags.length === 1 ? '' : 's'} to filter and discover recipes`}
+        spacing="xl"
+      >
+        {organizedData.tags.length === 0 ? (
+          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
+            <Text 
+              variant="2xl" 
+              weight="bold" 
+              style={{ textAlign: 'center', marginBottom: 12 }}
+            >
+              🏷️
+            </Text>
+            <Text 
+              variant="lg" 
+              color="secondary" 
+              style={{ textAlign: 'center' }}
+            >
+              Tags will appear automatically as you create and categorize your recipes
+            </Text>
+          </Card>
+        ) : (
+          <Card variant="default">
+            <View style={styles.tagsGrid}>
+              {organizedData.tags.map((tag) => (
+                <TouchableOpacity
+                  key={tag.id}
+                  style={[styles.tagChip, { backgroundColor: theme.colors.gray[100] }]}
+                  onPress={() => handleTagPress(tag.name)}
+                >
+                  <Text variant="caption" weight="medium">
+                    #{tag.name}
+                  </Text>
+                  <Text variant="caption" color="secondary">
+                    {tag.usage_count || 0}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
-
-            <View style={styles.folderStats}>
-              <View style={styles.statItem}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Recipes
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {folder.brewprints_count || 0}
-                </ProfessionalText>
-              </View>
-              
-              <View style={styles.statItem}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Created
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {new Date(folder.created_at).toLocaleDateString()}
-                </ProfessionalText>
-              </View>
-            </View>
-          </ProfessionalCard>
-        ))
-      )}
-
-      {/* Tags Section */}
-      <View style={[styles.sectionHeader, { marginTop: 32 }]}>
-        <ProfessionalText variant="label" weight="semibold" color="secondary">
-          TAGS
-        </ProfessionalText>
-        <ProfessionalText variant="caption" color="tertiary">
-          {organizedData.tags.length}
-        </ProfessionalText>
-      </View>
-
-      {organizedData.tags.length === 0 ? (
-        <ProfessionalCard variant="outlined">
-          <ProfessionalText variant="body" color="secondary" style={{ textAlign: 'center' }}>
-            Tags will appear automatically as you create recipes
-          </ProfessionalText>
-        </ProfessionalCard>
-      ) : (
-        <ProfessionalCard variant="outlined">
-          <View style={styles.tagsGrid}>
-            {organizedData.tags.map((tag) => (
-              <TouchableOpacity
-                key={tag.id}
-                style={[styles.tagChip, { backgroundColor: theme.colors.gray[100] }]}
-                onPress={() => handleTagPress(tag.name)}
-              >
-                <ProfessionalText variant="caption" weight="medium">
-                  #{tag.name}
-                </ProfessionalText>
-                <ProfessionalText variant="caption" color="secondary">
-                  {tag.usage_count || 0}
-                </ProfessionalText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ProfessionalCard>
-      )}
-    </ProfessionalContainer>
+          </Card>
+        )}
+      </Section>
+    </Container>
   );
 }
 

@@ -3,8 +3,8 @@ import { StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { toast } from 'sonner-native';
 
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { GrinderForm } from '@/forms/GrinderForm';
 
 export default function NewGrinderScreen() {
@@ -18,8 +18,8 @@ export default function NewGrinderScreen() {
   };
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="New Grinder"
         subtitle="Add grinding equipment"
         action={{
@@ -32,7 +32,7 @@ export default function NewGrinderScreen() {
         onSuccess={handleSuccess} 
         onCancel={handleCancel} 
       />
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

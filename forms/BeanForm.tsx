@@ -1,29 +1,21 @@
-import { useAuth } from "@/context/AuthContext";
-import { BeansService, type BeanInput } from "@/lib/services";
-import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { StyleSheet } from "react-native";
-import { toast } from "sonner-native";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { View } from "react-native";
+import { toast } from "sonner-native";
 
-// UI Components
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedCollapsible } from "@/components/ui/ThemedCollapsible";
-import { ThemedDatePicker } from "@/components/ui/ThemedDatePicker";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
+// Professional UI Components
+import { Container } from "@/components/ui/Container";
+import { Section } from "@/components/ui/Section";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+
+// Services and Context
+import { useAuth } from "@/context/AuthContext";
+import { BeansService, type BeanInput } from "@/lib/services";
 
 // Bean form validation schema
 const beanFormSchema = z.object({
@@ -35,7 +27,7 @@ const beanFormSchema = z.object({
   altitude: z.string().optional(),
   process: z.enum([
     "washed",
-    "natural",
+    "natural", 
     "honey",
     "pulped-natural",
     "semi-washed",
@@ -52,8 +44,8 @@ const beanFormSchema = z.object({
   variety: z.string().optional(),
 
   // Purchase & Inventory
-  purchase_date: z.date({ required_error: "Purchase date is required" }),
-  roast_date: z.date({ required_error: "Roast date is required" }),
+  purchase_date: z.string().min(1, "Purchase date is required"),
+  roast_date: z.string().min(1, "Roast date is required"),
   supplier: z.string().min(1, "Supplier is required"),
   cost: z.string().min(1, "Cost is required"),
   total_grams: z.string().min(1, "Total grams is required"),
@@ -81,8 +73,7 @@ interface BeanFormProps {
   initialData?: Partial<BeanFormData>;
 }
 
-// Dropdown options
-const processOptions: SelectOption[] = [
+const processOptions = [
   { label: "Washed", value: "washed" },
   { label: "Natural", value: "natural" },
   { label: "Honey", value: "honey" },
@@ -99,7 +90,7 @@ const processOptions: SelectOption[] = [
   { label: "Other", value: "other" },
 ];
 
-const roastLevelOptions: SelectOption[] = [
+const roastLevelOptions = [
   { label: "Light", value: "light" },
   { label: "Medium-Light", value: "medium-light" },
   { label: "Medium", value: "medium" },
@@ -107,19 +98,26 @@ const roastLevelOptions: SelectOption[] = [
   { label: "Dark", value: "dark" },
 ];
 
-const ratingOptions: SelectOption[] = [
-  { label: "● ○ ○ ○ ○", value: "1" },
-  { label: "● ● ○ ○ ○", value: "2" },
-  { label: "● ● ● ○ ○", value: "3" },
-  { label: "● ● ● ● ○", value: "4" },
-  { label: "● ● ● ● ●", value: "5" },
+const ratingOptions = [
+  { label: "★☆☆☆☆ (1)", value: "1" },
+  { label: "★★☆☆☆ (2)", value: "2" },
+  { label: "★★★☆☆ (3)", value: "3" },
+  { label: "★★★★☆ (4)", value: "4" },
+  { label: "★★★★★ (5)", value: "5" },
 ];
 
 export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const form = useForm<BeanFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<BeanFormData>({
     resolver: zodResolver(beanFormSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -129,12 +127,8 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
       altitude: initialData?.altitude || "",
       process: initialData?.process || "washed",
       variety: initialData?.variety || "",
-      purchase_date: initialData?.purchase_date
-        ? new Date(initialData.purchase_date)
-        : new Date(),
-      roast_date: initialData?.roast_date
-        ? new Date(initialData.roast_date)
-        : new Date(),
+      purchase_date: initialData?.purchase_date || new Date().toISOString().split('T')[0],
+      roast_date: initialData?.roast_date || new Date().toISOString().split('T')[0],
       supplier: initialData?.supplier || "",
       cost: initialData?.cost || "",
       total_grams: initialData?.total_grams || "",
@@ -172,12 +166,8 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
         altitude: data.altitude ? parseInt(data.altitude) : undefined,
         process: data.process,
         variety: data.variety || undefined,
-        purchase_date: data.purchase_date
-          ? data.purchase_date.toISOString().split("T")[0]
-          : undefined,
-        roast_date: data.roast_date
-          ? data.roast_date.toISOString().split("T")[0]
-          : undefined,
+        purchase_date: data.purchase_date,
+        roast_date: data.roast_date,
         supplier: data.supplier,
         cost: parseFloat(data.cost),
         total_grams: parseInt(data.total_grams),
@@ -204,7 +194,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
       }
 
       toast.success("Bean added successfully!");
-      form.reset();
+      reset();
       onSuccess?.();
     } catch (error) {
       console.error("Error adding bean:", error);
@@ -215,443 +205,303 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
   };
 
   const handleCancel = () => {
-    form.reset();
+    reset();
     onCancel?.();
   };
 
   return (
-    <ThemedView noBackground style={styles.container}>
-      <ThemedScrollView
-        paddingVertical={0}
-        paddingHorizontal={0}
-        style={styles.scrollView}
+    <Container scrollable>
+      <Section
+        title="Basic Information"
+        subtitle="Essential coffee bean details"
+        spacing="xl"
       >
-        <Form {...form}>
-          <ThemedView style={styles.form} noBackground>
-            {/* Basic Information Section - Required Fields Only */}
-            <ThemedCollapsible
-              title="Basic Information"
-              subtitle="Essential coffee details"
-              defaultOpen={true}
-              variant="ghost"
-              showBorder={false}
-              noPadding={true}
-              noBackground={true}
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bean Name *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Ethiopian Yirgacheffe"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Bean Name"
+              placeholder="Ethiopian Yirgacheffe"
+              value={watch("name")}
+              onChangeText={(value) => setValue("name", value)}
+              error={errors.name?.message}
+              required
+            />
+
+            <Input
+              label="Origin"
+              placeholder="Ethiopia"
+              value={watch("origin")}
+              onChangeText={(value) => setValue("origin", value)}
+              error={errors.origin?.message}
+              required
+            />
+
+            <Input
+              label="Supplier"
+              placeholder="Blue Bottle Coffee"
+              value={watch("supplier")}
+              onChangeText={(value) => setValue("supplier", value)}
+              error={errors.supplier?.message}
+              required
+            />
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Processing & Roast"
+        subtitle="Process method and roast characteristics"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Process Method *
+              </Text>
+              <View style={styles.selectOptions}>
+                {processOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("process") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("process", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Roast Level *
+              </Text>
+              <View style={styles.selectOptions}>
+                {roastLevelOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("roast_level") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("roast_level", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Purchase & Inventory"
+        subtitle="Purchase details and inventory tracking"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Purchase Date"
+              type="date"
+              value={watch("purchase_date")}
+              onChangeText={(value) => setValue("purchase_date", value)}
+              error={errors.purchase_date?.message}
+              required
+            />
+
+            <Input
+              label="Roast Date"
+              type="date"
+              value={watch("roast_date")}
+              onChangeText={(value) => setValue("roast_date", value)}
+              error={errors.roast_date?.message}
+              required
+            />
+
+            <View style={styles.row}>
+              <Input
+                label="Cost ($)"
+                placeholder="24.95"
+                type="number"
+                value={watch("cost")}
+                onChangeText={(value) => setValue("cost", value)}
+                error={errors.cost?.message}
+                style={{ flex: 1, marginRight: 8 }}
+                required
               />
 
-              <FormField
-                control={form.control}
-                name="origin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Origin *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Ethiopia"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <Input
+                label="Total (g)"
+                placeholder="340"
+                type="number"
+                value={watch("total_grams")}
+                onChangeText={(value) => setValue("total_grams", value)}
+                error={errors.total_grams?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+                required
+              />
+            </View>
+
+            <Input
+              label="Remaining Grams"
+              placeholder="340"
+              type="number"
+              value={watch("remaining_grams")}
+              onChangeText={(value) => setValue("remaining_grams", value)}
+              error={errors.remaining_grams?.message}
+              required
+            />
+          </View>
+        </Card>
+      </Section>
+
+      <Section
+        title="Additional Details"
+        subtitle="Optional coffee characteristics and notes"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.row}>
+              <Input
+                label="Farm"
+                placeholder="Chelchele Washing Station"
+                value={watch("farm")}
+                onChangeText={(value) => setValue("farm", value)}
+                style={{ flex: 1, marginRight: 8 }}
               />
 
-              <FormField
-                control={form.control}
-                name="process"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Process *</FormLabel>
-                    <FormControl>
-                      <ThemedSelect
-                        options={processOptions}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <Input
+                label="Region"
+                placeholder="Yirgacheffe"
+                value={watch("region")}
+                onChangeText={(value) => setValue("region", value)}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
+
+            <View style={styles.row}>
+              <Input
+                label="Altitude (m)"
+                placeholder="1800"
+                type="number"
+                value={watch("altitude")}
+                onChangeText={(value) => setValue("altitude", value)}
+                style={{ flex: 1, marginRight: 8 }}
               />
 
-              <FormField
-                control={form.control}
-                name="roast_level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Roast Level *</FormLabel>
-                    <FormControl>
-                      <ThemedSelect
-                        options={roastLevelOptions}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <Input
+                label="Variety"
+                placeholder="Heirloom"
+                value={watch("variety")}
+                onChangeText={(value) => setValue("variety", value)}
+                style={{ flex: 1, marginLeft: 8 }}
               />
-            </ThemedCollapsible>
+            </View>
 
-            {/* Purchase & Inventory Section - Required Fields */}
-            <ThemedCollapsible
-              title="Purchase & Inventory"
-              subtitle="Purchase details and inventory tracking"
-              defaultOpen={true}
-              variant="ghost"
-              showBorder={false}
-              noPadding={true}
-              noBackground={true}
-            >
-              <FormField
-                control={form.control}
-                name="purchase_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purchase Date *</FormLabel>
-                    <FormControl>
-                      <ThemedDatePicker
-                        value={field.value}
-                        onDateChange={field.onChange}
-                        placeholder="Select purchase date"
-                        error={form.formState.errors.purchase_date?.message}
-                        maximumDate={new Date()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <Input
+              label="Tasting Notes"
+              placeholder="fruity, bright, citrus (comma separated)"
+              value={watch("tasting_notes")}
+              onChangeText={(value) => setValue("tasting_notes", value)}
+            />
 
-              <FormField
-                control={form.control}
-                name="roast_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Roast Date *</FormLabel>
-                    <FormControl>
-                      <ThemedDatePicker
-                        value={field.value}
-                        onDateChange={field.onChange}
-                        placeholder="Select roast date"
-                        error={form.formState.errors.roast_date?.message}
-                        maximumDate={new Date()}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Rating (Optional)
+              </Text>
+              <View style={styles.selectOptions}>
+                {ratingOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("rating") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("rating", option.value)}
+                    style={styles.ratingButton}
+                  />
+                ))}
+              </View>
+            </View>
 
-              <FormField
-                control={form.control}
-                name="supplier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Supplier *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Blue Bottle Coffee"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <Input
+              label="Official Description"
+              placeholder="Roaster's official tasting notes and description..."
+              multiline
+              numberOfLines={3}
+              value={watch("official_description")}
+              onChangeText={(value) => setValue("official_description", value)}
+            />
 
-              <FormField
-                control={form.control}
-                name="cost"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cost ($) *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="24.95"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <Input
+              label="My Notes"
+              placeholder="Your personal notes about this bean..."
+              multiline
+              numberOfLines={3}
+              value={watch("my_notes")}
+              onChangeText={(value) => setValue("my_notes", value)}
+            />
+          </View>
+        </Card>
+      </Section>
 
-              <FormField
-                control={form.control}
-                name="total_grams"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Grams *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="340"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="remaining_grams"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Remaining Grams *</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="340"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </ThemedCollapsible>
-
-            {/* Advanced Parameters Section - All Optional Fields */}
-            <ThemedCollapsible
-              title="Advanced Parameters"
-              subtitle="Detailed coffee information (optional)"
-              defaultOpen={false}
-              variant="ghost"
-              showBorder={false}
-              noPadding={true}
-              noBackground={true}
-            >
-              <FormField
-                control={form.control}
-                name="farm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Farm</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Chelchele Washing Station"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Region</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Yirgacheffe"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="altitude"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Altitude (meters)</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="1800"
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="variety"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Variety</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Heirloom"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tasting_notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tasting Notes</FormLabel>
-                    <FormControl>
-                      <ThemedInput
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="fruity, bright, citrus"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="official_description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Official Description</FormLabel>
-                    <FormControl>
-                      <ThemedTextArea
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Roaster's official tasting notes and description..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="my_notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>My Notes</FormLabel>
-                    <FormControl>
-                      <ThemedTextArea
-                        value={field.value}
-                        onChangeText={field.onChange}
-                        onBlur={field.onBlur}
-                        placeholder="Your personal notes about this bean..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rating"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rating</FormLabel>
-                    <FormControl>
-                      <ThemedSelect
-                        options={ratingOptions}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Rate this bean"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </ThemedCollapsible>
-
-            {/* Form Actions */}
-            <ThemedView style={styles.actions} noBackground>
-              <ThemedButton
-                title="Add Bean"
-                onPress={form.handleSubmit(onSubmit)}
-                style={styles.submitButton}
-                loading={isLoading}
-                disabled={isLoading}
-              />
-              <ThemedButton
-                title="Cancel"
-                variant="outline"
-                onPress={handleCancel}
-                style={styles.cancelButton}
-                disabled={isLoading}
-              />
-            </ThemedView>
-          </ThemedView>
-        </Form>
-      </ThemedScrollView>
-    </ThemedView>
+      <Section
+        title="Actions"
+        subtitle="Save or cancel your changes"
+        spacing="xl"
+      >
+        <View style={styles.actions}>
+          <Button
+            title="Add Bean"
+            onPress={handleSubmit(onSubmit)}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            disabled={isLoading}
+          />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onPress={handleCancel}
+            disabled={isLoading}
+          />
+        </View>
+      </Section>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+const styles = {
+  fieldGroup: {
+    gap: 16,
   },
-  scrollView: {
-    flex: 1,
+  row: {
+    flexDirection: 'row' as const,
   },
-  form: {
-    padding: 16,
-    gap: 8, // Reduced from 16 to 8
+  selectField: {
+    gap: 8,
+  },
+  selectLabel: {
+    marginBottom: 4,
+  },
+  selectOptions: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+  },
+  optionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  ratingButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   actions: {
-    flexDirection: "column",
-    gap: 6, // Reduced from 12 to 6
-    marginTop: 12, // Reduced from 24 to 12
-    marginBottom: 16, // Reduced from 32 to 16
+    gap: 12,
   },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 1,
-  },
-});
+};

@@ -2,18 +2,18 @@ import { useAuth } from "@/context/AuthContext";
 import { BrewersService, type BrewerInput } from "@/lib/services/brewers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { StyleSheet } from "react-native";
+import { useForm } from "react-hook-form";
+import { View } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-// UI Components
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
+// Professional UI Components
+import { Container } from "@/components/ui/Container";
+import { Section } from "@/components/ui/Section";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 // Brewer form validation schema - only fields that exist in database
 const brewerFormSchema = z.object({
@@ -54,7 +54,7 @@ interface BrewerFormProps {
 }
 
 // Options for selects
-const brewerTypeOptions: SelectOption[] = [
+const brewerTypeOptions = [
   { label: "Pour Over", value: "pour-over" },
   { label: "Immersion", value: "immersion" },
   { label: "Espresso Machine", value: "espresso" },
@@ -65,6 +65,15 @@ const brewerTypeOptions: SelectOption[] = [
   { label: "Moka Pot", value: "moka" },
 ];
 
+const materialOptions = [
+  { label: "Ceramic", value: "ceramic" },
+  { label: "Glass", value: "glass" },
+  { label: "Plastic", value: "plastic" },
+  { label: "Stainless Steel", value: "stainless-steel" },
+  { label: "Aluminum", value: "aluminum" },
+  { label: "Other", value: "other" },
+];
+
 export function BrewerForm({
   onSuccess,
   onCancel,
@@ -73,10 +82,14 @@ export function BrewerForm({
 }: BrewerFormProps) {
   const { user } = useAuth();
 
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const {
-    control,
+    register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    watch,
+    setValue,
+    formState: { errors },
     reset,
   } = useForm<BrewerFormData>({
     resolver: zodResolver(brewerFormSchema),
@@ -93,11 +106,13 @@ export function BrewerForm({
     },
   });
 
-  const handleFormSubmit = async (data: BrewerFormData) => {
-    if (!user) {
-      toast.error("You must be logged in to save a brewer");
+  const onSubmit = async (data: BrewerFormData) => {
+    if (!user?.id) {
+      toast.error("User not authenticated");
       return;
     }
+
+    setIsLoading(true);
 
     try {
       // Transform form data to match service expectations (only available fields)
@@ -130,14 +145,17 @@ export function BrewerForm({
             ? "Brewer updated successfully!"
             : "Brewer created successfully!"
         );
-        onSuccess(result.data);
         reset();
+        onSuccess(result.data);
       } else {
-        toast.error(result.error || "Failed to save brewer");
+        console.error("Error saving brewer:", result.error);
+        toast.error(result.error || "Failed to save brewer. Please try again.");
       }
     } catch (error) {
       console.error("Error saving brewer:", error);
-      toast.error("An unexpected error occurred");
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,193 +165,177 @@ export function BrewerForm({
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
+    <Container scrollable>
+      <Section
+        title="Basic Information"
+        subtitle="Essential brewing equipment details"
+        spacing="xl"
       >
-        <ThemedView style={styles.form}>
-          {/* Basic Info */}
-          <ThemedView style={styles.section}>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Brewer Name *"
-                  placeholder="e.g., My V60, Kitchen Chemex"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.name?.message}
-                  style={styles.input}
-                />
-              )}
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Brewer Name"
+              placeholder="My V60, Kitchen Chemex"
+              value={watch("name")}
+              onChangeText={(value) => setValue("name", value)}
+              error={errors.name?.message}
+              required
             />
 
-            <Controller
-              control={control}
-              name="brand"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Brand *"
-                  placeholder="e.g., Hario, Chemex, AeroPress"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.brand?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+            <View style={styles.row}>
+              <Input
+                label="Brand"
+                placeholder="Hario, Chemex, AeroPress"
+                value={watch("brand")}
+                onChangeText={(value) => setValue("brand", value)}
+                error={errors.brand?.message}
+                style={{ flex: 1, marginRight: 8 }}
+                required
+              />
 
-            <Controller
-              control={control}
-              name="model"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Model *"
-                  placeholder="e.g., V60-02, Classic, Original"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.model?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+              <Input
+                label="Model"
+                placeholder="V60-02, Classic, Original"
+                value={watch("model")}
+                onChangeText={(value) => setValue("model", value)}
+                error={errors.model?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+                required
+              />
+            </View>
+          </View>
+        </Card>
+      </Section>
 
-            <Controller
-              control={control}
-              name="type"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Brewer Type *"
-                  value={value}
-                  onValueChange={onChange}
-                  options={brewerTypeOptions}
-                  error={errors.type?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+      <Section
+        title="Brewing Method"
+        subtitle="Type and brewing characteristics"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <View style={styles.selectField}>
+              <Text variant="caption" color="secondary" style={styles.selectLabel}>
+                Brewer Type *
+              </Text>
+              <View style={styles.selectOptions}>
+                {brewerTypeOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    title={option.label}
+                    variant={watch("type") === option.value ? "primary" : "secondary"}
+                    size="sm"
+                    onPress={() => setValue("type", option.value as any)}
+                    style={styles.optionButton}
+                  />
+                ))}
+              </View>
+            </View>
 
-            <Controller
-              control={control}
-              name="capacity_ml"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Capacity (ml)"
-                  placeholder="e.g., 500, 900"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.capacity_ml?.message}
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-              )}
-            />
+            <View style={styles.row}>
+              <Input
+                label="Capacity (ml)"
+                placeholder="500"
+                type="number"
+                value={watch("capacity_ml")}
+                onChangeText={(value) => setValue("capacity_ml", value)}
+                error={errors.capacity_ml?.message}
+                style={{ flex: 1, marginRight: 8 }}
+              />
 
-            <Controller
-              control={control}
-              name="material"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Material"
-                  placeholder="e.g., ceramic, glass, plastic"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.material?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+              <Input
+                label="Material"
+                placeholder="ceramic, glass, plastic"
+                value={watch("material")}
+                onChangeText={(value) => setValue("material", value)}
+                error={errors.material?.message}
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
 
-            <Controller
-              control={control}
-              name="filter_type"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Filter Type"
-                  placeholder="e.g., V60 02, Chemex Square, Metal"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.filter_type?.message}
-                  style={styles.input}
-                />
-              )}
+            <Input
+              label="Filter Type"
+              placeholder="V60 02, Chemex Square, Metal"
+              value={watch("filter_type")}
+              onChangeText={(value) => setValue("filter_type", value)}
+              error={errors.filter_type?.message}
             />
+          </View>
+        </Card>
+      </Section>
 
-            <Controller
-              control={control}
-              name="notes"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedTextArea
-                  label="Notes"
-                  placeholder="Any additional notes about this brewer..."
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.notes?.message}
-                  style={styles.input}
-                  rows={3}
-                />
-              )}
+      <Section
+        title="Additional Details"
+        subtitle="Optional notes and specifications"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.fieldGroup}>
+            <Input
+              label="Notes"
+              placeholder="Any additional notes about this brewer..."
+              multiline
+              numberOfLines={3}
+              value={watch("notes")}
+              onChangeText={(value) => setValue("notes", value)}
+              error={errors.notes?.message}
             />
-          </ThemedView>
+          </View>
+        </Card>
+      </Section>
 
-          {/* Form Actions */}
-          <ThemedView style={styles.buttonContainer}>
-            <ThemedButton
-              title="Cancel"
-              onPress={handleCancel}
-              variant="outline"
-              style={styles.cancelButton}
-            />
-            <ThemedButton
-              title={isEditing ? "Update Brewer" : "Create Brewer"}
-              onPress={handleSubmit(handleFormSubmit)}
-              loading={isSubmitting}
-              style={styles.submitButton}
-            />
-          </ThemedView>
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+      <Section
+        title="Actions"
+        subtitle="Save or cancel your changes"
+        spacing="xl"
+      >
+        <View style={styles.actions}>
+          <Button
+            title={isEditing ? "Update Brewer" : "Add Brewer"}
+            onPress={handleSubmit(onSubmit)}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            disabled={isLoading}
+          />
+          <Button
+            title="Cancel"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onPress={handleCancel}
+            disabled={isLoading}
+          />
+        </View>
+      </Section>
+    </Container>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  form: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  section: {
+const styles = {
+  fieldGroup: {
     gap: 16,
-    marginBottom: 8,
   },
-  input: {
-    marginBottom: 8,
+  row: {
+    flexDirection: 'row' as const,
   },
-  buttonContainer: {
-    flexDirection: "row",
+  selectField: {
+    gap: 8,
+  },
+  selectLabel: {
+    marginBottom: 4,
+  },
+  selectOptions: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 8,
+  },
+  optionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  actions: {
     gap: 12,
-    marginTop: 24,
-    paddingTop: 16,
   },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 2,
-  },
-});
+};

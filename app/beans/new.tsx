@@ -1,5 +1,5 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { BeanForm } from "@/forms/BeanForm";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -19,8 +19,8 @@ export default function NewBeanScreen() {
   };
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="Add New Bean"
         subtitle="Coffee inventory management"
         action={{
@@ -30,7 +30,7 @@ export default function NewBeanScreen() {
       />
 
       <BeanForm onSuccess={handleSuccess} onCancel={handleCancel} />
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

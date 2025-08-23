@@ -1,5 +1,5 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { BrewprintForm } from "@/forms/BrewprintForm";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo } from "react";
@@ -37,8 +37,8 @@ export default function NewBrewprintScreen() {
   const title = initialData ? "Duplicate Recipe" : "New Recipe";
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title={title}
         subtitle={initialData ? "Duplicate existing recipe" : "Create new recipe"}
         action={{
@@ -52,7 +52,7 @@ export default function NewBrewprintScreen() {
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

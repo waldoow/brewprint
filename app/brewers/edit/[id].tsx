@@ -1,6 +1,6 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Text } from "@/components/ui/Text";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { BrewersService } from "@/lib/services/brewers";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -82,8 +82,8 @@ export default function EditBrewerScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Loading..."
           action={{
             title: "Back",
@@ -91,17 +91,17 @@ export default function EditBrewerScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading brewer details...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="Edit Brewer"
         subtitle="Update brewing equipment"
         action={{
@@ -118,7 +118,7 @@ export default function EditBrewerScreen() {
           isEditing={true}
         />
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

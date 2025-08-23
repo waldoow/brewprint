@@ -1,25 +1,25 @@
 import React from 'react';
-import { Text, TextStyle } from 'react-native';
+import { Text as RNText, TextStyle } from 'react-native';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface ProfessionalTextProps {
+interface TextProps {
   children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'label';
+  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'label' | 'lg' | 'xl' | '2xl' | '3xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
-  color?: 'primary' | 'secondary' | 'tertiary' | 'inverse';
+  color?: 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'accent';
   align?: 'left' | 'center' | 'right';
   style?: TextStyle;
 }
 
-export function ProfessionalText({
+export function Text({
   children,
   variant = 'body',
   weight = 'normal',
   color = 'primary',
   align = 'left',
   style,
-}: ProfessionalTextProps) {
+}: TextProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -79,14 +79,41 @@ export function ProfessionalText({
           lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.normal,
           fontWeight: theme.typography.fontWeight.medium,
         };
+      case 'lg':
+        return {
+          ...baseStyle,
+          fontSize: theme.typography.fontSize.lg,
+          lineHeight: theme.typography.fontSize.lg * theme.typography.lineHeight.normal,
+        };
+      case 'xl':
+        return {
+          ...baseStyle,
+          fontSize: theme.typography.fontSize.xl,
+          lineHeight: theme.typography.fontSize.xl * theme.typography.lineHeight.normal,
+          fontWeight: theme.typography.fontWeight.semibold,
+        };
+      case '2xl':
+        return {
+          ...baseStyle,
+          fontSize: theme.typography.fontSize['2xl'],
+          lineHeight: theme.typography.fontSize['2xl'] * theme.typography.lineHeight.tight,
+          fontWeight: theme.typography.fontWeight.bold,
+        };
+      case '3xl':
+        return {
+          ...baseStyle,
+          fontSize: theme.typography.fontSize['3xl'],
+          lineHeight: theme.typography.fontSize['3xl'] * theme.typography.lineHeight.tight,
+          fontWeight: theme.typography.fontWeight.bold,
+        };
       default:
         return baseStyle;
     }
   };
 
   return (
-    <Text style={[getTextStyle(), style]}>
+    <RNText style={[getTextStyle(), style]}>
       {children}
-    </Text>
+    </RNText>
   );
 }

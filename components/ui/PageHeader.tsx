@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
-import { ProfessionalText } from './Text';
-import { ProfessionalButton } from './Button';
+import { Text } from './Text';
+import { Button } from './Button';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface ProfessionalHeaderProps {
+interface PageHeaderProps {
   title: string;
   subtitle?: string;
   action?: {
@@ -15,12 +15,12 @@ interface ProfessionalHeaderProps {
   style?: ViewStyle;
 }
 
-export function ProfessionalHeader({
+export function PageHeader({
   title,
   subtitle,
   action,
   style,
-}: ProfessionalHeaderProps) {
+}: PageHeaderProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -35,22 +35,22 @@ export function ProfessionalHeader({
         flex: 1,
         marginRight: action ? theme.spacing.lg : 0,
       }}>
-        <ProfessionalText variant="h2" weight="bold">
+        <Text variant="h2" weight="bold">
           {title}
-        </ProfessionalText>
+        </Text>
         {subtitle && (
-          <ProfessionalText 
+          <Text 
             variant="body" 
             color="secondary" 
             style={{ marginTop: theme.spacing.xs }}
           >
             {subtitle}
-          </ProfessionalText>
+          </Text>
         )}
       </View>
       
       {action && (
-        <ProfessionalButton
+        <Button
           title={action.title}
           onPress={action.onPress}
           variant="primary"
@@ -60,4 +60,3 @@ export function ProfessionalHeader({
     </View>
   );
 }
-

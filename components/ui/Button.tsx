@@ -1,10 +1,10 @@
 import React from 'react';
 import { TouchableOpacity, ViewStyle, ActivityIndicator } from 'react-native';
-import { ProfessionalText } from './Text';
+import { Text } from './Text';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface ProfessionalButtonProps {
+interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
@@ -15,7 +15,7 @@ interface ProfessionalButtonProps {
   style?: ViewStyle;
 }
 
-export function ProfessionalButton({
+export function Button({
   title,
   onPress,
   variant = 'primary',
@@ -24,7 +24,7 @@ export function ProfessionalButton({
   disabled = false,
   fullWidth = false,
   style,
-}: ProfessionalButtonProps) {
+}: ButtonProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -113,13 +113,13 @@ export function ProfessionalButton({
           style={{ marginRight: theme.spacing.sm }}
         />
       )}
-      <ProfessionalText
+      <Text
         variant="label"
         weight="medium"
         color={getTextColor()}
       >
         {title}
-      </ProfessionalText>
+      </Text>
     </TouchableOpacity>
   );
 }

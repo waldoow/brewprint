@@ -3,19 +3,21 @@ import { View, ScrollView, SafeAreaView, StatusBar, ViewStyle } from 'react-nati
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface ProfessionalContainerProps {
+interface ContainerProps {
   children: React.ReactNode;
   scrollable?: boolean;
   padding?: boolean;
   style?: ViewStyle;
+  refreshControl?: React.ReactElement;
 }
 
-export function ProfessionalContainer({
+export function Container({
   children,
   scrollable = false,
   padding = true,
   style,
-}: ProfessionalContainerProps) {
+  refreshControl,
+}: ContainerProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -32,9 +34,9 @@ export function ProfessionalContainer({
       style={containerStyle}
       contentContainerStyle={{
         paddingVertical: theme.spacing.lg,
-        gap: theme.spacing.lg,
       }}
       showsVerticalScrollIndicator={false}
+      refreshControl={refreshControl}
     >
       {children}
     </ScrollView>

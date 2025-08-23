@@ -1,6 +1,6 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
-import { ProfessionalText } from "@/components/ui/professional/Text";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Text } from "@/components/ui/Text";
 import { BeanForm } from "@/forms/BeanForm";
 import { BeansService } from "@/lib/services/beans";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -69,8 +69,8 @@ export default function EditBeanScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Loading..."
           action={{
             title: "Back",
@@ -78,17 +78,17 @@ export default function EditBeanScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading bean details...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="Edit Bean"
         subtitle="Update coffee inventory"
         action={{
@@ -105,7 +105,7 @@ export default function EditBeanScreen() {
           isEditing={true}
         />
       )}
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

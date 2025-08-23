@@ -100,36 +100,61 @@ export const RADIUS = {
   xl: 12,
 } as const;
 
-// Theme configurations
+// Runna-inspired subtle design system  
 export const LightTheme = {
   colors: {
     ...COLORS,
-    background: COLORS.white,
-    surface: COLORS.gray[50],
-    surfaceSecondary: COLORS.white,
-    border: COLORS.gray[200],
-    borderSubtle: COLORS.gray[100],
+    background: '#F5F5F5', // Runna's light gray background
+    surface: COLORS.white, // Clean white cards with subtle border
+    surfaceElevated: COLORS.white, // White cards with shadow
+    border: '#E1E5E9', // Subtle card borders for contrast
+    borderSubtle: '#F0F0F0', // Ultra-subtle borders
     text: {
-      primary: COLORS.gray[900],
-      secondary: COLORS.gray[600],
+      primary: '#1A1A1A', // Slightly softer than pure black
+      secondary: COLORS.gray[600], 
       tertiary: COLORS.gray[500],
       inverse: COLORS.white,
     },
   },
   spacing: SPACING,
   typography: TYPOGRAPHY,
-  shadows: SHADOWS,
+  shadows: {
+    // Runna-style subtle shadows
+    sm: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    lg: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.08,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+  },
   radius: RADIUS,
 } as const;
 
 export const DarkTheme = {
   colors: {
     ...COLORS,
-    background: COLORS.gray[900],
-    surface: COLORS.gray[800],
-    surfaceSecondary: COLORS.gray[700],
+    background: COLORS.gray[900], // Dark app background
+    backgroundSecondary: COLORS.gray[800], // Subtle secondary background
+    surface: COLORS.gray[800], // Cards on dark background
+    surfaceSecondary: COLORS.gray[750] || '#1F2832', // Subtle card variant
+    surfaceElevated: COLORS.gray[700], // Elevated cards
     border: COLORS.gray[700],
-    borderSubtle: COLORS.gray[800],
+    borderSubtle: COLORS.gray[750] || '#2D3748', // Very subtle borders
     text: {
       primary: COLORS.white,
       secondary: COLORS.gray[300],

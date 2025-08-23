@@ -1,5 +1,5 @@
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalHeader } from "@/components/ui/professional/Header";
+import { Container } from "@/components/ui/Container";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -19,8 +19,8 @@ export default function NewBrewerScreen() {
   };
 
   return (
-    <ProfessionalContainer>
-      <ProfessionalHeader
+    <Container>
+      <PageHeader
         title="New Brewer"
         subtitle="Add brewing equipment"
         action={{
@@ -33,7 +33,7 @@ export default function NewBrewerScreen() {
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

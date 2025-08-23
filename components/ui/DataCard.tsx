@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
-import { ProfessionalCard } from './Card';
-import { ProfessionalText } from './Text';
+import { Card } from './Card';
+import { Text } from './Text';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -15,7 +15,7 @@ interface DataPoint {
   };
 }
 
-interface ProfessionalDataCardProps {
+interface DataCardProps {
   title: string;
   subtitle?: string;
   data: DataPoint[];
@@ -24,14 +24,14 @@ interface ProfessionalDataCardProps {
   style?: ViewStyle;
 }
 
-export function ProfessionalDataCard({
+export function DataCard({
   title,
   subtitle,
   data,
   layout = 'vertical',
   variant = 'default',
   style,
-}: ProfessionalDataCardProps) {
+}: DataCardProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -54,9 +54,9 @@ export function ProfessionalDataCard({
         ]}
       >
         <View style={styles.dataPointHeader}>
-          <ProfessionalText variant="caption" color="secondary">
+          <Text variant="caption" color="secondary">
             {point.label}
-          </ProfessionalText>
+          </Text>
           {point.change && (
             <View style={[
               styles.changeIndicator,
@@ -64,22 +64,22 @@ export function ProfessionalDataCard({
                                 point.change.direction === 'down' ? theme.colors.error : 
                                 theme.colors.gray[400] }
             ]}>
-              <ProfessionalText variant="caption" color="inverse">
+              <Text variant="caption" color="inverse">
                 {point.change.direction === 'up' ? '+' : point.change.direction === 'down' ? '-' : ''}
                 {Math.abs(point.change.value)}
-              </ProfessionalText>
+              </Text>
             </View>
           )}
         </View>
         
         <View style={styles.dataValue}>
-          <ProfessionalText variant="h4" weight="semibold" color="primary">
+          <Text variant="h4" weight="semibold" color="primary">
             {point.value}
-          </ProfessionalText>
+          </Text>
           {point.unit && (
-            <ProfessionalText variant="body" color="tertiary" style={{ marginLeft: 2 }}>
+            <Text variant="body" color="tertiary" style={{ marginLeft: 2 }}>
               {point.unit}
-            </ProfessionalText>
+            </Text>
           )}
         </View>
       </View>
@@ -97,22 +97,22 @@ export function ProfessionalDataCard({
   };
 
   return (
-    <ProfessionalCard variant={variant} style={style}>
+    <Card variant={variant} style={style}>
       <View style={styles.header}>
-        <ProfessionalText variant="h4" weight="semibold">
+        <Text variant="h4" weight="semibold">
           {title}
-        </ProfessionalText>
+        </Text>
         {subtitle && (
-          <ProfessionalText variant="caption" color="secondary" style={{ marginTop: 2 }}>
+          <Text variant="caption" color="secondary" style={{ marginTop: 2 }}>
             {subtitle}
-          </ProfessionalText>
+          </Text>
         )}
       </View>
       
       <View style={[getContainerStyle(), { marginTop: theme.spacing.lg }]}>
         {data.map(renderDataPoint)}
       </View>
-    </ProfessionalCard>
+    </Card>
   );
 }
 

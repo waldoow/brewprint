@@ -7,11 +7,11 @@ import {
   Switch,
 } from 'react-native';
 import { router } from 'expo-router';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -118,8 +118,8 @@ export default function PreferencesScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Preferences"
           subtitle="Customize your coffee tracking experience"
           action={{
@@ -128,17 +128,17 @@ export default function PreferencesScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading preferences...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <PageHeader
         title="Preferences"
         subtitle="Customize your coffee tracking experience"
         action={{
@@ -153,16 +153,16 @@ export default function PreferencesScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Units Section */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
+        <Card variant="default" style={styles.section}>
+          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
             Units
-          </ProfessionalText>
+          </Text>
 
           {/* Temperature Unit */}
           <View style={styles.settingRow}>
-            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
+            <Text variant="body" weight="medium" style={styles.settingLabel}>
               Temperature
-            </ProfessionalText>
+            </Text>
             <View style={styles.unitOptions}>
               {TEMPERATURE_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -180,7 +180,7 @@ export default function PreferencesScreen() {
                   ]}
                   onPress={() => updatePreference('temperatureUnit', unit.value as 'celsius' | 'fahrenheit')}
                 >
-                  <ProfessionalText
+                  <Text
                     variant="caption"
                     style={[
                       styles.unitText,
@@ -188,7 +188,7 @@ export default function PreferencesScreen() {
                     ]}
                   >
                     {unit.label}
-                  </ProfessionalText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -196,9 +196,9 @@ export default function PreferencesScreen() {
 
           {/* Weight Unit */}
           <View style={styles.settingRow}>
-            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
+            <Text variant="body" weight="medium" style={styles.settingLabel}>
               Weight
-            </ProfessionalText>
+            </Text>
             <View style={styles.unitOptions}>
               {WEIGHT_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -216,7 +216,7 @@ export default function PreferencesScreen() {
                   ]}
                   onPress={() => updatePreference('weightUnit', unit.value as 'grams' | 'ounces')}
                 >
-                  <ProfessionalText
+                  <Text
                     variant="caption"
                     style={[
                       styles.unitText,
@@ -224,7 +224,7 @@ export default function PreferencesScreen() {
                     ]}
                   >
                     {unit.label}
-                  </ProfessionalText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -232,9 +232,9 @@ export default function PreferencesScreen() {
 
           {/* Volume Unit */}
           <View style={styles.settingRow}>
-            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
+            <Text variant="body" weight="medium" style={styles.settingLabel}>
               Volume
-            </ProfessionalText>
+            </Text>
             <View style={styles.unitOptions}>
               {VOLUME_UNITS.map((unit) => (
                 <TouchableOpacity
@@ -252,7 +252,7 @@ export default function PreferencesScreen() {
                   ]}
                   onPress={() => updatePreference('volumeUnit', unit.value as 'ml' | 'fl_oz')}
                 >
-                  <ProfessionalText
+                  <Text
                     variant="caption"
                     style={[
                       styles.unitText,
@@ -260,24 +260,24 @@ export default function PreferencesScreen() {
                     ]}
                   >
                     {unit.label}
-                  </ProfessionalText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Brewing Section */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
+        <Card variant="default" style={styles.section}>
+          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
             Brewing
-          </ProfessionalText>
+          </Text>
 
           {/* Default Brew Method */}
           <View style={styles.settingRow}>
-            <ProfessionalText variant="body" weight="medium" style={styles.settingLabel}>
+            <Text variant="body" weight="medium" style={styles.settingLabel}>
               Default Method
-            </ProfessionalText>
+            </Text>
             <View style={styles.methodOptions}>
               {BREW_METHODS.map((method) => (
                 <TouchableOpacity
@@ -295,7 +295,7 @@ export default function PreferencesScreen() {
                   ]}
                   onPress={() => updatePreference('defaultBrewMethod', method.value)}
                 >
-                  <ProfessionalText
+                  <Text
                     variant="caption"
                     style={[
                       styles.methodText,
@@ -303,7 +303,7 @@ export default function PreferencesScreen() {
                     ]}
                   >
                     {method.label}
-                  </ProfessionalText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -312,12 +312,12 @@ export default function PreferencesScreen() {
           {/* Auto-start Timer */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Auto-start Timer
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Start timer automatically when brewing begins
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={preferences.timerAutoStart}
@@ -330,12 +330,12 @@ export default function PreferencesScreen() {
           {/* Auto-save Brews */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Auto-save Brews
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Automatically save completed brewing sessions
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={preferences.autoSaveBrews}
@@ -348,12 +348,12 @@ export default function PreferencesScreen() {
           {/* Show Detailed Metrics */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Detailed Metrics
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Show advanced brewing metrics and analytics
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={preferences.showDetailedMetrics}
@@ -362,23 +362,23 @@ export default function PreferencesScreen() {
               thumbColor={preferences.showDetailedMetrics ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Interface Section */}
-        <ProfessionalCard variant="default" style={styles.section}>
-          <ProfessionalText variant="h4" weight="semibold" style={styles.sectionTitle}>
+        <Card variant="default" style={styles.section}>
+          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
             Interface
-          </ProfessionalText>
+          </Text>
 
           {/* Haptic Feedback */}
           <View style={styles.switchRow}>
             <View style={styles.switchInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Haptic Feedback
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Vibration feedback for button taps and interactions
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={preferences.hapticFeedback}
@@ -387,11 +387,11 @@ export default function PreferencesScreen() {
               thumbColor={preferences.hapticFeedback ? theme.colors.surface : theme.colors.textSecondary}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

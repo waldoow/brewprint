@@ -3,7 +3,7 @@ import { View, ViewStyle, TouchableOpacity, TouchableOpacityProps } from 'react-
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface ProfessionalCardProps extends TouchableOpacityProps {
+interface CardProps extends TouchableOpacityProps {
   children: React.ReactNode;
   variant?: 'default' | 'elevated' | 'outlined';
   padding?: 'sm' | 'md' | 'lg' | 'xl';
@@ -11,14 +11,14 @@ interface ProfessionalCardProps extends TouchableOpacityProps {
   onPress?: () => void;
 }
 
-export function ProfessionalCard({
+export function Card({
   children,
   variant = 'default',
   padding = 'md',
   style,
   onPress,
   ...props
-}: ProfessionalCardProps) {
+}: CardProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
@@ -31,9 +31,11 @@ export function ProfessionalCard({
     };
 
     const baseStyle: ViewStyle = {
-      backgroundColor: theme.colors.surfaceSecondary,
+      backgroundColor: theme.colors.surface,
       borderRadius: theme.radius.lg,
       padding: paddingMap[padding],
+      borderWidth: 1,
+      borderColor: theme.colors.border,
     };
 
     switch (variant) {
@@ -45,16 +47,11 @@ export function ProfessionalCard({
       case 'outlined':
         return {
           ...baseStyle,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
           backgroundColor: 'transparent',
         };
       case 'default':
       default:
-        return {
-          ...baseStyle,
-          ...theme.shadows.sm,
-        };
+        return baseStyle;
     }
   };
 

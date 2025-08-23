@@ -6,11 +6,11 @@ import {
   Switch,
 } from 'react-native';
 import { router } from 'expo-router';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -90,8 +90,8 @@ export default function NotificationsScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader
+      <Container>
+        <PageHeader
           title="Notifications"
           subtitle="Configure your notification preferences"
           action={{
@@ -100,17 +100,17 @@ export default function NotificationsScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading notification settings...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <PageHeader
         title="Notifications"
         subtitle="Configure your notification preferences"
         action={{
@@ -125,33 +125,33 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Info Banner */}
-        <ProfessionalCard variant="outlined" style={styles.infoBanner}>
-          <ProfessionalText variant="body" color="secondary" style={styles.infoText}>
+        <Card variant="outlined" style={styles.infoBanner}>
+          <Text variant="body" color="secondary" style={styles.infoText}>
             💡 Notification features are coming soon. Configure your preferences here and we&apos;ll enable them when ready.
-          </ProfessionalText>
-        </ProfessionalCard>
+          </Text>
+        </Card>
 
         {/* Brewing Notifications */}
-        <ProfessionalCard variant="default" style={styles.section}>
+        <Card variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ProfessionalText variant="h4" weight="semibold">
+            <Text variant="h4" weight="semibold">
               Brewing Notifications
-            </ProfessionalText>
+            </Text>
             <View style={styles.comingSoonBadge}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 Coming Soon
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Brewing Reminders
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Get reminded when it&apos;s time to start your next brew
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.brewingReminders}
@@ -164,12 +164,12 @@ export default function NotificationsScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Daily Brew Reminders
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Daily reminder to log your coffee brewing sessions
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.dailyBrewReminders}
@@ -182,12 +182,12 @@ export default function NotificationsScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Grinding Reminders
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Reminders to grind beans fresh before brewing
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.grindingReminders}
@@ -197,29 +197,29 @@ export default function NotificationsScreen() {
               disabled={true}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Inventory Notifications */}
-        <ProfessionalCard variant="default" style={styles.section}>
+        <Card variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ProfessionalText variant="h4" weight="semibold">
+            <Text variant="h4" weight="semibold">
               Inventory Alerts
-            </ProfessionalText>
+            </Text>
             <View style={styles.comingSoonBadge}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 Coming Soon
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Bean Expiration Alerts
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Get notified when your coffee beans are getting stale
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.beanExpirationAlerts}
@@ -229,29 +229,29 @@ export default function NotificationsScreen() {
               disabled={true}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
 
         {/* Progress Notifications */}
-        <ProfessionalCard variant="default" style={styles.section}>
+        <Card variant="default" style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ProfessionalText variant="h4" weight="semibold">
+            <Text variant="h4" weight="semibold">
               Progress & Reports
-            </ProfessionalText>
+            </Text>
             <View style={styles.comingSoonBadge}>
-              <ProfessionalText variant="caption" color="secondary">
+              <Text variant="caption" color="secondary">
                 Coming Soon
-              </ProfessionalText>
+              </Text>
             </View>
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Weekly Reports
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Weekly summary of your brewing activities and improvements
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.weeklyReports}
@@ -264,12 +264,12 @@ export default function NotificationsScreen() {
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <ProfessionalText variant="body" weight="medium">
+              <Text variant="body" weight="medium">
                 Achievement Notifications
-              </ProfessionalText>
-              <ProfessionalText variant="caption" color="secondary">
+              </Text>
+              <Text variant="caption" color="secondary">
                 Get notified when you reach brewing milestones
-              </ProfessionalText>
+              </Text>
             </View>
             <Switch
               value={settings.achievementNotifications}
@@ -279,11 +279,11 @@ export default function NotificationsScreen() {
               disabled={true}
             />
           </View>
-        </ProfessionalCard>
+        </Card>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

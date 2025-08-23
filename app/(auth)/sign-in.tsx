@@ -10,11 +10,12 @@ import {
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-import { ProfessionalContainer } from "@/components/ui/professional/Container";
-import { ProfessionalCard } from "@/components/ui/professional/Card";
-import { ProfessionalText } from "@/components/ui/professional/Text";
-import { ProfessionalButton } from "@/components/ui/professional/Button";
-import { ProfessionalInput } from "@/components/ui/professional/Input";
+import { Container } from "@/components/ui/Container";
+import { Card } from "@/components/ui/Card";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Section } from "@/components/ui/Section";
 import {
   Form,
   FormControl,
@@ -83,24 +84,26 @@ export default function SignIn({
   };
 
   return (
-    <ProfessionalContainer scrollable>
+    <Container scrollable>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
         <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.header}>
-            <ProfessionalText variant="h1" weight="semibold" style={styles.title}>
-              Welcome Back
-            </ProfessionalText>
-            <ProfessionalText variant="body" color="secondary" style={styles.subtitle}>
-              Sign in to your account to continue
-            </ProfessionalText>
-          </View>
+          <Section 
+            title="Welcome Back"
+            subtitle="Sign in to continue your coffee journey"
+            variant="accent"
+            spacing="xl"
+            style={{ marginBottom: 32 }}
+          />
 
-          {/* Form Card */}
-          <ProfessionalCard variant="default" style={styles.formCard}>
+          <Section 
+            title="Account Access"
+            variant="elevated"
+            spacing="lg"
+          >
+            <Card variant="elevated" style={styles.formCard}>
             <Form {...form}>
               <View style={styles.form}>
                 {/* Email Input */}
@@ -110,12 +113,12 @@ export default function SignIn({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <ProfessionalText variant="label" weight="medium">
+                        <Text variant="label" weight="medium">
                           Email
-                        </ProfessionalText>
+                        </Text>
                       </FormLabel>
                       <FormControl>
-                        <ProfessionalInput
+                        <Input
                           type="email"
                           placeholder="Enter your email"
                           value={field.value}
@@ -136,12 +139,12 @@ export default function SignIn({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <ProfessionalText variant="label" weight="medium">
+                        <Text variant="label" weight="medium">
                           Password
-                        </ProfessionalText>
+                        </Text>
                       </FormLabel>
                       <FormControl>
-                        <ProfessionalInput
+                        <Input
                           type="password"
                           placeholder="Enter your password"
                           value={field.value}
@@ -156,7 +159,7 @@ export default function SignIn({
                 />
 
                 {/* Forgot Password */}
-                <ProfessionalButton
+                <Button
                   variant="ghost"
                   title="Forgot your password?"
                   onPress={onForgotPassword}
@@ -164,7 +167,7 @@ export default function SignIn({
                 />
 
                 {/* Sign In Button */}
-                <ProfessionalButton
+                <Button
                   title="Sign In"
                   onPress={form.handleSubmit(onSubmit)}
                   disabled={isLoading}
@@ -173,22 +176,27 @@ export default function SignIn({
                 />
               </View>
             </Form>
-          </ProfessionalCard>
+            </Card>
+          </Section>
 
-          {/* Sign Up Link */}
-          <View style={styles.signUpContainer}>
-            <ProfessionalText variant="body" color="secondary" style={styles.signUpText}>
-              Don&apos;t have an account?{" "}
-            </ProfessionalText>
-            <ProfessionalButton
-              variant="ghost"
-              title="Sign Up"
+          <Section 
+            title="New to Brewprint?"
+            subtitle="Join thousands of coffee enthusiasts perfecting their craft"
+            variant="accent"
+            spacing="lg"
+          >
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
+              title="Create Your Account"
               onPress={onNavigateToSignUp}
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
             />
-          </View>
+          </Section>
         </View>
       </KeyboardAvoidingView>
-    </ProfessionalContainer>
+    </Container>
   );
 }
 

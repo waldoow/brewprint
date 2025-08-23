@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'expo-router';
 import { View } from 'react-native';
-import { ProfessionalText } from '@/components/ui/professional/Text';
+import { Text } from '@/components/ui/Text';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -20,9 +20,9 @@ export default function Index() {
         backgroundColor: theme.colors.background,
         padding: 32 
       }}>
-        <ProfessionalText variant="body" color="secondary">
+        <Text variant="body" color="secondary">
           Loading...
-        </ProfessionalText>
+        </Text>
       </View>
     );
   }

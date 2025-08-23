@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ProfessionalContainer } from '@/components/ui/professional/Container';
-import { ProfessionalHeader } from '@/components/ui/professional/Header';
-import { ProfessionalCard } from '@/components/ui/professional/Card';
-import { ProfessionalText } from '@/components/ui/professional/Text';
-import { ProfessionalButton } from '@/components/ui/professional/Button';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BeansService, type Bean } from '@/lib/services/beans';
@@ -45,8 +46,8 @@ export default function BeanDetailScreen() {
 
   if (loading) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader 
+      <Container>
+        <PageHeader 
           title="Bean Details"
           action={{
             title: 'Back',
@@ -54,47 +55,47 @@ export default function BeanDetailScreen() {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ProfessionalText variant="body" color="secondary">
+          <Text variant="body" color="secondary">
             Loading bean details...
-          </ProfessionalText>
+          </Text>
         </View>
-      </ProfessionalContainer>
+      </Container>
     );
   }
 
   if (!bean) {
     return (
-      <ProfessionalContainer>
-        <ProfessionalHeader 
+      <Container>
+        <PageHeader 
           title="Bean Not Found"
           action={{
             title: 'Back',
             onPress: () => router.back(),
           }}
         />
-        <ProfessionalCard variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <ProfessionalText 
+        <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
+          <Text 
             variant="h4" 
             weight="semibold" 
             style={{ textAlign: 'center', marginBottom: 8 }}
           >
             Bean Not Found
-          </ProfessionalText>
-          <ProfessionalText 
+          </Text>
+          <Text 
             variant="body" 
             color="secondary" 
             style={{ textAlign: 'center', marginBottom: 24 }}
           >
             The requested bean could not be found.
-          </ProfessionalText>
-          <ProfessionalButton
+          </Text>
+          <Button
             title="Back to Library"
             onPress={() => router.back()}
             variant="primary"
             fullWidth
           />
-        </ProfessionalCard>
-      </ProfessionalContainer>
+        </Card>
+      </Container>
     );
   }
 
@@ -112,270 +113,304 @@ export default function BeanDetailScreen() {
     freshnessStatus === 'Stale' ? theme.colors.error : theme.colors.gray[400];
 
   return (
-    <ProfessionalContainer scrollable>
-      <ProfessionalHeader
+    <Container scrollable>
+      <Section 
         title={bean.name}
         subtitle={`${bean.origin || 'Unknown Origin'} • ${bean.supplier || 'Independent Roaster'}`}
-        action={{
-          title: 'Edit',
-          onPress: () => router.push(`/beans/edit/${bean.id}`),
-        }}
-      />
+        spacing="xl"
+      >
+        <Button
+          title="Edit Bean Details"
+          variant="secondary"
+          size="lg"
+          fullWidth
+          onPress={() => router.push(`/beans/edit/${bean.id}`)}
+        />
+      </Section>
 
-      {/* Status Overview */}
-      <ProfessionalCard variant="elevated">
-        <View style={styles.statusRow}>
-          <View style={styles.statusItem}>
-            <ProfessionalText variant="caption" color="secondary">
-              Freshness
-            </ProfessionalText>
-            <View style={[styles.statusBadge, { backgroundColor: freshnessColor }]}>
-              <ProfessionalText variant="caption" color="inverse">
-                {freshnessStatus.toUpperCase()}
-              </ProfessionalText>
+      <Section 
+        title="Bean Status"
+        subtitle="Current freshness and inventory status"
+        spacing="lg"
+      >
+        <Card variant="default">
+          <View style={styles.statusRow}>
+            <View style={styles.statusItem}>
+              <Text variant="caption" color="secondary">
+                Freshness
+              </Text>
+              <View style={[styles.statusBadge, { backgroundColor: freshnessColor }]}>
+                <Text variant="caption" color="inverse">
+                  {freshnessStatus.toUpperCase()}
+                </Text>
+              </View>
+              {freshnessDays !== null && (
+                <Text variant="caption" color="secondary">
+                  {freshnessDays} days post-roast
+                </Text>
+              )}
+            </View>
+            
+            <View style={styles.statusItem}>
+              <Text variant="caption" color="secondary">
+                Remaining
+              </Text>
+              <Text variant="h4" weight="semibold">
+                {bean.remaining_grams || 0}g
+              </Text>
+              {bean.total_grams && (
+                <Text variant="caption" color="secondary">
+                  of {bean.total_grams}g total
+                </Text>
+              )}
+            </View>
+            
+            <View style={styles.statusItem}>
+              <Text variant="caption" color="secondary">
+                Roast Level
+              </Text>
+              <Text variant="body" weight="medium">
+                {bean.roast_level ? bean.roast_level.charAt(0).toUpperCase() + bean.roast_level.slice(1).replace('-', ' ') : 'Unknown'}
+              </Text>
             </View>
           </View>
-          
-          <View style={styles.statusItem}>
-            <ProfessionalText variant="caption" color="secondary">
-              Remaining
-            </ProfessionalText>
-            <ProfessionalText variant="h4" weight="semibold">
-              {bean.remaining_grams || 0}g
-            </ProfessionalText>
-          </View>
-          
-          <View style={styles.statusItem}>
-            <ProfessionalText variant="caption" color="secondary">
-              Roast Level
-            </ProfessionalText>
-            <ProfessionalText variant="body" weight="medium">
-              {bean.roast_level ? bean.roast_level.charAt(0).toUpperCase() + bean.roast_level.slice(1).replace('-', ' ') : 'Unknown'}
-            </ProfessionalText>
-          </View>
-        </View>
-      </ProfessionalCard>
+        </Card>
+      </Section>
 
-      {/* Origin Information */}
       {(bean.origin || bean.region || bean.farm || bean.altitude) && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-            Origin Details
-          </ProfessionalText>
-          
-          <View style={styles.detailsGrid}>
-            {bean.origin && (
-              <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Country
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.origin}
-                </ProfessionalText>
-              </View>
-            )}
-            
-            {bean.region && (
-              <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Region
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.region}
-                </ProfessionalText>
-              </View>
-            )}
-            
-            {bean.farm && (
-              <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Farm
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.farm}
-                </ProfessionalText>
-              </View>
-            )}
-            
-            {bean.altitude && (
-              <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Altitude
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.altitude}m
-                </ProfessionalText>
-              </View>
-            )}
-          </View>
-        </ProfessionalCard>
+        <Section
+          title="Origin Details"
+          subtitle="Where this coffee comes from"
+          spacing="lg"
+        >
+          <Card variant="default">
+            <View style={styles.detailsGrid}>
+              {bean.origin && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Country
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.origin}
+                  </Text>
+                </View>
+              )}
+              
+              {bean.region && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Region
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.region}
+                  </Text>
+                </View>
+              )}
+              
+              {bean.farm && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Farm
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.farm}
+                  </Text>
+                </View>
+              )}
+              
+              {bean.altitude && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Altitude
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.altitude}m
+                  </Text>
+                </View>
+              )}
+            </View>
+          </Card>
+        </Section>
       )}
 
-      {/* Processing & Variety */}
       {(bean.variety || bean.process) && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-            Processing & Variety
-          </ProfessionalText>
-          
+        <Section
+          title="Processing & Variety"
+          subtitle="Coffee variety and processing method"
+          spacing="lg"
+        >
+          <Card variant="default">
+            <View style={styles.detailsGrid}>
+              {bean.variety && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Variety
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.variety}
+                  </Text>
+                </View>
+              )}
+              
+              {bean.process && (
+                <View style={styles.detailRow}>
+                  <Text variant="caption" color="secondary">
+                    Process
+                  </Text>
+                  <Text variant="caption" weight="medium">
+                    {bean.process.charAt(0).toUpperCase() + bean.process.slice(1)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </Card>
+        </Section>
+      )}
+
+      <Section
+        title="Purchase Details"
+        subtitle="Purchase and roasting information"
+        spacing="lg"
+      >
+        <Card variant="default">
           <View style={styles.detailsGrid}>
-            {bean.variety && (
+            {bean.roast_date && (
               <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Variety
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.variety}
-                </ProfessionalText>
+                <Text variant="caption" color="secondary">
+                  Roast Date
+                </Text>
+                <Text variant="caption" weight="medium">
+                  {formatDate(bean.roast_date)}
+                </Text>
               </View>
             )}
             
-            {bean.process && (
+            {bean.purchase_date && (
               <View style={styles.detailRow}>
-                <ProfessionalText variant="caption" color="secondary">
-                  Process
-                </ProfessionalText>
-                <ProfessionalText variant="caption" weight="medium">
-                  {bean.process.charAt(0).toUpperCase() + bean.process.slice(1)}
-                </ProfessionalText>
+                <Text variant="caption" color="secondary">
+                  Purchase Date
+                </Text>
+                <Text variant="caption" weight="medium">
+                  {formatDate(bean.purchase_date)}
+                </Text>
+              </View>
+            )}
+            
+            {bean.cost && (
+              <View style={styles.detailRow}>
+                <Text variant="caption" color="secondary">
+                  Cost
+                </Text>
+                <Text variant="caption" weight="medium">
+                  ${bean.cost}
+                </Text>
+              </View>
+            )}
+            
+            {bean.total_grams && (
+              <View style={styles.detailRow}>
+                <Text variant="caption" color="secondary">
+                  Total Weight
+                </Text>
+                <Text variant="caption" weight="medium">
+                  {bean.total_grams}g
+                </Text>
               </View>
             )}
           </View>
-        </ProfessionalCard>
-      )}
+        </Card>
+      </Section>
 
-      {/* Purchase Information */}
-      <ProfessionalCard variant="default">
-        <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-          Purchase Details
-        </ProfessionalText>
-        
-        <View style={styles.detailsGrid}>
-          {bean.roast_date && (
-            <View style={styles.detailRow}>
-              <ProfessionalText variant="caption" color="secondary">
-                Roast Date
-              </ProfessionalText>
-              <ProfessionalText variant="caption" weight="medium">
-                {formatDate(bean.roast_date)}
-              </ProfessionalText>
-            </View>
-          )}
-          
-          {bean.purchase_date && (
-            <View style={styles.detailRow}>
-              <ProfessionalText variant="caption" color="secondary">
-                Purchase Date
-              </ProfessionalText>
-              <ProfessionalText variant="caption" weight="medium">
-                {formatDate(bean.purchase_date)}
-              </ProfessionalText>
-            </View>
-          )}
-          
-          {bean.cost && (
-            <View style={styles.detailRow}>
-              <ProfessionalText variant="caption" color="secondary">
-                Cost
-              </ProfessionalText>
-              <ProfessionalText variant="caption" weight="medium">
-                ${bean.cost}
-              </ProfessionalText>
-            </View>
-          )}
-          
-          {bean.total_grams && (
-            <View style={styles.detailRow}>
-              <ProfessionalText variant="caption" color="secondary">
-                Total Weight
-              </ProfessionalText>
-              <ProfessionalText variant="caption" weight="medium">
-                {bean.total_grams}g
-              </ProfessionalText>
-            </View>
-          )}
-        </View>
-      </ProfessionalCard>
-
-      {/* Tasting Notes */}
       {bean.tasting_notes && bean.tasting_notes.length > 0 && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-            Tasting Notes
-          </ProfessionalText>
-          <View style={styles.tagsGrid}>
-            {bean.tasting_notes.map((note, index) => (
-              <View key={index} style={[styles.noteTag, { backgroundColor: theme.colors.gray[100] }]}>
-                <ProfessionalText variant="caption" weight="medium">
-                  {note}
-                </ProfessionalText>
-              </View>
-            ))}
-          </View>
-        </ProfessionalCard>
+        <Section
+          title="Flavor Profile"
+          subtitle="Tasting notes and flavor characteristics"
+          spacing="lg"
+        >
+          <Card variant="default">
+            <View style={styles.tagsGrid}>
+              {bean.tasting_notes.map((note, index) => (
+                <View key={index} style={[styles.noteTag, { backgroundColor: theme.colors.gray[100] }]}>
+                  <Text variant="caption" weight="medium">
+                    {note}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+        </Section>
       )}
 
-      {/* Rating */}
       {bean.rating && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-            Rating
-          </ProfessionalText>
-          <View style={styles.ratingRow}>
-            <ProfessionalText variant="h2" weight="bold">
-              {bean.rating}
-            </ProfessionalText>
-            <ProfessionalText variant="body" color="secondary">
-              /5 stars
-            </ProfessionalText>
-          </View>
-        </ProfessionalCard>
+        <Section
+          title="My Rating"
+          subtitle="Personal evaluation of this coffee"
+          spacing="lg"
+        >
+          <Card variant="default" style={{ alignItems: 'center', padding: 24 }}>
+            <View style={styles.ratingRow}>
+              <Text variant="3xl" weight="bold">
+                {bean.rating}
+              </Text>
+              <Text variant="lg" color="secondary">
+                /5 stars
+              </Text>
+            </View>
+          </Card>
+        </Section>
       )}
 
-      {/* Descriptions */}
-      {bean.official_description && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 12 }}>
-            Official Description
-          </ProfessionalText>
-          <ProfessionalText variant="body" color="secondary" style={{ lineHeight: 20 }}>
-            {bean.official_description}
-          </ProfessionalText>
-        </ProfessionalCard>
+      {(bean.official_description || bean.my_notes) && (
+        <Section
+          title="Notes & Descriptions"
+          subtitle="Official descriptions and personal notes"
+          spacing="lg"
+        >
+          {bean.official_description && (
+            <Card variant="default" style={{ marginBottom: bean.my_notes ? 16 : 0 }}>
+              <Text variant="body" weight="medium" style={{ marginBottom: 8 }}>
+                Official Description
+              </Text>
+              <Text variant="body" color="secondary" style={{ lineHeight: 20 }}>
+                {bean.official_description}
+              </Text>
+            </Card>
+          )}
+
+          {bean.my_notes && (
+            <Card variant="default">
+              <Text variant="body" weight="medium" style={{ marginBottom: 8 }}>
+                My Notes
+              </Text>
+              <Text variant="body" color="secondary" style={{ lineHeight: 20 }}>
+                {bean.my_notes}
+              </Text>
+            </Card>
+          )}
+        </Section>
       )}
 
-      {bean.my_notes && (
-        <ProfessionalCard variant="default">
-          <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 12 }}>
-            My Notes
-          </ProfessionalText>
-          <ProfessionalText variant="body" color="secondary" style={{ lineHeight: 20 }}>
-            {bean.my_notes}
-          </ProfessionalText>
-        </ProfessionalCard>
-      )}
-
-      {/* Actions */}
-      <ProfessionalCard variant="outlined">
-        <ProfessionalText variant="h4" weight="semibold" style={{ marginBottom: 16 }}>
-          Actions
-        </ProfessionalText>
+      <Section
+        title="Quick Actions"
+        subtitle="Edit details or create a new brewing recipe"
+        spacing="xl"
+      >
         <View style={styles.actionsRow}>
-          <ProfessionalButton
+          <Button
             title="Edit Bean"
             variant="secondary"
             onPress={() => router.push(`/beans/edit/${bean.id}`)}
             style={{ flex: 1, marginRight: 8 }}
           />
-          <ProfessionalButton
-            title="New Brew"
+          <Button
+            title="New Recipe"
             variant="primary"
             onPress={() => router.push(`/brewprints/new?bean_id=${bean.id}`)}
             style={{ flex: 1, marginLeft: 8 }}
           />
         </View>
-      </ProfessionalCard>
-    </ProfessionalContainer>
+      </Section>
+    </Container>
   );
 }
 
