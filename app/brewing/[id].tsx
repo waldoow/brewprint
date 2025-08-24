@@ -1,25 +1,19 @@
-// app/brewing/[id].tsx
-import { TimerDisplay } from "@/components/brewing/TimerDisplay";
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
-import { getTheme } from "@/constants/ProfessionalDesign";
-import { useBrewprint } from "@/hooks/useBrewprint";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { useTimer } from "@/hooks/useTimer";
-import type { BrewStep } from "@/lib/services/brewprints";
-import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  ScrollView,
-  View,
-} from "react-native";
-import { toast } from "sonner-native";
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Container } from '@/components/ui/Container';
+import { Section } from '@/components/ui/Section';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { DataCard } from '@/components/ui/DataCard';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { useBrewprint } from '@/hooks/useBrewprint';
+import { useTimer } from '@/hooks/useTimer';
+import type { BrewStep } from '@/lib/services/brewprints';
+import * as Haptics from 'expo-haptics';
+import { toast } from 'sonner-native';
 
 export default function BrewingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -28,9 +22,10 @@ export default function BrewingScreen() {
 
   const { brewprint, loading, error } = useBrewprint(id);
 
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1); // -1 = preparation phase
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [isBrewingStarted, setIsBrewingStarted] = useState(false);
   const [isBrewingComplete, setIsBrewingComplete] = useState(false);
+  const [brewingPhase, setBrewingPhase] = useState<'preparation' | 'brewing' | 'complete'>('preparation');
 
   const {
     time,
@@ -40,37 +35,18 @@ export default function BrewingScreen() {
     reset: resetTimer,
   } = useTimer();
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-
-  useEffect(() => {
-    if (brewprint) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [brewprint]);
-
   const handleStartBrewing = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsBrewingStarted(true);
     setCurrentStepIndex(0);
+    setBrewingPhase('brewing');
     startTimer();
     
     if (brewprint?.steps && brewprint.steps.length > 0) {
       const firstStep = brewprint.steps[0];
-      toast.success(`Brewing started! Begin: ${firstStep.title}`);
+      toast.success(`Started: ${firstStep.title}`, { duration: 2000 });
     } else {
-      toast.success("Brewing started!");
+      toast.success('Brewing started', { duration: 2000 });
     }
   };
 
@@ -83,12 +59,12 @@ export default function BrewingScreen() {
       const nextIndex = currentStepIndex + 1;
       setCurrentStepIndex(nextIndex);
       const nextStep = brewprint.steps[nextIndex];
-      toast.info(`Next step: ${nextStep.title}`);
+      toast.info(`Step ${nextIndex + 1}: ${nextStep.title}`, { duration: 1500 });
     } else {
-      // All steps completed
       setIsBrewingComplete(true);
+      setBrewingPhase('complete');
       pauseTimer();
-      toast.success("Brewing complete! How was it?");
+      toast.success('Brewing complete! Time to taste.', { duration: 3000 });
     }
   };
 
@@ -97,15 +73,58 @@ export default function BrewingScreen() {
     return brewprint.steps[currentStepIndex] || null;
   };
 
+  const resetBrewing = () => {
+    setIsBrewingStarted(false);
+    setIsBrewingComplete(false);
+    setCurrentStepIndex(-1);
+    setBrewingPhase('preparation');
+    resetTimer();
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getProgress = () => {
+    if (!brewprint?.parameters?.total_time) return 0;
+    return Math.min((time / brewprint.parameters.total_time) * 100, 100);
+  };
+
+  const getStepProgress = () => {
+    if (!brewprint?.steps || currentStepIndex < 0) return 0;
+    return ((currentStepIndex + 1) / brewprint.steps.length) * 100;
+  };
+
+  const getPhaseColor = () => {
+    switch (brewingPhase) {
+      case 'brewing': return theme.colors.warning;
+      case 'complete': return theme.colors.success;
+      default: return theme.colors.gray[400];
+    }
+  };
+
+  const getStatusText = () => {
+    switch (brewingPhase) {
+      case 'preparation': return 'Ready to brew';
+      case 'brewing': return isRunning ? 'Brewing in progress' : 'Brewing paused';
+      case 'complete': return 'Brewing complete';
+    }
+  };
+
   if (loading) {
     return (
       <Container>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text variant="body" color="secondary" style={styles.loadingText}>
-            Loading brewprint...
-          </Text>
-        </View>
+        <Section title="Loading Brewing Session" subtitle="Preparing your recipe">
+          <DataCard
+            title="Loading Status"
+            data={[
+              { label: 'Status', value: 'Fetching recipe details...' },
+            ]}
+            variant="outlined"
+          />
+        </Section>
       </Container>
     );
   }
@@ -113,402 +132,489 @@ export default function BrewingScreen() {
   if (error || !brewprint) {
     return (
       <Container>
-        <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <Text 
-            variant="h4" 
-            weight="semibold" 
-            style={{ textAlign: 'center', marginBottom: 8 }}
-          >
-            Brewprint Not Found
-          </Text>
-          <Text 
-            variant="body" 
-            color="secondary" 
-            style={{ textAlign: 'center', marginBottom: 24 }}
-          >
-            {error || 'The requested brewprint could not be found.'}
-          </Text>
-          <Button
-            title="Go Back"
-            onPress={() => router.back()}
-            variant="primary"
-            fullWidth
-          />
-        </Card>
+        <Section title="Brewing Session Error" subtitle="Unable to load this recipe">
+          <Card variant="outlined" style={styles.errorCard}>
+            <Text variant="h4" weight="semibold" style={styles.errorTitle}>
+              Recipe Not Available
+            </Text>
+            <Text variant="body" color="secondary" style={styles.errorMessage}>
+              {error || 'This brewing recipe could not be loaded. Please check your connection and try again.'}
+            </Text>
+            <Button
+              title="Back to Recipes"
+              onPress={() => router.back()}
+              variant="primary"
+              fullWidth
+            />
+          </Card>
+        </Section>
       </Container>
     );
   }
 
-  return (
-    <Container>
-      <PageHeader
-        title="Brewing Session"
-        subtitle={`${brewprint.name} • ${brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')}`}
-        action={{
-          title: "Back",
-          onPress: () => router.back(),
-        }}
-      />
+  const ratio = Math.round((brewprint.parameters.water_grams / brewprint.parameters.coffee_grams) * 10) / 10;
+  const currentStep = getCurrentStep();
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+  return (
+    <Container scrollable>
+      {/* Header with Status */}
+      <Section
+        title={brewprint.name}
+        subtitle={`${brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')} • ${getStatusText()}`}
+        spacing="xl"
       >
-        <Animated.View
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          }}
-        >
-          {/* Recipe Parameters */}
-          <Card variant="default" style={styles.parametersCard}>
-            <Text variant="h3" weight="semibold" style={styles.recipeName}>
-              {brewprint.name}
+        <View style={styles.headerActions}>
+          <Button
+            title="Back"
+            variant="secondary"
+            onPress={() => router.back()}
+            style={{ flex: 1, marginRight: 8 }}
+          />
+          <View style={[styles.statusIndicator, { backgroundColor: getPhaseColor() }]}>
+            <Text variant="caption" weight="semibold" color="inverse">
+              {brewingPhase.toUpperCase()}
             </Text>
-            {brewprint.description && (
-              <Text variant="body" color="secondary" style={styles.recipeDescription}>
-                {brewprint.description}
-              </Text>
-            )}
-            
-            <View style={styles.parameterGrid}>
-              <View style={styles.parameterItem}>
-                <Text variant="h4" weight="semibold">
-                  {brewprint.parameters.coffee_grams}g
-                </Text>
-                <Text variant="caption" color="secondary">
-                  Coffee
-                </Text>
+          </View>
+        </View>
+      </Section>
+
+      {/* Recipe Parameters - Enhanced */}
+      <Section
+        title="Recipe Specifications"
+        subtitle="Brewing parameters for this recipe"
+        spacing="lg"
+      >
+        <DataCard
+          title="Brewing Parameters"
+          data={[
+            { label: 'Coffee Dose', value: brewprint.parameters.coffee_grams, unit: 'g' },
+            { label: 'Water Volume', value: brewprint.parameters.water_grams, unit: 'ml' },
+            { label: 'Water Temperature', value: brewprint.parameters.water_temp, unit: '°C' },
+            { label: 'Coffee Ratio', value: `1:${ratio}` },
+          ]}
+          layout="horizontal"
+          variant="elevated"
+        />
+      </Section>
+
+      {/* Timer Section - Professional */}
+      <Section
+        title="Extraction Timer"
+        subtitle={isRunning ? `Timer active - ${Math.round(getProgress())}% complete` : 'Timer ready'}
+        spacing="lg"
+      >
+        <View style={styles.timerContainer}>
+          <View style={styles.timerMain}>
+            <Text variant="h1" weight="bold" style={styles.timerDisplay}>
+              {formatTime(time)}
+            </Text>
+            <View style={styles.timerMeta}>
+              {brewprint.parameters.total_time && (
+                <>
+                  <Text variant="body" color="secondary">
+                    Target: {formatTime(brewprint.parameters.total_time)}
+                  </Text>
+                  <Text variant="body" color="secondary">
+                    Remaining: {formatTime(Math.max(0, brewprint.parameters.total_time - time))}
+                  </Text>
+                </>
+              )}
+            </View>
+          </View>
+
+          {brewprint.parameters.total_time && (
+            <View style={styles.progressSection}>
+              <View style={[styles.progressTrack, { backgroundColor: theme.colors.gray[200] }]}>
+                <View 
+                  style={[
+                    styles.progressBar,
+                    { 
+                      backgroundColor: isRunning ? theme.colors.warning : theme.colors.text.primary,
+                      width: `${getProgress()}%`
+                    }
+                  ]}
+                />
               </View>
-              <View style={styles.parameterItem}>
-                <Text variant="h4" weight="semibold">
-                  {brewprint.parameters.water_grams}ml
+              <View style={styles.progressLabels}>
+                <Text variant="caption" color="tertiary">
+                  Progress: {Math.round(getProgress())}%
                 </Text>
-                <Text variant="caption" color="secondary">
-                  Water
-                </Text>
-              </View>
-              <View style={styles.parameterItem}>
-                <Text variant="h4" weight="semibold">
-                  {brewprint.parameters.water_temp}°C
-                </Text>
-                <Text variant="caption" color="secondary">
-                  Temperature
-                </Text>
-              </View>
-              <View style={styles.parameterItem}>
-                <Text variant="h4" weight="semibold">
-                  1:{Math.round((brewprint.parameters.water_grams / brewprint.parameters.coffee_grams) * 10) / 10}
-                </Text>
-                <Text variant="caption" color="secondary">
-                  Ratio
+                <Text variant="caption" color="tertiary">
+                  Rate: {isRunning ? '1.0x' : '0.0x'}
                 </Text>
               </View>
             </View>
+          )}
+        </View>
+      </Section>
+
+      {/* Current Step - Active Phase */}
+      {isBrewingStarted && !isBrewingComplete && currentStep && (
+        <Section
+          title={`Step ${currentStepIndex + 1} of ${brewprint.steps.length}`}
+          subtitle="Active brewing instruction"
+          spacing="lg"
+        >
+          <Card variant="elevated" style={[styles.activeStepCard, { borderLeftColor: theme.colors.warning }]}>
+            <View style={styles.stepHeader}>
+              <View style={styles.stepProgress}>
+                <View style={[styles.stepProgressTrack, { backgroundColor: theme.colors.gray[200] }]}>
+                  <View 
+                    style={[
+                      styles.stepProgressBar,
+                      { 
+                        backgroundColor: theme.colors.warning,
+                        width: `${getStepProgress()}%`
+                      }
+                    ]}
+                  />
+                </View>
+                <Text variant="caption" color="secondary">
+                  {Math.round(getStepProgress())}% through brewing steps
+                </Text>
+              </View>
+            </View>
+
+            <Text variant="h3" weight="semibold" style={styles.stepTitle}>
+              {currentStep.title}
+            </Text>
+            
+            <Text variant="body" color="secondary" style={styles.stepDescription}>
+              {currentStep.description}
+            </Text>
+
+            <DataCard
+              title="Step Parameters"
+              data={[
+                { label: 'Duration', value: currentStep.duration, unit: 's' },
+                { label: 'Water Amount', value: currentStep.water_amount, unit: 'g' },
+                { label: 'Technique', value: currentStep.technique.replace('-', ' ') },
+              ]}
+              layout="horizontal"
+              variant="default"
+            />
           </Card>
+        </Section>
+      )}
 
-          {/* Timer Section */}
-          <TimerDisplay
-            time={time}
-            isRunning={isRunning}
-            targetTime={brewprint.parameters.total_time}
-          />
-
-          {/* Current Step Display */}
-          {isBrewingStarted && !isBrewingComplete && getCurrentStep() && (
-            <Card variant="default" style={styles.currentStepCard}>
-              <View style={styles.currentStepHeader}>
-                <View style={styles.stepProgressIndicator}>
-                  <Text variant="caption" weight="semibold" style={styles.stepProgress}>
-                    {currentStepIndex + 1}/{brewprint.steps.length}
-                  </Text>
-                </View>
-                <Text variant="h2" weight="semibold" style={styles.currentStepTitle}>
-                  {getCurrentStep()?.title}
-                </Text>
-              </View>
-              
-              <Text variant="body" style={styles.currentStepDescription}>
-                {getCurrentStep()?.description}
+      {/* Steps Overview - Pre-brewing */}
+      {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
+        <Section
+          title="Brewing Process Overview"
+          subtitle={`${brewprint.steps.length} precise steps to perfect extraction`}
+          spacing="lg"
+        >
+          <Card variant="elevated">
+            <View style={styles.stepsHeader}>
+              <Text variant="h4" weight="semibold">
+                Brewing Sequence
               </Text>
-              
-              <View style={styles.currentStepDetails}>
-                <View style={styles.stepDetailItem}>
-                  <Text variant="h4" weight="semibold">
-                    {getCurrentStep()?.duration}s
-                  </Text>
-                  <Text variant="caption" color="secondary">
-                    Duration
-                  </Text>
-                </View>
-                <View style={styles.stepDetailItem}>
-                  <Text variant="h4" weight="semibold">
-                    {getCurrentStep()?.water_amount}g
-                  </Text>
-                  <Text variant="caption" color="secondary">
-                    Water
-                  </Text>
-                </View>
-                <View style={styles.stepDetailItem}>
-                  <Text variant="body" weight="medium" style={styles.techniqueText}>
-                    {getCurrentStep()?.technique.replace('-', ' ').split(' ').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                  </Text>
-                  <Text variant="caption" color="secondary">
-                    Technique
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          )}
-
-          {/* All Steps Overview (when not brewing) */}
-          {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
-            <Card variant="default" style={styles.stepsOverview}>
-              <View style={styles.stepsHeader}>
-                <Text variant="h3" weight="semibold">
-                  Brewing Process
+              <View style={[styles.stepsBadge, { backgroundColor: theme.colors.gray[100] }]}>
+                <Text variant="caption" weight="medium" color="secondary">
+                  {brewprint.steps.length} steps
                 </Text>
-                <View style={styles.stepCountBadge}>
-                  <Text variant="caption" weight="medium" style={styles.stepCountText}>
-                    {brewprint.steps.length} steps
+              </View>
+            </View>
+
+            {brewprint.steps.map((step, index) => (
+              <TouchableOpacity
+                key={step.id}
+                style={[styles.stepRow, index === brewprint.steps.length - 1 && styles.lastStep]}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.stepNumber, { backgroundColor: theme.colors.gray[100] }]}>
+                  <Text variant="caption" weight="bold" color="secondary">
+                    {index + 1}
                   </Text>
                 </View>
-              </View>
-              
-              {brewprint.steps.map((step, index) => (
-                <View key={step.id} style={styles.stepPreview}>
-                  <View style={styles.stepPreviewLeft}>
-                    <View style={styles.stepNumber}>
-                      <Text variant="caption" weight="semibold" style={styles.stepNumberText}>
-                        {index + 1}
-                      </Text>
-                    </View>
-                    <View style={styles.stepPreviewContent}>
-                      <Text variant="body" weight="semibold" style={styles.stepPreviewTitle}>
-                        {step.title}
-                      </Text>
-                      <Text variant="caption" color="secondary" style={styles.stepPreviewDesc}>
-                        {step.description}
-                      </Text>
-                      <View style={styles.stepPreviewMeta}>
-                        <Text variant="caption" color="secondary">
-                          {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
+                
+                <View style={styles.stepContent}>
+                  <Text variant="body" weight="semibold">
+                    {step.title}
+                  </Text>
+                  <Text variant="caption" color="secondary" style={styles.stepMeta}>
+                    {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
+                  </Text>
+                  {step.description && (
+                    <Text variant="caption" color="tertiary" style={styles.stepNote} numberOfLines={1}>
+                      {step.description}
+                    </Text>
+                  )}
                 </View>
-              ))}
-            </Card>
-          )}
 
-          {/* Action Panel */}
-          <View style={styles.actionPanel}>
-            {!isBrewingStarted ? (
-              <Button
-                title="Start Brewing Session"
-                onPress={handleStartBrewing}
-                variant="primary"
-                size="lg"
-                fullWidth
-              />
-            ) : isBrewingComplete ? (
-              <View style={styles.actionGroup}>
-                <Button
-                  title="View Results"
-                  onPress={() => router.push(`/brewing/${id}/results`)}
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                />
-                <Button
-                  title="Brew Again"
-                  onPress={() => {
-                    setIsBrewingStarted(false);
-                    setIsBrewingComplete(false);
-                    setCurrentStepIndex(-1);
-                    resetTimer();
-                  }}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                />
-              </View>
-            ) : (
-              <View style={styles.actionGroup}>
-                <Button
-                  title={currentStepIndex < (brewprint.steps?.length || 0) - 1 ? "Next Step" : "Complete Brewing"}
-                  onPress={handleNextStep}
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                />
-                <Button
-                  title={isRunning ? "Pause Timer" : "Resume Timer"}
-                  onPress={isRunning ? pauseTimer : startTimer}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                />
-              </View>
-            )}
+                <View style={styles.stepIndicator}>
+                  <Text variant="caption" color="tertiary">
+                    {step.duration}s
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </Section>
+      )}
+
+      {/* Brewing Analytics - Post completion */}
+      {isBrewingComplete && (
+        <Section
+          title="Brewing Analytics"
+          subtitle="Your extraction performance metrics"
+          spacing="lg"
+        >
+          <DataCard
+            title="Session Results"
+            data={[
+              { 
+                label: 'Total Time', 
+                value: formatTime(time),
+                change: brewprint.parameters.total_time ? {
+                  value: Math.abs(time - brewprint.parameters.total_time),
+                  direction: time > brewprint.parameters.total_time ? 'up' : time < brewprint.parameters.total_time ? 'down' : 'neutral'
+                } : undefined
+              },
+              { label: 'Steps Completed', value: brewprint.steps.length },
+              { label: 'Extraction Rate', value: Math.round((time / (brewprint.parameters.total_time || time)) * 100), unit: '%' },
+              { label: 'Precision Score', value: time === brewprint.parameters.total_time ? 100 : Math.max(0, 100 - Math.abs(time - (brewprint.parameters.total_time || time))), unit: '%' },
+            ]}
+            layout="grid"
+            variant="elevated"
+          />
+        </Section>
+      )}
+
+      {/* Action Controls */}
+      <Section
+        title="Brewing Controls"
+        subtitle={brewingPhase === 'preparation' 
+          ? "Ready to begin your brewing session" 
+          : brewingPhase === 'brewing' 
+          ? "Control your active brewing session"
+          : "Session complete - review or brew again"
+        }
+        spacing="xl"
+      >
+        {!isBrewingStarted ? (
+          <Button
+            title={`Start Brewing ${brewprint.name}`}
+            onPress={handleStartBrewing}
+            variant="primary"
+            size="lg"
+            fullWidth
+          />
+        ) : isBrewingComplete ? (
+          <View style={styles.actionGroup}>
+            <Button
+              title="View Full Results"
+              onPress={() => router.push(`/brewing/${id}/results`)}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+            <Button
+              title="Brew This Recipe Again"
+              onPress={resetBrewing}
+              variant="secondary"
+              size="lg"
+              fullWidth
+            />
           </View>
-        </Animated.View>
-      </ScrollView>
+        ) : (
+          <View style={styles.actionGroup}>
+            <Button
+              title={currentStepIndex < (brewprint.steps?.length || 0) - 1 ? "Continue to Next Step" : "Complete Brewing Session"}
+              onPress={handleNextStep}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+            <View style={styles.timerControls}>
+              <Button
+                title={isRunning ? "Pause Timer" : "Resume Timer"}
+                onPress={isRunning ? pauseTimer : startTimer}
+                variant="secondary"
+                style={{ flex: 1, marginRight: 8 }}
+              />
+              <Button
+                title="Reset Session"
+                onPress={resetBrewing}
+                variant="outline"
+                style={{ flex: 1, marginLeft: 8 }}
+              />
+            </View>
+          </View>
+        )}
+      </Section>
     </Container>
   );
 }
 
 const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
+  errorCard: {
     alignItems: 'center' as const,
-    gap: 16,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: 32,
   },
 
-  // Recipe Parameters Card
-  parametersCard: {
-    marginBottom: 16,
-  },
-  recipeName: {
+  errorTitle: {
+    textAlign: 'center' as const,
     marginBottom: 8,
   },
-  recipeDescription: {
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  parameterGrid: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    gap: 12,
-  },
-  parameterItem: {
-    flex: 1,
-    alignItems: 'center' as const,
-    padding: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.02)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
+
+  errorMessage: {
+    textAlign: 'center' as const,
+    marginBottom: 24,
+    lineHeight: 22,
   },
 
-  // Current Step Card (Enhanced)
-  currentStepCard: {
-    marginBottom: 16,
-    padding: 20,
-  },
-  currentStepHeader: {
+  headerActions: {
+    flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginBottom: 16,
+    gap: 12,
   },
-  stepProgressIndicator: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+
+  statusIndicator: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    marginBottom: 12,
-  },
-  stepProgress: {
-    fontSize: 12,
-  },
-  currentStepTitle: {
-    textAlign: 'center' as const,
-    fontSize: 24,
-  },
-  currentStepDescription: {
-    textAlign: 'center' as const,
-    lineHeight: 22,
-    marginBottom: 20,
-    fontSize: 16,
-  },
-  currentStepDetails: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-around' as const,
-    gap: 16,
-  },
-  stepDetailItem: {
-    flex: 1,
+    minWidth: 80,
     alignItems: 'center' as const,
-    padding: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.02)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F0F0F0',
-  },
-  techniqueText: {
-    textAlign: 'center' as const,
-    fontSize: 14,
   },
 
-  // Steps Overview (Improved)
-  stepsOverview: {
-    marginBottom: 16,
+  timerContainer: {
+    alignItems: 'center' as const,
+    paddingVertical: 16,
   },
+
+  timerMain: {
+    alignItems: 'center' as const,
+    marginBottom: 32,
+  },
+
+  timerDisplay: {
+    fontSize: 96,
+    lineHeight: 96,
+    marginBottom: 12,
+    fontVariant: ['tabular-nums'] as any,
+  },
+
+  timerMeta: {
+    flexDirection: 'row' as const,
+    gap: 24,
+  },
+
+  progressSection: {
+    width: '100%' as const,
+    gap: 12,
+  },
+
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden' as const,
+  },
+
+  progressBar: {
+    height: '100%' as const,
+    borderRadius: 4,
+    minWidth: 4,
+  },
+
+  progressLabels: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+  },
+
+  activeStepCard: {
+    borderLeftWidth: 6,
+    padding: 24,
+  },
+
+  stepHeader: {
+    marginBottom: 20,
+  },
+
+  stepProgress: {
+    gap: 8,
+  },
+
+  stepProgressTrack: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden' as const,
+  },
+
+  stepProgressBar: {
+    height: '100%' as const,
+    borderRadius: 2,
+    minWidth: 2,
+  },
+
+  stepTitle: {
+    marginBottom: 12,
+  },
+
+  stepDescription: {
+    marginBottom: 20,
+    lineHeight: 24,
+  },
+
   stepsHeader: {
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  stepCountBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+
+  stepsBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
-  stepCountText: {
-    fontSize: 12,
-  },
-  stepPreview: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  stepPreviewLeft: {
+
+  stepRow: {
     flexDirection: 'row' as const,
-    gap: 12,
+    alignItems: 'center' as const,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
+
+  lastStep: {
+    borderBottomWidth: 0,
+  },
+
   stepNumber: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
+    justifyContent: 'center' as const,
+    marginRight: 16,
   },
-  stepNumberText: {
-    fontSize: 12,
-  },
-  stepPreviewContent: {
+
+  stepContent: {
     flex: 1,
     gap: 4,
   },
-  stepPreviewTitle: {
-    fontSize: 16,
-    lineHeight: 20,
-  },
-  stepPreviewDesc: {
-    lineHeight: 18,
-    marginBottom: 4,
-  },
-  stepPreviewMeta: {
-    marginTop: 4,
+
+  stepMeta: {
+    fontSize: 11,
   },
 
-  // Action Panel (Cleaner)
-  actionPanel: {
-    gap: 12,
+  stepNote: {
+    fontSize: 10,
+    marginTop: 2,
   },
+
+  stepIndicator: {
+    alignItems: 'center' as const,
+    minWidth: 40,
+  },
+
   actionGroup: {
-    gap: 12,
+    gap: 16,
+  },
+
+  timerControls: {
+    flexDirection: 'row' as const,
+    gap: 0,
   },
 };
