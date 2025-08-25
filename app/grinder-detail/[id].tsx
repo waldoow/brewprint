@@ -20,11 +20,7 @@ export default function GrinderDetailScreen() {
   const [grinder, setGrinder] = useState<Grinder | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadGrinder();
-  }, [id]);
-
-  const loadGrinder = async () => {
+  const loadGrinder = React.useCallback(async () => {
     try {
       setLoading(true);
       const result = await GrindersService.getGrinderById(id as string);
@@ -33,12 +29,16 @@ export default function GrinderDetailScreen() {
       } else {
         toast.error('Grinder not found');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load grinder details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadGrinder();
+  }, [loadGrinder]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();

@@ -1,16 +1,14 @@
-import { Card } from "@/components/ui/Card";
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Text } from "@/components/ui/Text";
-import { getTheme } from "@/constants/ProfessionalDesign";
+import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
+import { DataCard, InfoCard } from "@/components/ui/DataCard";
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
+import { getTheme } from "@/constants/DataFirstDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
   Linking,
-  ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -98,376 +96,194 @@ export default function AboutScreen() {
   };
 
   return (
-    <Container scrollable>
-      <PageHeader
-        title="About"
-        subtitle="App information and support"
-        action={{
-          title: "Back",
-          onPress: () => router.back(),
-        }}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* App Info */}
-        <Card variant="default" style={styles.section}>
+    <DataLayout
+      title="About Brewprint"
+      subtitle="App information and support"
+      scrollable
+    >
+      {/* App Info */}
+      <DataSection title="Application Details" spacing="lg">
+        <DataCard>
           <View style={styles.appHeader}>
-            <Text variant="h1" weight="bold" style={styles.appName}>
+            <DataText variant="h2" weight="bold">
               Brewprint
-            </Text>
-            <View style={styles.versionBadge}>
-              <Text variant="caption" color="secondary">
-                v{APP_VERSION}
-              </Text>
-            </View>
+            </DataText>
+            <DataText variant="caption" color="secondary">
+              v{APP_VERSION}
+            </DataText>
           </View>
 
-          <Text
-            variant="body"
-            color="secondary"
-            style={styles.tagline}
-          >
+          <DataText variant="body" color="secondary" style={styles.tagline}>
             Your complete coffee recipe tracker for perfecting every brew
-          </Text>
+          </DataText>
 
-          <View style={styles.versionInfo}>
+          <DataGrid columns={2} gap="md" style={{ marginTop: 16 }}>
             <View style={styles.versionItem}>
-              <Text variant="caption" color="secondary">
+              <DataText variant="caption" color="secondary">
                 Version
-              </Text>
-              <Text variant="body" weight="semibold">
+              </DataText>
+              <DataText variant="body" weight="semibold">
                 {APP_VERSION}
-              </Text>
+              </DataText>
             </View>
-
             <View style={styles.versionItem}>
-              <Text variant="caption" color="secondary">
+              <DataText variant="caption" color="secondary">
                 Build
-              </Text>
-              <Text variant="body" weight="semibold">
+              </DataText>
+              <DataText variant="body" weight="semibold">
                 {BUILD_NUMBER}
-              </Text>
+              </DataText>
             </View>
-          </View>
-        </Card>
+          </DataGrid>
+        </DataCard>
+      </DataSection>
 
-        {/* Features */}
-        <Card variant="default" style={styles.section}>
-          <Text
-            variant="h4"
-            weight="semibold"
-            style={styles.sectionTitle}
-          >
-            What&apos;s Included
-          </Text>
-
+      {/* Features */}
+      <DataSection title="Features" subtitle="What's included in Brewprint" spacing="lg">
+        <DataCard>
           <View style={styles.featureList}>
             <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Text style={styles.featureIconText}>
-                  ☕
-                </Text>
-              </View>
+              <DataText variant="body" style={styles.featureIcon}>☕</DataText>
               <View style={styles.featureContent}>
-                <Text variant="body" weight="semibold">
+                <DataText variant="body" weight="semibold">
                   Recipe Management
-                </Text>
-                <Text variant="caption" color="secondary">
+                </DataText>
+                <DataText variant="caption" color="secondary">
                   Create, edit, and perfect your coffee brewing recipes
-                </Text>
+                </DataText>
               </View>
             </View>
 
             <View style={styles.featureItem}>
-              <View
-                style={[
-                  styles.featureIcon,
-                  { backgroundColor: colors.primary },
-                ]}
-              >
-                <ThemedText style={styles.featureIconText}>📊</ThemedText>
-              </View>
+              <DataText variant="body" style={styles.featureIcon}>📊</DataText>
               <View style={styles.featureContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.featureTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold">
                   Analytics & Insights
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.featureDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
+                </DataText>
+                <DataText variant="caption" color="secondary">
                   Track your brewing progress and quality trends
-                </ThemedText>
+                </DataText>
               </View>
             </View>
 
             <View style={styles.featureItem}>
-              <View
-                style={[
-                  styles.featureIcon,
-                  { backgroundColor: colors.primary },
-                ]}
-              >
-                <ThemedText style={styles.featureIconText}>🫘</ThemedText>
-              </View>
+              <DataText variant="body" style={styles.featureIcon}>🫘</DataText>
               <View style={styles.featureContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.featureTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold">
                   Bean Library
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.featureDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
+                </DataText>
+                <DataText variant="caption" color="secondary">
                   Manage your coffee bean inventory and notes
-                </ThemedText>
+                </DataText>
               </View>
             </View>
 
             <View style={styles.featureItem}>
-              <View
-                style={[
-                  styles.featureIcon,
-                  { backgroundColor: colors.primary },
-                ]}
-              >
-                <ThemedText style={styles.featureIconText}>⏱️</ThemedText>
-              </View>
+              <DataText variant="body" style={styles.featureIcon}>⏱️</DataText>
               <View style={styles.featureContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.featureTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold">
                   Brewing Timer
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.featureDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
+                </DataText>
+                <DataText variant="caption" color="secondary">
                   Guided brewing with precise timing and measurements
-                </ThemedText>
+                </DataText>
               </View>
             </View>
           </View>
-        </Card>
+        </DataCard>
+      </DataSection>
 
-        {/* Support & Links */}
-        <View
-          style={[styles.section, { backgroundColor: colors.cardBackground }]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.text }]}
-          >
-            Support & Information
-          </ThemedText>
-
+      {/* Support & Links */}
+      <DataSection title="Support & Information" spacing="lg">
+        <DataCard>
           <View style={styles.linkList}>
-            <TouchableOpacity
-              style={styles.linkItem}
-              onPress={handleContactSupport}
-            >
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.linkText, { color: colors.primary }]}
-              >
+            <TouchableOpacity style={styles.linkItem} onPress={handleContactSupport}>
+              <DataText variant="body" weight="semibold" color="primary">
                 Contact Support
-              </ThemedText>
-              <ThemedText style={styles.linkArrow}>→</ThemedText>
+              </DataText>
+              <DataText variant="body" color="secondary">→</DataText>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.linkItem}
-              onPress={handleOpenWebsite}
-            >
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.linkText, { color: colors.primary }]}
-              >
+            <TouchableOpacity style={styles.linkItem} onPress={handleOpenWebsite}>
+              <DataText variant="body" weight="semibold" color="primary">
                 Visit Website
-              </ThemedText>
-              <ThemedText style={styles.linkArrow}>→</ThemedText>
+              </DataText>
+              <DataText variant="body" color="secondary">→</DataText>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.linkItem}
-              onPress={handleOpenPrivacyPolicy}
-            >
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.linkText, { color: colors.primary }]}
-              >
+            <TouchableOpacity style={styles.linkItem} onPress={handleOpenPrivacyPolicy}>
+              <DataText variant="body" weight="semibold" color="primary">
                 Privacy Policy
-              </ThemedText>
-              <ThemedText style={styles.linkArrow}>→</ThemedText>
+              </DataText>
+              <DataText variant="body" color="secondary">→</DataText>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.linkItem} onPress={handleOpenTerms}>
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.linkText, { color: colors.primary }]}
-              >
+              <DataText variant="body" weight="semibold" color="primary">
                 Terms of Service
-              </ThemedText>
-              <ThemedText style={styles.linkArrow}>→</ThemedText>
+              </DataText>
+              <DataText variant="body" color="secondary">→</DataText>
             </TouchableOpacity>
           </View>
-        </View>
+        </DataCard>
+      </DataSection>
 
-        {/* Credits */}
-        <View
-          style={[styles.section, { backgroundColor: colors.cardBackground }]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.text }]}
-          >
-            Credits
-          </ThemedText>
-
-          <ThemedText
-            type="caption"
-            style={[styles.creditsText, { color: colors.textSecondary }]}
-          >
+      {/* Credits */}
+      <DataSection title="Credits" spacing="lg">
+        <DataCard>
+          <DataText variant="body" color="secondary" style={styles.creditsText}>
             Built with love for the coffee community.
             {"\n\n"}
             Special thanks to all the coffee enthusiasts who helped shape
             Brewprint into the perfect brewing companion.
-          </ThemedText>
-        </View>
-
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </Container>
+          </DataText>
+        </DataCard>
+      </DataSection>
+    </DataLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  section: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
+const styles = {
   appHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     marginBottom: 8,
   },
-  appName: {
-    fontWeight: "700",
-    fontSize: 28,
-  },
   tagline: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  versionInfo: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.1)",
+    textAlign: "center" as const,
+    marginTop: 8,
   },
   versionItem: {
-    alignItems: "center",
-  },
-  versionLabel: {
-    fontSize: 11,
-    marginBottom: 4,
-  },
-  versionValue: {
-    fontSize: 14,
-  },
-  sectionTitle: {
-    fontWeight: "600",
-    marginBottom: 16,
+    alignItems: "center" as const,
   },
   featureList: {
     gap: 16,
   },
   featureItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
     gap: 12,
   },
   featureIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featureIconText: {
-    fontSize: 14,
+    fontSize: 18,
+    minWidth: 24,
   },
   featureContent: {
     flex: 1,
-  },
-  featureTitle: {
-    marginBottom: 2,
-  },
-  featureDescription: {
-    fontSize: 12,
-    lineHeight: 16,
   },
   linkList: {
     gap: 4,
   },
   linkItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     paddingVertical: 12,
     paddingHorizontal: 4,
   },
-  linkText: {
-    fontSize: 15,
-  },
-  linkArrow: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
   creditsText: {
-    fontSize: 13,
+    textAlign: "center" as const,
     lineHeight: 18,
-    textAlign: "center",
   },
-  bottomSpacing: {
-    height: 20,
-  },
-});
+};

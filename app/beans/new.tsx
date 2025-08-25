@@ -1,9 +1,7 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { DataLayout } from "@/components/ui/DataLayout";
 import { BeanForm } from "@/forms/BeanForm";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 
 export default function NewBeanScreen() {
@@ -19,19 +17,12 @@ export default function NewBeanScreen() {
   };
 
   return (
-    <Container>
-      <PageHeader
-        title="Add New Bean"
-        subtitle="Coffee inventory management"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-
+    <DataLayout
+      title="Add New Bean"
+      subtitle="Expand your coffee inventory with detailed tracking"
+      scrollable
+    >
       <BeanForm onSuccess={handleSuccess} onCancel={handleCancel} />
-    </Container>
+    </DataLayout>
   );
 }
-
-const styles = StyleSheet.create({});

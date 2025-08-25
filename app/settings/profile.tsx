@@ -1,18 +1,16 @@
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
+import { DataCard } from "@/components/ui/DataCard";
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
 import { Input } from "@/components/ui/Input";
-import { Text } from "@/components/ui/Text";
-import { Section } from "@/components/ui/Section";
-import { getTheme } from "@/constants/ProfessionalDesign";
+import { getTheme } from "@/constants/DataFirstDesign";
 import { useAuth } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, StyleSheet, Switch, View } from "react-native";
+import { Alert, Switch, View } from "react-native";
 import { toast } from "sonner-native";
 
 interface ProfileSettings {
@@ -40,42 +38,42 @@ export default function ProfileSyncScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadProfileSettings();
-  }, []);
-
-  const loadProfileSettings = async () => {
+  const loadProfileSettings = React.useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem("profile_settings");
       if (stored) {
         const parsed = JSON.parse(stored);
         setSettings({ ...DEFAULT_PROFILE_SETTINGS, ...parsed });
-      } else if (user?.email) {
-        // Initialize with user email as display name
-        const initialSettings = {
-          ...DEFAULT_PROFILE_SETTINGS,
-          displayName: user.email.split("@")[0],
-        };
-        setSettings(initialSettings);
       }
-    } catch (error) {
-      console.error("Failed to load profile settings:", error);
+      // Set display name from user if available
+      if (user?.email) {
+        setSettings(prev => ({
+          ...prev,
+          displayName: prev.displayName || user.email.split('@')[0]
+        }));
+      }
+    } catch {
+      console.error("Failed to load profile settings");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadProfileSettings();
+  }, [loadProfileSettings]);
 
   const saveProfileSettings = async (newSettings: ProfileSettings) => {
     try {
       setSaving(true);
-      await AsyncStorage.setItem(
-        "profile_settings",
-        JSON.stringify(newSettings)
-      );
+      await AsyncStorage.setItem("profile_settings", JSON.stringify(newSettings));
       setSettings(newSettings);
-
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      toast.success("Profile settings updated");
+      
+      if (newSettings.autoSync) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      
+      toast.success("Profile settings updated successfully");
     } catch (error) {
       console.error("Failed to save profile settings:", error);
       toast.error("Failed to save settings");
@@ -92,17 +90,23 @@ export default function ProfileSyncScreen() {
     saveProfileSettings(newSettings);
   };
 
-  const handleForceSync = () => {
+  const handleSignOut = () => {
     Alert.alert(
-      "Sync Data",
-      "This will sync your local data with the cloud. This may take a few moments.",
+      "Sign Out",
+      "Are you sure you want to sign out? Any unsaved changes will be lost.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Sync Now",
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            toast.success("Sync completed (simulated)");
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Note: actual sign out would be handled by useAuth context
+              toast.success("Signed out successfully");
+              router.replace("/(auth)");
+            } catch (error) {
+              toast.error("Failed to sign out");
+            }
           },
         },
       ]
@@ -111,324 +115,220 @@ export default function ProfileSyncScreen() {
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader
-          title="Profile & Sync"
-          action={{
-            title: "Back",
-            onPress: () => router.back(),
-          }}
-        />
+      <DataLayout
+        title="Profile & Sync"
+        subtitle="Manage your account and sync preferences"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading profile settings...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container scrollable>
-      <Section 
-        title="Profile & Sync"
-        subtitle="Account settings and data synchronization"
-        spacing="xl"
-      />
-
-      <Section
-        title="Profile Information"
-        subtitle="Email address and display preferences"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.profileField}>
-            <Text
-              variant="body"
-              weight="semibold"
-              style={styles.fieldLabel}
-            >
-              Email Address
-            </Text>
-            <View
-              style={[
-                styles.emailContainer,
-                { backgroundColor: theme.colors.gray[100] },
-              ]}
-            >
-              <Text variant="body">
-                {user?.email || "Not available"}
-              </Text>
-              <View style={styles.verifiedBadge}>
-                <Text variant="caption" color="inverse">
-                  Verified
-                </Text>
-              </View>
+    <DataLayout
+      title="Profile & Sync"
+      subtitle="Manage your account and sync preferences"
+      scrollable
+    >
+      {/* Account Information */}
+      <DataSection title="Account Information" spacing="lg">
+        <DataCard>
+          <View style={styles.accountInfo}>
+            <View style={styles.avatar}>
+              <DataText variant="h2" weight="bold" style={styles.avatarText}>
+                {user?.email?.charAt(0).toUpperCase() || "U"}
+              </DataText>
+            </View>
+            
+            <View style={styles.accountDetails}>
+              <DataText variant="h4" weight="semibold">
+                {settings.displayName || "User"}
+              </DataText>
+              <DataText variant="body" color="secondary">
+                {user?.email || "No email available"}
+              </DataText>
             </View>
           </View>
 
-          <View style={styles.profileField}>
+          <View style={styles.formField}>
+            <DataText variant="body" weight="medium" style={styles.fieldLabel}>
+              Display Name
+            </DataText>
             <Input
-              label="Display Name"
               value={settings.displayName}
-              onChangeText={(value) => updateSetting("displayName", value)}
-              placeholder="Your display name"
+              onChangeText={(text) => updateSetting('displayName', text)}
+              placeholder="Enter display name"
+              variant="outline"
             />
           </View>
-        </Card>
-      </Section>
+        </DataCard>
+      </DataSection>
 
-      <Section
-        title="Sync Settings"
-        subtitle="Automatic synchronization preferences"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.sectionHeader}>
-            <Text variant="h4" weight="semibold">
-              Sync Controls
-            </Text>
-            <View style={styles.comingSoonBadge}>
-              <Text variant="caption" color="inverse">
-                Coming Soon
-              </Text>
-            </View>
-          </View>
-
+      {/* Sync Preferences */}
+      <DataSection title="Sync Preferences" subtitle="Control how your data syncs across devices" spacing="lg">
+        <DataCard>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text variant="body" weight="semibold">
-                Automatic Sync
-              </Text>
-              <Text variant="caption" color="secondary">
+              <DataText variant="body" weight="semibold">
+                Auto Sync
+              </DataText>
+              <DataText variant="caption" color="secondary">
                 Automatically sync your data when changes are made
-              </Text>
+              </DataText>
             </View>
             <Switch
               value={settings.autoSync}
-              onValueChange={(value) => updateSetting("autoSync", value)}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={
-                settings.autoSync
-                  ? theme.colors.surface
-                  : theme.colors.textSecondary
-              }
-              disabled={true} // Disabled until sync is implemented
+              onValueChange={(value) => updateSetting('autoSync', value)}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text variant="body" weight="semibold">
+              <DataText variant="body" weight="semibold">
                 Sync on Cellular
-              </Text>
-              <Text variant="caption" color="secondary">
-                Allow syncing when using cellular data (may use data)
-              </Text>
+              </DataText>
+              <DataText variant="caption" color="secondary">
+                Allow syncing when using cellular data (may use more data)
+              </DataText>
             </View>
             <Switch
               value={settings.syncOnCellular}
-              onValueChange={(value) => updateSetting("syncOnCellular", value)}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={
-                settings.syncOnCellular
-                  ? theme.colors.surface
-                  : theme.colors.textSecondary
-              }
-              disabled={true}
+              onValueChange={(value) => updateSetting('syncOnCellular', value)}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
+              disabled={!settings.autoSync}
             />
           </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text variant="body" weight="semibold">
+              <DataText variant="body" weight="semibold">
                 Backup Before Sync
-              </Text>
-              <Text variant="caption" color="secondary">
-                Create a backup before syncing changes
-              </Text>
+              </DataText>
+              <DataText variant="caption" color="secondary">
+                Create local backups before syncing to prevent data loss
+              </DataText>
             </View>
             <Switch
               value={settings.backupBeforeSync}
-              onValueChange={(value) =>
-                updateSetting("backupBeforeSync", value)
-              }
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={
-                settings.backupBeforeSync
-                  ? theme.colors.surface
-                  : theme.colors.textSecondary
-              }
-              disabled={true}
+              onValueChange={(value) => updateSetting('backupBeforeSync', value)}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
+              disabled={!settings.autoSync}
             />
           </View>
-        </Card>
-      </Section>
+        </DataCard>
+      </DataSection>
 
-      <Section
-        title="Sync Actions"
-        subtitle="Manual sync controls and status"
-        spacing="lg"
-      >
-        <Card variant="default">
-
+      {/* Sync Status */}
+      <DataSection title="Sync Status" spacing="lg">
+        <DataCard>
           <View style={styles.syncStatus}>
-            <Text
-              variant="caption"
-              color="secondary"
-              style={styles.statusText}
-            >
-              Last sync: Never (sync feature coming soon)
-            </Text>
+            <View style={styles.statusItem}>
+              <DataText variant="body" weight="medium">Last Sync</DataText>
+              <DataText variant="caption" color="secondary">Never</DataText>
+            </View>
+            
+            <View style={styles.statusItem}>
+              <DataText variant="body" weight="medium">Sync Status</DataText>
+              <DataText variant="caption" color="secondary">
+                {settings.autoSync ? "Enabled" : "Disabled"}
+              </DataText>
+            </View>
           </View>
-
-          <Button
+          
+          <DataButton
             title="Sync Now"
-            onPress={handleForceSync}
-            variant="outline"
-            disabled={true} // Disabled until sync is implemented
-            fullWidth
+            onPress={() => toast.info("Manual sync coming soon")}
+            variant="secondary"
+            disabled={!settings.autoSync}
           />
+        </DataCard>
+      </DataSection>
 
-          <View style={styles.infoBox}>
-            <Text
-              variant="caption"
-              color="secondary"
-              style={styles.infoText}
-            >
-              💡 Cloud sync functionality is coming soon. Your data is currently
-              stored locally and backed up securely on your device.
-            </Text>
-          </View>
-        </Card>
-      </Section>
-
-      <Section
-        title="Account Actions"
-        subtitle="Manage your account security and data"
-        spacing="lg"
-      >
-        <Card variant="default">
-
-          <View style={styles.actionGrid}>
-            <Button
+      {/* Account Actions */}
+      <DataSection title="Account Actions" spacing="xl">
+        <DataCard>
+          <DataGrid columns={1} gap="md">
+            <DataButton
               title="Change Password"
-              onPress={() => {}}
+              onPress={() => toast.info("Password change coming soon")}
               variant="outline"
-              disabled={true} // TODO: Implement password change
-              fullWidth
             />
-
-            <Button
-              title="Delete Account"
+            
+            <DataButton
+              title="Sign Out"
+              onPress={handleSignOut}
               variant="destructive"
-              onPress={() => {}}
-              disabled={true} // TODO: Implement account deletion
-              fullWidth
             />
-          </View>
-
-          <View style={styles.warningBox}>
-            <Text
-              variant="caption"
-              color="secondary"
-              style={styles.warningText}
-            >
-              Account management features are coming soon. For now, you can
-              manage your account through the authentication system.
-            </Text>
-          </View>
-        </Card>
-      </Section>
-    </Container>
+          </DataGrid>
+        </DataCard>
+      </DataSection>
+    </DataLayout>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = {
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     padding: 32,
   },
-  comingSoonBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "#6B7280",
-    borderRadius: 4,
+  accountInfo: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    marginBottom: 20,
   },
-  verifiedBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: "#059669",
-    borderRadius: 4,
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#2563EB",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginRight: 16,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
+  avatarText: {
+    color: "#fff",
+    fontSize: 24,
   },
-  profileField: {
-    marginBottom: 16,
+  accountDetails: {
+    flex: 1,
+    gap: 4,
+  },
+  formField: {
+    gap: 8,
   },
   fieldLabel: {
-    marginBottom: 8,
-  },
-  emailContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 12,
-    borderRadius: 8,
+    marginBottom: 4,
   },
   settingRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.05)",
   },
   settingInfo: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 16,
+    gap: 4,
   },
   syncStatus: {
-    marginBottom: 16,
-  },
-  statusText: {
-    textAlign: "center",
-  },
-  infoBox: {
-    backgroundColor: "rgba(139, 92, 246, 0.1)",
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(139, 92, 246, 0.2)",
-  },
-  infoText: {
-    textAlign: "center",
-  },
-  actionGrid: {
     gap: 12,
     marginBottom: 16,
   },
-  warningBox: {
-    backgroundColor: "rgba(255, 193, 7, 0.1)",
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255, 193, 7, 0.2)",
+  statusItem: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
   },
-  warningText: {
-    textAlign: "center",
-  },
-});
+};

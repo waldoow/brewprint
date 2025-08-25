@@ -7,13 +7,11 @@ import { View } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-// Professional UI Components
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
+// Data-First UI Components
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
 import { Input } from "@/components/ui/Input";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 
 // Brewer form validation schema - only fields that exist in database
 const brewerFormSchema = z.object({
@@ -165,14 +163,17 @@ export function BrewerForm({
   };
 
   return (
-    <Container scrollable>
-      <Section
-        title="Basic Information"
-        subtitle="Essential brewing equipment details"
-        spacing="xl"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+      {/* Basic Information */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Basic Information
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Essential brewing equipment details
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Brewer Name"
               placeholder="My V60, Kitchen Chemex"
@@ -203,34 +204,27 @@ export function BrewerForm({
                 required
               />
             </View>
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Brewing Method"
-        subtitle="Type and brewing characteristics"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Brewer Type *
-              </Text>
-              <View style={styles.selectOptions}>
-                {brewerTypeOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("type") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("type", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+      {/* Brewing Method */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Brewing Method
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Type and brewing characteristics
+        </DataText>
+
+        <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Brewer Type *"
+              options={brewerTypeOptions}
+              value={watch("type")}
+              onValueChange={(value) => setValue("type", value as any)}
+              placeholder="Select brewer type"
+              error={errors.type?.message}
+            />
 
             <View style={styles.row}>
               <Input
@@ -260,17 +254,19 @@ export function BrewerForm({
               onChangeText={(value) => setValue("filter_type", value)}
               error={errors.filter_type?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Additional Details"
-        subtitle="Optional notes and specifications"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Additional Details */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Additional Details
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Optional notes and specifications
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Notes"
               placeholder="Any additional notes about this brewer..."
@@ -280,17 +276,13 @@ export function BrewerForm({
               onChangeText={(value) => setValue("notes", value)}
               error={errors.notes?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Actions"
-        subtitle="Save or cancel your changes"
-        spacing="xl"
-      >
+      {/* Actions */}
+      <View style={styles.section}>
         <View style={styles.actions}>
-          <Button
+          <DataButton
             title={isEditing ? "Update Brewer" : "Add Brewer"}
             onPress={handleSubmit(onSubmit)}
             variant="primary"
@@ -299,7 +291,7 @@ export function BrewerForm({
             loading={isLoading}
             disabled={isLoading}
           />
-          <Button
+          <DataButton
             title="Cancel"
             variant="secondary"
             size="lg"
@@ -308,32 +300,20 @@ export function BrewerForm({
             disabled={isLoading}
           />
         </View>
-      </Section>
-    </Container>
+      </View>
+    </View>
   );
 }
 
 const styles = {
+  section: {
+    gap: 16,
+  },
   fieldGroup: {
     gap: 16,
   },
   row: {
     flexDirection: 'row' as const,
-  },
-  selectField: {
-    gap: 8,
-  },
-  selectLabel: {
-    marginBottom: 4,
-  },
-  selectOptions: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   actions: {
     gap: 12,

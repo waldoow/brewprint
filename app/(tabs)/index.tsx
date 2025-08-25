@@ -1,25 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { DataCard } from '@/components/ui/DataCard';
-import { Card } from '@/components/ui/Card';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { Section } from '@/components/ui/Section';
-import { useAuth } from '@/context/AuthContext';
-import { BeansService, type Bean } from '@/lib/services/beans';
-import { BrewprintsService, type Brewprint } from '@/lib/services';
-import { AnalyticsService, type BrewingStats } from '@/lib/services/analytics';
-import { toast } from 'sonner-native';
+import { DataCard, InfoCard, MetricCard } from "@/components/ui/DataCard";
+import { DataGrid, DataLayout, DataSection } from "@/components/ui/DataLayout";
+import { DataMetric } from "@/components/ui/DataMetric";
+import { DataText } from "@/components/ui/DataText";
+import { useAuth } from "@/context/AuthContext";
+import { BrewprintsService, type Brewprint } from "@/lib/services";
+import { AnalyticsService, type BrewingStats } from "@/lib/services/analytics";
+import { BeansService, type Bean } from "@/lib/services/beans";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { RefreshControl } from "react-native";
+import { toast } from "sonner-native";
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const [beans, setBeans] = useState<Bean[]>([]);
   const [brewprints, setBrewprints] = useState<Brewprint[]>([]);
   const [stats, setStats] = useState<BrewingStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -29,7 +26,7 @@ export default function HomeScreen() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       const [beansResult, brewprintsResult, statsResult] = await Promise.all([
         BeansService.getAllBeans(),
         BrewprintsService.getAllBrewprints(),
@@ -39,9 +36,8 @@ export default function HomeScreen() {
       if (beansResult.success) setBeans(beansResult.data || []);
       if (brewprintsResult.success) setBrewprints(brewprintsResult.data || []);
       if (statsResult.success) setStats(statsResult.data);
-      
-    } catch (error) {
-      toast.error('Failed to load dashboard data');
+    } catch {
+      toast.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -53,213 +49,192 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  // Calculate metrics
-  const activeBeans = beans.filter(bean => bean.current_stock && bean.current_stock > 0).length;
+  // Calculate key metrics
+  const activeBeans = beans.filter(
+    (bean) => bean.current_stock && bean.current_stock > 0
+  ).length;
   const totalRecipes = brewprints.length;
-  const perfectedRecipes = brewprints.filter(r => r.status === 'final').length;
-  
+  const perfectedRecipes = brewprints.filter(
+    (r) => r.status === "final"
+  ).length;
+  const averageRating = stats?.average_rating || 0;
+  const totalBrews = stats?.total_brews || 0;
+  const successRate = stats?.success_rate || 0;
+
+  // Get recent brews for activity
+  const recentBrews = brewprints
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    .slice(0, 3);
+
   return (
-    <Container 
-      scrollable 
+    <DataLayout
+      title="Dashboard"
+      subtitle={`Welcome back, ${
+        user?.user_metadata?.username || "Coffee Enthusiast"
+      }`}
+      scrollable
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <Section 
-        title="Good Morning"
-        subtitle={`Welcome back, ${user?.user_metadata?.username || 'Coffee Enthusiast'}`}
-        spacing="xl"
-      >
-        <Button
-          title="Create New Recipe"
-          variant="primary"
-          size="lg"
-          fullWidth
-          onPress={() => router.push('/brewprints/new')}
-        />
-      </Section>
-
-      <Section 
-        title="Your Brewing Analytics"
-        subtitle="Track your coffee journey with detailed insights"
-        spacing="xl"
-      >
-        <DataCard
-          title="Brewing Overview"
-          subtitle="Your coffee brewing statistics"
-          data={[
-            {
-              label: 'Total Brews',
-              value: stats?.total_brews || 0,
-              change: { value: 5, direction: 'up' },
-            },
-            {
-              label: 'Average Rating',
-              value: stats?.average_rating || 0,
-              unit: '/5',
-            },
-            {
-              label: 'Success Rate',
-              value: stats?.success_rate || 0,
-              unit: '%',
-              change: { value: 3, direction: 'up' },
-            },
-          ]}
-          layout="horizontal"
-          variant="elevated"
-        />
-
-        <DataCard
-          title="Inventory Status"
-          subtitle="Current coffee bean stock levels"
-          data={[
-            {
-              label: 'Active Beans',
-              value: activeBeans,
-              unit: 'types',
-            },
-            {
-              label: 'Total Stock',
-              value: beans.reduce((sum, bean) => sum + (bean.current_stock || 0), 0),
-              unit: 'g',
-            },
-            {
-              label: 'Low Stock',
-              value: beans.filter(bean => (bean.current_stock || 0) < 100).length,
-              unit: 'types',
-            },
-          ]}
-          layout="horizontal"
-          variant="default"
-        />
-
-        <DataCard
-          title="Recipe Development"
-          subtitle="Recipe creation and refinement progress"
-          data={[
-            {
-              label: 'Total Recipes',
-              value: totalRecipes,
-            },
-            {
-              label: 'Perfected',
-              value: perfectedRecipes,
-              change: { value: 2, direction: 'up' },
-            },
-            {
-              label: 'In Development',
-              value: brewprints.filter(r => r.status === 'experimenting').length,
-            },
-            {
-              label: 'Success Rate',
-              value: totalRecipes > 0 ? Math.round((perfectedRecipes / totalRecipes) * 100) : 0,
-              unit: '%',
-            },
-          ]}
-          layout="grid"
-          variant="outlined"
-        />
-      </Section>
-
-      <Section 
-        title="Quick Actions"
-        subtitle="Jump into your brewing workflow"
-        variant="elevated"
-        spacing="xl"
-      >
-        <View style={{ gap: 16 }}>
-          <Button
-            title="Start New Brew"
-            onPress={() => router.push('/brewprints')}
-            variant="primary"
-            size="lg"
-            fullWidth
+      {/* Key Metrics Overview */}
+      <DataSection title="Overview" spacing="lg">
+        <DataGrid columns={2} gap="md">
+          <MetricCard
+            title="Brewing Activity"
+            metrics={[
+              <DataMetric
+                key="total-brews"
+                label="Total Brews"
+                value={totalBrews}
+                size="sm"
+                trend={{ value: 5, direction: "up", period: "this week" }}
+              />,
+              <DataMetric
+                key="success-rate"
+                label="Success Rate"
+                value={Math.round(successRate)}
+                unit="%"
+                size="sm"
+                trend={{ value: 3, direction: "up", period: "this month" }}
+              />,
+            ]}
+            onPress={() => router.push("/analytics")}
           />
-          
-          <Button
-            title="Manage Bean Inventory"
-            onPress={() => router.push('/beans')}
-            variant="secondary"
-            size="lg"
-            fullWidth
-          />
-        </View>
-      </Section>
 
-      {brewprints.length > 0 && (
-        <Section 
-          title="Recent Creations"
-          subtitle="Your latest brewing experiments and discoveries"
-          variant="elevated"
-          spacing="xl"
+          <MetricCard
+            title="Quality Metrics"
+            metrics={[
+              <DataMetric
+                key="avg-rating"
+                label="Avg Rating"
+                value={averageRating.toFixed(1)}
+                unit="/5"
+                size="sm"
+              />,
+              <DataMetric
+                key="perfected"
+                label="Perfected"
+                value={perfectedRecipes}
+                unit="recipes"
+                size="sm"
+              />,
+            ]}
+            onPress={() => router.push("/brewprints")}
+          />
+        </DataGrid>
+      </DataSection>
+
+      {/* Inventory Status */}
+      <DataSection title="Inventory" spacing="lg">
+        <DataCard
+          title="Bean Inventory"
+          variant="bordered"
+          onPress={() => router.push("/library")}
         >
-          <View style={{ gap: 16 }}>
-            {brewprints.slice(0, 3).map((recipe, index) => (
-              <Card
-                key={recipe.id}
-                variant="elevated"
-                padding="lg"
-                onPress={() => router.push(`/brewprints/${recipe.id}`)}
-              >
-                <Text variant="xl" weight="bold" style={{ marginBottom: 4 }}>
-                  {recipe.name}
-                </Text>
-                <Text variant="body" color="secondary" style={{ marginBottom: 16 }}>
-                  {recipe.method?.toUpperCase()} • {recipe.status?.toUpperCase()}
-                </Text>
-                
-                {/* Brewing Parameters */}
-                <View style={{ 
-                  flexDirection: 'row', 
-                  justifyContent: 'space-between',
-                  backgroundColor: '#F8F9FA',
-                  padding: 12,
-                  borderRadius: 8,
-                }}>
-                  <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text variant="caption" color="tertiary">
-                      Coffee
-                    </Text>
-                    <Text variant="body" weight="semibold">
-                      {recipe.parameters?.coffee_grams || 'Unknown'}g
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text variant="caption" color="tertiary">
-                      Water
-                    </Text>
-                    <Text variant="body" weight="semibold">
-                      {recipe.parameters?.water_grams || 'Unknown'}g
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text variant="caption" color="tertiary">
-                      Time
-                    </Text>
-                    <Text variant="body" weight="semibold">
-                      {recipe.parameters?.total_time
-                        ? `${Math.floor(recipe.parameters.total_time / 60)}:${(
-                            recipe.parameters.total_time % 60
-                          )
-                            .toString()
-                            .padStart(2, '0')}`
-                        : 'Unknown'}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text variant="caption" color="tertiary">
-                      Temp
-                    </Text>
-                    <Text variant="body" weight="semibold">
-                      {recipe.parameters?.water_temp || 'Unknown'}°C
-                    </Text>
-                  </View>
-                </View>
-              </Card>
+          <DataMetric
+            label="Active Bean Types"
+            value={activeBeans}
+            size="md"
+            trend={
+              activeBeans > 0
+                ? { value: 12, direction: "up", period: "vs last month" }
+                : undefined
+            }
+          />
+        </DataCard>
+      </DataSection>
+
+      {/* Recent Activity */}
+      {recentBrews.length > 0 && (
+        <DataSection
+          title="Recent Brews"
+          subtitle="Your latest brewing experiments"
+        >
+          <DataGrid columns={1} gap="sm">
+            {recentBrews.map((brew) => (
+              <InfoCard
+                key={brew.id}
+                title={brew.name}
+                items={[
+                  {
+                    label: "Method",
+                    value: brew.method?.toUpperCase() || "Unknown",
+                  },
+                  {
+                    label: "Coffee",
+                    value: `${brew.parameters?.coffee_grams || "?"}g`,
+                  },
+                  {
+                    label: "Water",
+                    value: `${brew.parameters?.water_grams || "?"}g`,
+                  },
+                  {
+                    label: "Time",
+                    value: brew.parameters?.total_time
+                      ? `${Math.floor(brew.parameters.total_time / 60)}:${(
+                          brew.parameters.total_time % 60
+                        )
+                          .toString()
+                          .padStart(2, "0")}`
+                      : "?",
+                  },
+                  {
+                    label: "Temp",
+                    value: `${brew.parameters?.water_temp || "?"}°C`,
+                  },
+                ]}
+                variant="surface"
+                onPress={() => {
+                  console.log(
+                    "Navigating to brewing with ID:",
+                    brew.id,
+                    "Full brew:",
+                    brew
+                  );
+                  if (!brew.id) {
+                    toast.error(
+                      "Recipe ID missing - cannot start brewing session"
+                    );
+                    return;
+                  }
+                  router.push(`/brewing/${brew.id}`);
+                }}
+              />
             ))}
-          </View>
-        </Section>
+          </DataGrid>
+        </DataSection>
       )}
-    </Container>
+
+      {/* Quick Actions */}
+      <DataSection title="Quick Actions" spacing="lg">
+        <DataGrid columns={1} gap="sm">
+          <DataCard
+            title="Start New Brew"
+            subtitle="Begin a new brewing session"
+            variant="bordered"
+            onPress={() => router.push("/brewprints/new")}
+          >
+            <DataText variant="small" color="secondary">
+              Create and track a new brewing recipe
+            </DataText>
+          </DataCard>
+
+          <DataCard
+            title="Browse Recipes"
+            subtitle="Explore your brewing library"
+            variant="surface"
+            onPress={() => router.push("/brewprints")}
+          >
+            <DataText variant="small" color="secondary">
+              {totalRecipes} recipes available
+            </DataText>
+          </DataCard>
+        </DataGrid>
+      </DataSection>
+    </DataLayout>
   );
 }

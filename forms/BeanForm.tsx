@@ -5,13 +5,11 @@ import { z } from "zod";
 import { View } from "react-native";
 import { toast } from "sonner-native";
 
-// Professional UI Components
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
+// Data-First UI Components
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
 import { Input } from "@/components/ui/Input";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 
 // Services and Context
 import { useAuth } from "@/context/AuthContext";
@@ -210,14 +208,17 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
   };
 
   return (
-    <Container scrollable>
-      <Section
-        title="Basic Information"
-        subtitle="Essential coffee bean details"
-        spacing="xl"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+      {/* Basic Information */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Basic Information
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Essential coffee bean details
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Bean Name"
               placeholder="Ethiopian Yirgacheffe"
@@ -244,63 +245,49 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
               error={errors.supplier?.message}
               required
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Processing & Roast"
-        subtitle="Process method and roast characteristics"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Process Method *
-              </Text>
-              <View style={styles.selectOptions}>
-                {processOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("process") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("process", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+      {/* Processing & Roast */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Processing & Roast
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Process method and roast characteristics
+        </DataText>
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Roast Level *
-              </Text>
-              <View style={styles.selectOptions}>
-                {roastLevelOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("roast_level") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("roast_level", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        </Card>
-      </Section>
+        <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Process Method *"
+              options={processOptions}
+              value={watch("process")}
+              onValueChange={(value) => setValue("process", value as any)}
+              placeholder="Select process method"
+              error={errors.process?.message}
+            />
 
-      <Section
-        title="Purchase & Inventory"
-        subtitle="Purchase details and inventory tracking"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Roast Level *"
+              options={roastLevelOptions}
+              value={watch("roast_level")}
+              onValueChange={(value) => setValue("roast_level", value as any)}
+              placeholder="Select roast level"
+              error={errors.roast_level?.message}
+            />
+        </View>
+      </View>
+
+      {/* Purchase & Inventory */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Purchase & Inventory
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Purchase details and inventory tracking
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Purchase Date"
               type="date"
@@ -352,17 +339,19 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
               error={errors.remaining_grams?.message}
               required
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Additional Details"
-        subtitle="Optional coffee characteristics and notes"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Additional Details */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Additional Details
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Optional coffee characteristics and notes
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <View style={styles.row}>
               <Input
                 label="Farm"
@@ -407,23 +396,14 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
               onChangeText={(value) => setValue("tasting_notes", value)}
             />
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Rating (Optional)
-              </Text>
-              <View style={styles.selectOptions}>
-                {ratingOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("rating") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("rating", option.value)}
-                    style={styles.ratingButton}
-                  />
-                ))}
-              </View>
-            </View>
+            <ThemedSelect
+              label="Rating (Optional)"
+              options={ratingOptions}
+              value={watch("rating")}
+              onValueChange={(value) => setValue("rating", value)}
+              placeholder="Select rating"
+              error={errors.rating?.message}
+            />
 
             <Input
               label="Official Description"
@@ -442,17 +422,13 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
               value={watch("my_notes")}
               onChangeText={(value) => setValue("my_notes", value)}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Actions"
-        subtitle="Save or cancel your changes"
-        spacing="xl"
-      >
+      {/* Actions */}
+      <View style={styles.section}>
         <View style={styles.actions}>
-          <Button
+          <DataButton
             title="Add Bean"
             onPress={handleSubmit(onSubmit)}
             variant="primary"
@@ -461,7 +437,7 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
             loading={isLoading}
             disabled={isLoading}
           />
-          <Button
+          <DataButton
             title="Cancel"
             variant="secondary"
             size="lg"
@@ -470,36 +446,20 @@ export function BeanForm({ onSuccess, onCancel, initialData }: BeanFormProps) {
             disabled={isLoading}
           />
         </View>
-      </Section>
-    </Container>
+      </View>
+    </View>
   );
 }
 
 const styles = {
+  section: {
+    gap: 16,
+  },
   fieldGroup: {
     gap: 16,
   },
   row: {
     flexDirection: 'row' as const,
-  },
-  selectField: {
-    gap: 8,
-  },
-  selectLabel: {
-    marginBottom: 4,
-  },
-  selectOptions: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  ratingButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
   },
   actions: {
     gap: 12,

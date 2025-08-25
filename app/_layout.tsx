@@ -7,7 +7,6 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -64,12 +63,11 @@ export default function RootLayout() {
               <Stack.Screen name="settings/profile" />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <StatusBar style="auto" />
             <Toaster
-              position="bottom-center"
+              position="top-center"
               duration={3000}
               swipeToDismissDirection="up"
-              visibleToasts={4}
+              visibleToasts={2}
             />
           </ThemeProvider>
         </AuthProvider>

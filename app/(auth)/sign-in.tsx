@@ -6,16 +6,16 @@ import {
   Platform,
   View,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-
-import { Container } from "@/components/ui/Container";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Section } from "@/components/ui/Section";
+import { getTheme } from '@/constants/DataFirstDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { DataCard } from '@/components/ui/DataCard';
+import { DataText } from '@/components/ui/DataText';
+import { DataButton } from '@/components/ui/DataButton';
+import { Input } from '@/components/ui/Input';
 import {
   Form,
   FormControl,
@@ -24,6 +24,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+
+const { height } = Dimensions.get('window');
 
 // Zod schema for sign-in validation
 const signInSchema = z.object({
@@ -83,27 +85,60 @@ export default function SignIn({
     }
   };
 
-  return (
-    <Container scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
-        <View style={styles.content}>
-          <Section 
-            title="Welcome Back"
-            subtitle="Sign in to continue your coffee journey"
-            variant="accent"
-            spacing="xl"
-            style={{ marginBottom: 32 }}
-          />
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-          <Section 
-            title="Account Access"
-            variant="elevated"
-            spacing="lg"
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
+        {/* Clean App Header */}
+        <View style={styles.header}>
+          <DataText 
+            variant="display" 
+            weight="bold" 
+            color="primary"
+            style={{
+              textAlign: 'center',
+              marginBottom: theme.spacing[2]
+            }}
           >
-            <Card variant="elevated" style={styles.formCard}>
+            Brewprint
+          </DataText>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{
+              textAlign: 'center',
+            }}
+          >
+            Professional Coffee Recipe Management
+          </DataText>
+        </View>
+
+        {/* Clean Sign In Card */}
+        <DataCard style={styles.authCard}>
+          <View style={{ gap: 16 }}>
+            <View style={styles.authHeader}>
+              <DataText 
+                variant="h1" 
+                weight="semibold" 
+                color="primary"
+                style={{ marginBottom: theme.spacing[2] }}
+              >
+                Sign In
+              </DataText>
+              <DataText 
+                variant="body" 
+                color="secondary"
+                style={{ textAlign: 'center' }}
+              >
+                Access your brewing recipes and data
+              </DataText>
+            </View>
+
             <Form {...form}>
               <View style={styles.form}>
                 {/* Email Input */}
@@ -113,9 +148,9 @@ export default function SignIn({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
-                          Email
-                        </Text>
+                        <DataText variant="small" weight="medium" color="primary">
+                          Email Address
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -139,9 +174,9 @@ export default function SignIn({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
+                        <DataText variant="small" weight="medium" color="primary">
                           Password
-                        </Text>
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -158,89 +193,87 @@ export default function SignIn({
                   )}
                 />
 
-                {/* Forgot Password */}
-                <Button
+                {/* Forgot Password Link */}
+                <DataButton
                   variant="ghost"
                   title="Forgot your password?"
                   onPress={onForgotPassword}
                   style={styles.forgotPassword}
                 />
 
-                {/* Sign In Button */}
-                <Button
+                {/* Clean Sign In Button */}
+                <DataButton
                   title="Sign In"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
                   onPress={form.handleSubmit(onSubmit)}
                   disabled={isLoading}
                   loading={isLoading}
-                  style={styles.signInButton}
+                  style={{
+                    marginTop: theme.spacing[6]
+                  }}
                 />
               </View>
             </Form>
-            </Card>
-          </Section>
+          </View>
+        </DataCard>
 
-          <Section 
-            title="New to Brewprint?"
-            subtitle="Join thousands of coffee enthusiasts perfecting their craft"
-            variant="accent"
-            spacing="lg"
+        {/* Sign Up Section */}
+        <View style={styles.signUpSection}>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{ textAlign: 'center', marginBottom: theme.spacing[4] }}
           >
-            <Button
-              variant="secondary"
-              size="lg"
-              fullWidth
-              title="Create Your Account"
-              onPress={onNavigateToSignUp}
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
-            />
-          </Section>
+            Don&apos;t have an account?
+          </DataText>
+          <DataButton
+            variant="secondary"
+            size="lg"
+            fullWidth
+            title="Create Account"
+            onPress={onNavigateToSignUp}
+          />
         </View>
-      </KeyboardAvoidingView>
-    </Container>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardView: {
+  container: {
     flex: 1,
   },
   content: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingVertical: 40,
+    minHeight: height,
   },
   header: {
-    alignItems: "center",
-    marginBottom: 40,
+    alignItems: 'center',
+    marginBottom: 48,
+    paddingTop: 20,
   },
-  title: {
-    marginBottom: 8,
+  authCard: {
+    marginBottom: 32,
   },
-  subtitle: {
-    textAlign: "center",
-  },
-  formCard: {
+  authHeader: {
+    alignItems: 'center',
     marginBottom: 32,
   },
   form: {
-    width: "100%",
+    width: '100%',
+    gap: 16,
   },
   forgotPassword: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginTop: 8,
-    marginBottom: 24,
+    marginBottom: 8,
   },
-  signInButton: {
-    marginTop: 8,
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 4,
-  },
-  signUpText: {
-    fontSize: 16,
+  signUpSection: {
+    alignItems: 'center',
   },
 });

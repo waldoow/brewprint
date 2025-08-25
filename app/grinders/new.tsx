@@ -1,10 +1,8 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { toast } from 'sonner-native';
 
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { DataLayout } from '@/components/ui/DataLayout';
 import { GrinderForm } from '@/forms/GrinderForm';
 
 export default function NewGrinderScreen() {
@@ -18,22 +16,15 @@ export default function NewGrinderScreen() {
   };
 
   return (
-    <Container>
-      <PageHeader
-        title="New Grinder"
-        subtitle="Add grinding equipment"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-      
+    <DataLayout
+      title="New Grinder"
+      subtitle="Add precision grinding equipment to your setup"
+      scrollable
+    >
       <GrinderForm 
         onSuccess={handleSuccess} 
         onCancel={handleCancel} 
       />
-    </Container>
+    </DataLayout>
   );
 }
-
-const styles = StyleSheet.create({});

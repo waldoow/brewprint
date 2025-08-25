@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  StyleSheet,
-  ScrollView,
   View,
   TouchableOpacity,
   Switch,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Card } from '@/components/ui/Card';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
+import { DataCard } from '@/components/ui/DataCard';
+import { DataText } from '@/components/ui/DataText';
+import { DataButton } from '@/components/ui/DataButton';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
@@ -99,7 +96,7 @@ export default function PreferencesScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
       
-      toast.success('Preferences updated');
+      toast.success('Preferences updated successfully');
     } catch (error) {
       console.error('Failed to save preferences:', error);
       toast.error('Failed to save preferences');
@@ -118,346 +115,244 @@ export default function PreferencesScreen() {
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader
-          title="Preferences"
-          subtitle="Customize your coffee tracking experience"
-          action={{
-            title: "Back",
-            onPress: () => router.back(),
-          }}
-        />
+      <DataLayout
+        title="Preferences"
+        subtitle="Customize your brewing experience"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading preferences...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container scrollable>
-      <PageHeader
-        title="Preferences"
-        subtitle="Customize your coffee tracking experience"
-        action={{
-          title: "Back",
-          onPress: () => router.back(),
-        }}
-      />
-
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Units Section */}
-        <Card variant="default" style={styles.section}>
-          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
-            Units
-          </Text>
-
-          {/* Temperature Unit */}
-          <View style={styles.settingRow}>
-            <Text variant="body" weight="medium" style={styles.settingLabel}>
-              Temperature
-            </Text>
-            <View style={styles.unitOptions}>
+    <DataLayout
+      title="Preferences"
+      subtitle="Customize your brewing experience"
+      scrollable
+    >
+      {/* Units Section */}
+      <DataSection title="Units of Measurement" subtitle="Choose your preferred units for brewing" spacing="lg">
+        <DataCard>
+          <View style={styles.unitGroup}>
+            <DataText variant="body" weight="semibold">Temperature</DataText>
+            <DataGrid columns={2} gap="sm">
               {TEMPERATURE_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.temperatureUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.surface,
-                      borderColor: preferences.temperatureUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.temperatureUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('temperatureUnit', unit.value as 'celsius' | 'fahrenheit')}
                 >
-                  <Text
-                    variant="caption"
-                    style={[
-                      styles.unitText,
-                      { color: preferences.temperatureUnit === unit.value ? theme.colors.surface : theme.colors.text }
-                    ]}
+                  <DataText 
+                    variant="body" 
+                    color={preferences.temperatureUnit === unit.value ? 'primary' : 'secondary'}
+                    weight={preferences.temperatureUnit === unit.value ? 'semibold' : 'normal'}
                   >
                     {unit.label}
-                  </Text>
+                  </DataText>
                 </TouchableOpacity>
               ))}
-            </View>
+            </DataGrid>
           </View>
 
-          {/* Weight Unit */}
-          <View style={styles.settingRow}>
-            <Text variant="body" weight="medium" style={styles.settingLabel}>
-              Weight
-            </Text>
-            <View style={styles.unitOptions}>
+          <View style={styles.unitGroup}>
+            <DataText variant="body" weight="semibold">Weight</DataText>
+            <DataGrid columns={2} gap="sm">
               {WEIGHT_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.weightUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.surface,
-                      borderColor: preferences.weightUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.weightUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('weightUnit', unit.value as 'grams' | 'ounces')}
                 >
-                  <Text
-                    variant="caption"
-                    style={[
-                      styles.unitText,
-                      { color: preferences.weightUnit === unit.value ? theme.colors.surface : theme.colors.text }
-                    ]}
+                  <DataText 
+                    variant="body" 
+                    color={preferences.weightUnit === unit.value ? 'primary' : 'secondary'}
+                    weight={preferences.weightUnit === unit.value ? 'semibold' : 'normal'}
                   >
                     {unit.label}
-                  </Text>
+                  </DataText>
                 </TouchableOpacity>
               ))}
-            </View>
+            </DataGrid>
           </View>
 
-          {/* Volume Unit */}
-          <View style={styles.settingRow}>
-            <Text variant="body" weight="medium" style={styles.settingLabel}>
-              Volume
-            </Text>
-            <View style={styles.unitOptions}>
+          <View style={styles.unitGroup}>
+            <DataText variant="body" weight="semibold">Volume</DataText>
+            <DataGrid columns={2} gap="sm">
               {VOLUME_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.volumeUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.surface,
-                      borderColor: preferences.volumeUnit === unit.value 
-                        ? theme.colors.primary 
-                        : theme.colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.volumeUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('volumeUnit', unit.value as 'ml' | 'fl_oz')}
                 >
-                  <Text
-                    variant="caption"
-                    style={[
-                      styles.unitText,
-                      { color: preferences.volumeUnit === unit.value ? theme.colors.surface : theme.colors.text }
-                    ]}
+                  <DataText 
+                    variant="body" 
+                    color={preferences.volumeUnit === unit.value ? 'primary' : 'secondary'}
+                    weight={preferences.volumeUnit === unit.value ? 'semibold' : 'normal'}
                   >
                     {unit.label}
-                  </Text>
+                  </DataText>
                 </TouchableOpacity>
               ))}
-            </View>
+            </DataGrid>
           </View>
-        </Card>
+        </DataCard>
+      </DataSection>
 
-        {/* Brewing Section */}
-        <Card variant="default" style={styles.section}>
-          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
-            Brewing
-          </Text>
-
-          {/* Default Brew Method */}
+      {/* Brewing Preferences */}
+      <DataSection title="Brewing Preferences" subtitle="Customize your brewing workflow" spacing="lg">
+        <DataCard>
           <View style={styles.settingRow}>
-            <Text variant="body" weight="medium" style={styles.settingLabel}>
-              Default Method
-            </Text>
-            <View style={styles.methodOptions}>
-              {BREW_METHODS.map((method) => (
-                <TouchableOpacity
-                  key={method.value}
-                  style={[
-                    styles.methodButton,
-                    {
-                      backgroundColor: preferences.defaultBrewMethod === method.value 
-                        ? theme.colors.primary 
-                        : theme.colors.surface,
-                      borderColor: preferences.defaultBrewMethod === method.value 
-                        ? theme.colors.primary 
-                        : theme.colors.border,
-                    }
-                  ]}
-                  onPress={() => updatePreference('defaultBrewMethod', method.value)}
-                >
-                  <Text
-                    variant="caption"
-                    style={[
-                      styles.methodText,
-                      { color: preferences.defaultBrewMethod === method.value ? theme.colors.surface : theme.colors.text }
-                    ]}
-                  >
-                    {method.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Auto-start Timer */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <Text variant="body" weight="medium">
-                Auto-start Timer
-              </Text>
-              <Text variant="caption" color="secondary">
-                Start timer automatically when brewing begins
-              </Text>
+            <View style={styles.settingInfo}>
+              <DataText variant="body" weight="semibold">Timer Auto-Start</DataText>
+              <DataText variant="caption" color="secondary">
+                Automatically start timer when brewing begins
+              </DataText>
             </View>
             <Switch
               value={preferences.timerAutoStart}
               onValueChange={(value) => updatePreference('timerAutoStart', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={preferences.timerAutoStart ? theme.colors.surface : theme.colors.textSecondary}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
             />
           </View>
 
-          {/* Auto-save Brews */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <Text variant="body" weight="medium">
-                Auto-save Brews
-              </Text>
-              <Text variant="caption" color="secondary">
-                Automatically save completed brewing sessions
-              </Text>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <DataText variant="body" weight="semibold">Auto-Save Brews</DataText>
+              <DataText variant="caption" color="secondary">
+                Automatically save brewing sessions when completed
+              </DataText>
             </View>
             <Switch
               value={preferences.autoSaveBrews}
               onValueChange={(value) => updatePreference('autoSaveBrews', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={preferences.autoSaveBrews ? theme.colors.surface : theme.colors.textSecondary}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
             />
           </View>
 
-          {/* Show Detailed Metrics */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <Text variant="body" weight="medium">
-                Detailed Metrics
-              </Text>
-              <Text variant="caption" color="secondary">
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <DataText variant="body" weight="semibold">Detailed Metrics</DataText>
+              <DataText variant="caption" color="secondary">
                 Show advanced brewing metrics and analytics
-              </Text>
+              </DataText>
             </View>
             <Switch
               value={preferences.showDetailedMetrics}
               onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={preferences.showDetailedMetrics ? theme.colors.surface : theme.colors.textSecondary}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
             />
           </View>
-        </Card>
+        </DataCard>
+      </DataSection>
 
-        {/* Interface Section */}
-        <Card variant="default" style={styles.section}>
-          <Text variant="h4" weight="semibold" style={styles.sectionTitle}>
-            Interface
-          </Text>
-
-          {/* Haptic Feedback */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <Text variant="body" weight="medium">
-                Haptic Feedback
-              </Text>
-              <Text variant="caption" color="secondary">
-                Vibration feedback for button taps and interactions
-              </Text>
+      {/* App Experience */}
+      <DataSection title="App Experience" subtitle="Customize interface and feedback" spacing="lg">
+        <DataCard>
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <DataText variant="body" weight="semibold">Haptic Feedback</DataText>
+              <DataText variant="caption" color="secondary">
+                Enable vibration feedback for interactions
+              </DataText>
             </View>
             <Switch
               value={preferences.hapticFeedback}
               onValueChange={(value) => updatePreference('hapticFeedback', value)}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={preferences.hapticFeedback ? theme.colors.surface : theme.colors.textSecondary}
+              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
+              thumbColor={theme.colors.white}
             />
           </View>
-        </Card>
+        </DataCard>
+      </DataSection>
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </Container>
+      {/* Default Brew Method */}
+      <DataSection title="Default Brew Method" subtitle="Select your preferred brewing method" spacing="lg">
+        <DataCard>
+          <DataGrid columns={1} gap="sm">
+            {BREW_METHODS.map((method) => (
+              <TouchableOpacity
+                key={method.value}
+                style={[
+                  styles.methodOption,
+                  preferences.defaultBrewMethod === method.value && styles.methodOptionSelected
+                ]}
+                onPress={() => updatePreference('defaultBrewMethod', method.value)}
+              >
+                <DataText 
+                  variant="body" 
+                  color={preferences.defaultBrewMethod === method.value ? 'primary' : 'default'}
+                  weight={preferences.defaultBrewMethod === method.value ? 'semibold' : 'normal'}
+                >
+                  {method.label}
+                </DataText>
+              </TouchableOpacity>
+            ))}
+          </DataGrid>
+        </DataCard>
+      </DataSection>
+    </DataLayout>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = {
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    padding: 32,
   },
-  section: {
-    marginBottom: 16,
+  unitGroup: {
+    marginBottom: 20,
+    gap: 12,
   },
-  sectionTitle: {
-    marginBottom: 16,
+  unitOption: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    alignItems: 'center' as const,
+  },
+  unitOptionSelected: {
+    borderColor: '#2563EB',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+  },
+  methodOption: {
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  methodOptionSelected: {
+    borderColor: '#2563EB',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
   },
   settingRow: {
-    marginBottom: 20,
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
-  settingLabel: {
-    marginBottom: 8,
-  },
-  unitOptions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  unitButton: {
+  settingInfo: {
     flex: 1,
-    minWidth: '45%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
+    marginRight: 16,
+    gap: 4,
   },
-  unitText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  methodOptions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  methodButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  methodText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  switchInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  bottomSpacing: {
-    height: 20,
-  },
-});
+};

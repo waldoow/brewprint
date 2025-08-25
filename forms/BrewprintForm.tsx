@@ -1,24 +1,22 @@
-// Professional UI Components
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
+// Data-First UI Components
+import { DataButton } from "@/components/ui/DataButton";
+import { DataText } from "@/components/ui/DataText";
 import { Input } from "@/components/ui/Input";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
+import { useAuth } from "@/context/AuthContext";
 import {
   BeansService,
   BrewersService,
-  GrindersService,
   BrewprintsService,
+  GrindersService,
   type BrewprintInput,
   type BrewStep,
 } from "@/lib/services";
+import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import { toast } from "sonner-native";
-import { useAuth } from "@/context/AuthContext";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 interface BrewprintFormProps {
@@ -78,7 +76,7 @@ const methodOptions = [
   { label: "Siphon", value: "siphon" },
   { label: "Percolator", value: "percolator" },
   { label: "Turkish", value: "turkish" },
-  { label: "Moka", value: "moka" },
+  { label: "Moka Pot", value: "moka" },
 ];
 
 const techniqueOptions = [
@@ -94,7 +92,9 @@ const techniqueOptions = [
 const brewprintFormSchema = z.object({
   name: z.string().min(1, "Brewprint name is required"),
   description: z.string().optional(),
-  method: z.string().min(1, "Method is required"),
+  method: z.enum(["v60", "chemex", "french-press", "aeropress", "espresso", "cold-brew", "siphon", "percolator", "turkish", "moka"], {
+    errorMap: () => ({ message: "Please select a valid brewing method" })
+  }),
   brewer_id: z.string().min(1, "Brewer is required"),
   bean_id: z.string().min(1, "Bean is required"),
   grinder_id: z.string().optional(),
@@ -109,14 +109,16 @@ const brewprintFormSchema = z.object({
   target_extraction: z.string().optional(),
   target_strength: z.string().optional(),
   target_time: z.string().optional(),
-  steps: z.array(z.object({
-    title: z.string().min(1, "Step title is required"),
-    description: z.string().min(1, "Step description is required"),
-    duration: z.string().min(1, "Duration is required"),
-    water_amount: z.string().min(1, "Water amount is required"),
-    technique: z.string().min(1, "Technique is required"),
-    temperature: z.string().optional(),
-  })),
+  steps: z.array(
+    z.object({
+      title: z.string().min(1, "Step title is required"),
+      description: z.string().min(1, "Step description is required"),
+      duration: z.string().min(1, "Duration is required"),
+      water_amount: z.string().min(1, "Water amount is required"),
+      technique: z.string().min(1, "Technique is required"),
+      temperature: z.string().optional(),
+    })
+  ),
 });
 
 export function BrewprintForm({
@@ -130,7 +132,9 @@ export function BrewprintForm({
     []
   );
   const [beans, setBeans] = useState<{ label: string; value: string }[]>([]);
-  const [grinders, setGrinders] = useState<{ label: string; value: string }[]>([]);
+  const [grinders, setGrinders] = useState<{ label: string; value: string }[]>(
+    []
+  );
   const [selectedGrinder, setSelectedGrinder] = useState<any>(null);
 
   // Initialize form with validation
@@ -251,7 +255,7 @@ export function BrewprintForm({
           const result = await GrindersService.getGrinderById(watchedGrinderId);
           if (result.success && result.data) {
             setSelectedGrinder(result.data);
-            
+
             // Auto-populate grind setting if grinder has a default and current setting is empty
             if (result.data.default_setting && !getValues("grind_setting")) {
               setValue("grind_setting", result.data.default_setting.toString());
@@ -343,7 +347,9 @@ export function BrewprintForm({
         onSuccess(result.data);
       } else {
         console.error("Error creating brewprint:", result.error);
-        toast.error(result.error || "Failed to create brewprint. Please try again.");
+        toast.error(
+          result.error || "Failed to create brewprint. Please try again."
+        );
       }
     } catch (error) {
       console.error("Error creating brewprint:", error);
@@ -371,25 +377,33 @@ export function BrewprintForm({
 
   if (isLoading) {
     return (
-      <Container>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
-          <Text variant="body" color="secondary">
-            Loading brewprint data...
-          </Text>
-        </View>
-      </Container>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 32,
+        }}
+      >
+        <DataText variant="body" color="secondary">
+          Loading brewprint data...
+        </DataText>
+      </View>
     );
   }
 
   return (
-    <Container scrollable>
-      <Section
-        title="Basic Information"
-        subtitle="Recipe details and brewing method"
-        spacing="xl"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+      {/* Basic Information */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Basic Information
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Recipe details and brewing method
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Recipe Name"
               placeholder="My V60 Recipe"
@@ -409,116 +423,75 @@ export function BrewprintForm({
               error={errors.description?.message}
             />
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Brewing Method *
-              </Text>
-              <View style={styles.selectOptions}>
-                {methodOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("method") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("method", option.value)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+            <ThemedSelect
+              label="Brewing Method *"
+              options={methodOptions}
+              value={watch("method")}
+              onValueChange={(value) => setValue("method", value)}
+              placeholder="Select brewing method"
+              error={errors.method?.message}
+            />
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Difficulty *
-              </Text>
-              <View style={styles.selectOptions}>
-                {difficultyOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("difficulty") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("difficulty", option.value)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        </Card>
-      </Section>
+            <ThemedSelect
+              label="Difficulty *"
+              options={difficultyOptions}
+              value={watch("difficulty")}
+              onValueChange={(value) => setValue("difficulty", value)}
+              placeholder="Select difficulty"
+              error={errors.difficulty?.message}
+            />
+        </View>
+      </View>
 
-      <Section
-        title="Equipment Selection"
-        subtitle="Choose your brewing equipment"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Brewer *
-              </Text>
-              <View style={styles.selectOptions}>
-                {brewers.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("brewer_id") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("brewer_id", option.value)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+      {/* Equipment Selection */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Equipment Selection
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Choose your brewing equipment
+        </DataText>
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Coffee Bean *
-              </Text>
-              <View style={styles.selectOptions}>
-                {beans.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("bean_id") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("bean_id", option.value)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+        <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Brewer *"
+              options={brewers}
+              value={watch("brewer_id")}
+              onValueChange={(value) => setValue("brewer_id", value)}
+              placeholder="Select a brewer"
+              error={errors.brewer_id?.message}
+            />
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Grinder (Optional)
-              </Text>
-              <View style={styles.selectOptions}>
-                {grinders.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("grinder_id") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("grinder_id", option.value)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        </Card>
-      </Section>
+            <ThemedSelect
+              label="Coffee Bean *"
+              options={beans}
+              value={watch("bean_id")}
+              onValueChange={(value) => setValue("bean_id", value)}
+              placeholder="Select a coffee bean"
+              error={errors.bean_id?.message}
+            />
 
-      <Section
-        title="Recipe Parameters"
-        subtitle="Brewing ratios and temperatures"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Grinder (Optional)"
+              options={grinders}
+              value={watch("grinder_id")}
+              onValueChange={(value) => setValue("grinder_id", value)}
+              placeholder="Select a grinder"
+              error={errors.grinder_id?.message}
+            />
+        </View>
+      </View>
+
+      {/* Recipe Parameters */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Recipe Parameters
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Brewing ratios and temperatures
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <View style={styles.row}>
               <Input
                 label="Coffee (g)"
@@ -544,10 +517,10 @@ export function BrewprintForm({
             </View>
 
             {calculateRatio() && (
-              <View style={{ alignItems: 'center', marginVertical: 8 }}>
-                <Text variant="body" weight="semibold">
+              <View style={{ alignItems: "center", marginVertical: 8 }}>
+                <DataText variant="body" weight="semibold">
                   Ratio: {calculateRatio()}
-                </Text>
+                </DataText>
               </View>
             )}
 
@@ -595,25 +568,27 @@ export function BrewprintForm({
                 style={{ flex: 1, marginLeft: 8 }}
               />
             </View>
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Brewing Steps"
-        subtitle="Step-by-step brewing instructions"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Brewing Steps */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Brewing Steps
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Step-by-step brewing instructions
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             {stepFields.map((field, index) => (
               <View key={field.id} style={styles.stepCard}>
                 <View style={styles.stepHeader}>
-                  <Text variant="body" weight="semibold">
+                  <DataText variant="body" weight="semibold">
                     Step {index + 1}
-                  </Text>
+                  </DataText>
                   {stepFields.length > 1 && (
-                    <Button
+                    <DataButton
                       title="Remove"
                       variant="secondary"
                       size="sm"
@@ -626,7 +601,9 @@ export function BrewprintForm({
                   label="Title"
                   placeholder="Bloom"
                   value={watch(`steps.${index}.title`)}
-                  onChangeText={(value) => setValue(`steps.${index}.title`, value)}
+                  onChangeText={(value) =>
+                    setValue(`steps.${index}.title`, value)
+                  }
                   error={errors.steps?.[index]?.title?.message}
                   required
                 />
@@ -637,7 +614,9 @@ export function BrewprintForm({
                   multiline
                   numberOfLines={2}
                   value={watch(`steps.${index}.description`)}
-                  onChangeText={(value) => setValue(`steps.${index}.description`, value)}
+                  onChangeText={(value) =>
+                    setValue(`steps.${index}.description`, value)
+                  }
                   error={errors.steps?.[index]?.description?.message}
                   required
                 />
@@ -648,7 +627,9 @@ export function BrewprintForm({
                     placeholder="30"
                     type="number"
                     value={watch(`steps.${index}.duration`)}
-                    onChangeText={(value) => setValue(`steps.${index}.duration`, value)}
+                    onChangeText={(value) =>
+                      setValue(`steps.${index}.duration`, value)
+                    }
                     error={errors.steps?.[index]?.duration?.message}
                     style={{ flex: 1, marginRight: 8 }}
                     required
@@ -659,50 +640,38 @@ export function BrewprintForm({
                     placeholder="50"
                     type="number"
                     value={watch(`steps.${index}.water_amount`)}
-                    onChangeText={(value) => setValue(`steps.${index}.water_amount`, value)}
+                    onChangeText={(value) =>
+                      setValue(`steps.${index}.water_amount`, value)
+                    }
                     error={errors.steps?.[index]?.water_amount?.message}
                     style={{ flex: 1, marginLeft: 8 }}
                     required
                   />
                 </View>
 
-                <View style={styles.selectField}>
-                  <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                    Technique *
-                  </Text>
-                  <View style={styles.selectOptions}>
-                    {techniqueOptions.map((option) => (
-                      <Button
-                        key={option.value}
-                        title={option.label}
-                        variant={watch(`steps.${index}.technique`) === option.value ? "primary" : "secondary"}
-                        size="sm"
-                        onPress={() => setValue(`steps.${index}.technique`, option.value)}
-                        style={styles.smallOptionButton}
-                      />
-                    ))}
-                  </View>
-                </View>
+                <ThemedSelect
+                  label="Technique *"
+                  options={techniqueOptions}
+                  value={watch(`steps.${index}.technique`)}
+                  onValueChange={(value) => setValue(`steps.${index}.technique`, value)}
+                  placeholder="Select technique"
+                  error={errors.steps?.[index]?.technique?.message}
+                />
               </View>
             ))}
 
-            <Button
+            <DataButton
               title="Add Step"
               variant="secondary"
               onPress={addStep}
-              style={{ marginTop: 8 }}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Actions"
-        subtitle="Save or cancel your changes"
-        spacing="xl"
-      >
+      {/* Actions */}
+      <View style={styles.section}>
         <View style={styles.actions}>
-          <Button
+          <DataButton
             title={initialData ? "Duplicate Recipe" : "Create Recipe"}
             onPress={handleSubmit(onSubmit)}
             variant="primary"
@@ -711,7 +680,7 @@ export function BrewprintForm({
             loading={isLoading}
             disabled={isLoading}
           />
-          <Button
+          <DataButton
             title="Cancel"
             variant="secondary"
             size="lg"
@@ -720,52 +689,36 @@ export function BrewprintForm({
             disabled={isLoading}
           />
         </View>
-      </Section>
-    </Container>
+      </View>
+    </View>
   );
 }
 
 const styles = {
+  section: {
+    gap: 16,
+  },
   fieldGroup: {
     gap: 16,
   },
   row: {
-    flexDirection: 'row' as const,
-  },
-  selectField: {
-    gap: 8,
-  },
-  selectLabel: {
-    marginBottom: 4,
-  },
-  selectOptions: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  smallOptionButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    flexDirection: "row" as const,
   },
   stepCard: {
-    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+    backgroundColor: "rgba(0, 0, 0, 0.02)",
     padding: 16,
-    borderRadius: 8,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#E1E5E9',
+    borderRadius: 12,
+    gap: 16,
+    marginBottom: 8,
   },
   stepHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row" as const,
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   actions: {
     gap: 12,
+    marginTop: 8,
   },
 };

@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
 
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Text } from "@/components/ui/Text";
+import { DataLayout } from "@/components/ui/DataLayout";
+import { DataText } from "@/components/ui/DataText";
 import { GrinderForm } from "@/forms/GrinderForm";
 import { GrindersService } from "@/lib/services/grinders";
 
@@ -14,13 +13,7 @@ export default function EditGrinderScreen() {
   const [grinderData, setGrinderData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      loadGrinder();
-    }
-  }, [id]);
-
-  const loadGrinder = async () => {
+  const loadGrinder = React.useCallback(async () => {
     try {
       const result = await GrindersService.getGrinderById(id!);
       if (result.success && result.data) {
@@ -36,7 +29,13 @@ export default function EditGrinderScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      loadGrinder();
+    }
+  }, [id, loadGrinder]);
 
   const handleSuccess = () => {
     toast.success("Grinder updated successfully");
@@ -49,59 +48,46 @@ export default function EditGrinderScreen() {
 
   if (isLoading) {
     return (
-      <Container>
-        <PageHeader
-          title="Loading..."
-          action={{
-            title: "Back",
-            onPress: handleCancel,
-          }}
-        />
+      <DataLayout
+        title="Loading Grinder Details..."
+        subtitle="Retrieving grinding equipment information for editing"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading grinder details...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   if (!grinderData) {
     return (
-      <Container>
-        <PageHeader
-          title="Not Found"
-          action={{
-            title: "Back",
-            onPress: handleCancel,
-          }}
-        />
+      <DataLayout
+        title="Grinder Not Found"
+        subtitle="Grinding equipment could not be located"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Grinder not found
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container>
-      <PageHeader
-        title="Edit Grinder"
-        subtitle="Update grinding equipment"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-
+    <DataLayout
+      title="Edit Grinder"
+      subtitle="Update grinding equipment specifications"
+      scrollable
+    >
       <GrinderForm
         initialData={grinderData}
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </Container>
+    </DataLayout>
   );
 }
 

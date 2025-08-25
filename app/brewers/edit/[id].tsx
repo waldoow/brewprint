@@ -1,6 +1,5 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Text } from "@/components/ui/Text";
+import { DataLayout } from "@/components/ui/DataLayout";
+import { DataText } from "@/components/ui/DataText";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { BrewersService } from "@/lib/services/brewers";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -82,34 +81,25 @@ export default function EditBrewerScreen() {
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader
-          title="Loading..."
-          action={{
-            title: "Back",
-            onPress: handleCancel,
-          }}
-        />
+      <DataLayout
+        title="Loading Equipment Details..."
+        subtitle="Retrieving brewing equipment information for editing"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading brewer details...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container>
-      <PageHeader
-        title="Edit Brewer"
-        subtitle="Update brewing equipment"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-      
+    <DataLayout
+      title="Edit Equipment"
+      subtitle="Update brewing equipment specifications"
+      scrollable
+    >
       {initialData && (
         <BrewerForm
           onSuccess={handleSuccess}
@@ -118,7 +108,7 @@ export default function EditBrewerScreen() {
           isEditing={true}
         />
       )}
-    </Container>
+    </DataLayout>
   );
 }
 

@@ -1,17 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft } from "lucide-react-native";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-
 import {
   Form,
   FormControl,
@@ -20,13 +17,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Container } from "@/components/ui/Container";
 import { Input } from "@/components/ui/Input";
-import { Text } from "@/components/ui/Text";
-import { Section } from "@/components/ui/Section";
-import { getTheme } from "@/constants/ProfessionalDesign";
+import { DataCard, InfoCard } from '@/components/ui/DataCard';
+import { DataText } from '@/components/ui/DataText';
+import { DataButton } from '@/components/ui/DataButton';
+import { getTheme } from "@/constants/DataFirstDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // Zod schema for forgot password validation
@@ -92,28 +87,59 @@ export default function ForgotPassword({
   const theme = getTheme(colorScheme ?? "light");
 
   return (
-    <Container scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
-        <View style={styles.content}>
-          <Section 
-            title={emailSent ? "Check Your Email" : "Password Recovery"}
-            subtitle={emailSent
-              ? "We've sent password reset instructions to your email address"
-              : "Enter your email to reset your password and get back to brewing"}
-            variant="accent"
-            spacing="xl"
-            style={{ marginBottom: 32 }}
-          />
-
-          <Section 
-            title={emailSent ? "Email Sent" : "Reset Password"}
-            variant="elevated"
-            spacing="lg"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
+        {/* Clean Header */}
+        <View style={styles.header}>
+          <DataText 
+            variant="display" 
+            weight="bold" 
+            color="primary"
+            style={{
+              textAlign: 'center',
+              marginBottom: theme.spacing[2]
+            }}
           >
-            <Card variant="elevated" style={styles.formCard}>
+            Brewprint
+          </DataText>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{
+              textAlign: 'center',
+            }}
+          >
+            Professional Coffee Recipe Management
+          </DataText>
+        </View>
+
+        {/* Clean Form Card */}
+        <DataCard style={styles.formCard}>
+          <View style={{ gap: 16 }}>
+            <View style={styles.formHeader}>
+              <DataText 
+                variant="h1" 
+                weight="semibold" 
+                color="primary"
+                style={{ marginBottom: theme.spacing[2] }}
+              >
+                {emailSent ? "Check Your Email" : "Reset Password"}
+              </DataText>
+              <DataText 
+                variant="body" 
+                color="secondary"
+                style={{ textAlign: 'center' }}
+              >
+                {emailSent
+                  ? "Password reset instructions sent to your email"
+                  : "Enter your email to reset your password"
+                }
+              </DataText>
+            </View>
+
             <Form {...form}>
               <View style={styles.form}>
                 {!emailSent ? (
@@ -125,9 +151,9 @@ export default function ForgotPassword({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            <Text variant="label" weight="medium">
-                              Email
-                            </Text>
+                            <DataText variant="small" weight="medium" color="primary">
+                              Email Address
+                            </DataText>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -145,72 +171,64 @@ export default function ForgotPassword({
                     />
 
                     {/* Reset Password Button */}
-                    <Button
+                    <DataButton
                       title="Send Reset Instructions"
+                      variant="primary"
+                      size="lg"
+                      fullWidth
                       onPress={form.handleSubmit(onSubmit)}
                       disabled={isLoading}
                       loading={isLoading}
-                      style={styles.resetButton}
+                      style={{
+                        marginTop: theme.spacing[6]
+                      }}
                     />
                   </>
                 ) : (
                   <View style={styles.emailSentContainer}>
-                    {/* Success Message */}
-                    <View style={styles.successMessage}>
-                      <Text
-                        variant="3xl"
-                        style={styles.checkEmailText}
-                      >
-                        📧
-                      </Text>
-                      <Text
-                        variant="body"
-                        color="secondary"
-                        style={styles.instructionsText}
-                      >
-                        If an account with that email exists, you'll receive password reset instructions shortly.
-                      </Text>
-                    </View>
-
-                    {/* Resend Email Button */}
-                    <Button
-                      title="Resend Email"
-                      variant="secondary"
-                      onPress={handleResendEmail}
-                      disabled={isLoading}
-                      loading={isLoading}
-                      style={styles.resendButton}
+                    <InfoCard
+                      title="Email Sent"
+                      message="If an account with that email exists, you'll receive password reset instructions shortly."
+                      variant="success"
+                      action={{
+                        title: "Resend Email",
+                        onPress: handleResendEmail,
+                        variant: "secondary",
+                        disabled: isLoading,
+                        loading: isLoading
+                      }}
                     />
                   </View>
                 )}
               </View>
             </Form>
-            </Card>
-          </Section>
+          </View>
+        </DataCard>
 
-          <Section 
-            title="Ready to Sign In?"
-            subtitle="Return to the sign-in page when you're ready"
-            variant="accent"
-            spacing="lg"
+        {/* Back to Sign In */}
+        <View style={styles.backSection}>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{ textAlign: 'center', marginBottom: theme.spacing[4] }}
           >
-            <Button
-              variant="secondary"
-              size="lg"
-              fullWidth
-              title="Back to Sign In"
-              onPress={onNavigateToSignIn}
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
-            />
-          </Section>
+            Remember your password?
+          </DataText>
+          <DataButton
+            variant="secondary"
+            size="lg"
+            fullWidth
+            title="Back to Sign In"
+            onPress={onNavigateToSignIn}
+          />
         </View>
-      </KeyboardAvoidingView>
-    </Container>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardView: {
+  container: {
     flex: 1,
   },
   content: {
@@ -223,51 +241,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 40,
   },
-  title: {
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: "center",
-    lineHeight: 24,
-  },
   formCard: {
+    marginBottom: 32,
+  },
+  formHeader: {
+    alignItems: "center",
     marginBottom: 32,
   },
   form: {
     width: "100%",
-  },
-  resetButton: {
-    marginTop: 8,
+    gap: 16,
   },
   emailSentContainer: {
     alignItems: "center",
   },
-  successMessage: {
+  backSection: {
     alignItems: "center",
-    marginBottom: 32,
-    paddingHorizontal: 16,
-  },
-  checkEmailText: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  instructionsText: {
-    textAlign: "center",
-    lineHeight: 24,
-  },
-  resendButton: {
-    marginBottom: 16,
-  },
-  backToSignInContainer: {
-    alignItems: "center",
-    marginTop: 24,
-  },
-  backToSignInButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  backToSignInText: {
-    fontSize: 16,
   },
 });

@@ -35,7 +35,7 @@ export function PageHeader({
         flex: 1,
         marginRight: action ? theme.spacing.lg : 0,
       }}>
-        <Text variant="h2" weight="bold">
+        <Text variant="3xl" weight="extrabold" style={{ letterSpacing: -1 }}>
           {title}
         </Text>
         {subtitle && (

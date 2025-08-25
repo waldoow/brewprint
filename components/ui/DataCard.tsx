@@ -1,164 +1,216 @@
 import React from 'react';
-import { View, ViewStyle } from 'react-native';
-import { Card } from './Card';
-import { Text } from './Text';
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { View, ViewStyle, TouchableOpacity } from 'react-native';
+import { DataText } from './DataText';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-interface DataPoint {
-  label: string;
-  value: string | number;
-  unit?: string;
-  change?: {
-    value: number;
-    direction: 'up' | 'down' | 'neutral';
-  };
-}
-
 interface DataCardProps {
-  title: string;
+  children: React.ReactNode;
+  title?: string;
   subtitle?: string;
-  data: DataPoint[];
-  layout?: 'vertical' | 'horizontal' | 'grid';
-  variant?: 'default' | 'elevated' | 'outlined';
+  variant?: 'default' | 'surface' | 'bordered';
+  padding?: 'sm' | 'md' | 'lg';
+  onPress?: () => void;
   style?: ViewStyle;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export function DataCard({
+  children,
   title,
   subtitle,
-  data,
-  layout = 'vertical',
   variant = 'default',
+  padding = 'md',
+  onPress,
   style,
+  accessibilityLabel,
+  accessibilityHint,
 }: DataCardProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
 
-  const renderDataPoint = (point: DataPoint, index: number) => {
-    const isLast = index === data.length - 1;
-    
+  const getPaddingValue = () => {
+    switch (padding) {
+      case 'sm': return theme.layout.card.padding.sm;
+      case 'lg': return theme.layout.card.padding.lg;
+      default: return theme.layout.card.padding.md;
+    }
+  };
+
+  const getCardStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      borderRadius: theme.layout.card.radius.md,
+      padding: getPaddingValue(),
+    };
+
+    switch (variant) {
+      case 'surface':
+        return {
+          ...baseStyle,
+          backgroundColor: theme.colors.surface,
+        };
+      case 'bordered':
+        return {
+          ...baseStyle,
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+        };
+      default: // default
+        return {
+          ...baseStyle,
+          backgroundColor: theme.colors.card,
+          ...theme.shadows.card,
+        };
+    }
+  };
+
+  const renderHeader = () => {
+    if (!title && !subtitle) return null;
+
     return (
-      <View
-        key={index}
-        style={[
-          styles.dataPoint,
-          layout === 'horizontal' && styles.dataPointHorizontal,
-          layout === 'grid' && styles.dataPointGrid,
-          !isLast && layout === 'vertical' && {
-            borderBottomWidth: 1,
-            borderBottomColor: theme.colors.borderSubtle,
-            paddingBottom: theme.spacing.md,
-            marginBottom: theme.spacing.md,
-          },
-        ]}
-      >
-        <View style={styles.dataPointHeader}>
-          <Text variant="caption" color="secondary">
-            {point.label}
-          </Text>
-          {point.change && (
-            <View style={[
-              styles.changeIndicator,
-              { backgroundColor: point.change.direction === 'up' ? theme.colors.success : 
-                                point.change.direction === 'down' ? theme.colors.error : 
-                                theme.colors.gray[400] }
-            ]}>
-              <Text variant="caption" color="inverse">
-                {point.change.direction === 'up' ? '+' : point.change.direction === 'down' ? '-' : ''}
-                {Math.abs(point.change.value)}
-              </Text>
-            </View>
-          )}
-        </View>
-        
-        <View style={styles.dataValue}>
-          <Text variant="h4" weight="semibold" color="primary">
-            {point.value}
-          </Text>
-          {point.unit && (
-            <Text variant="body" color="tertiary" style={{ marginLeft: 2 }}>
-              {point.unit}
-            </Text>
-          )}
-        </View>
+      <View style={{ marginBottom: theme.spacing[4] }}>
+        {title && (
+          <DataText
+            variant="h4"
+            color="primary"
+            weight="semibold"
+            style={{ marginBottom: subtitle ? theme.spacing[1] : 0 }}
+          >
+            {title}
+          </DataText>
+        )}
+        {subtitle && (
+          <DataText variant="small" color="secondary">
+            {subtitle}
+          </DataText>
+        )}
       </View>
     );
   };
 
-  const getContainerStyle = () => {
-    if (layout === 'horizontal') {
-      return styles.horizontalLayout;
-    }
-    if (layout === 'grid') {
-      return styles.gridLayout;
-    }
-    return styles.verticalLayout;
-  };
+  const cardStyle = getCardStyle();
+  const content = (
+    <>
+      {renderHeader()}
+      {children}
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={[cardStyle, style]}
+        onPress={onPress}
+        activeOpacity={0.97}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel || title}
+        accessibilityHint={accessibilityHint}
+      >
+        {content}
+      </TouchableOpacity>
+    );
+  }
 
   return (
-    <Card variant={variant} style={style}>
-      <View style={styles.header}>
-        <Text variant="h4" weight="semibold">
-          {title}
-        </Text>
-        {subtitle && (
-          <Text variant="caption" color="secondary" style={{ marginTop: 2 }}>
-            {subtitle}
-          </Text>
-        )}
-      </View>
-      
-      <View style={[getContainerStyle(), { marginTop: theme.spacing.lg }]}>
-        {data.map(renderDataPoint)}
-      </View>
-    </Card>
+    <View 
+      style={[cardStyle, style]}
+      accessible={true}
+      accessibilityRole="group"
+      accessibilityLabel={accessibilityLabel || title}
+    >
+      {content}
+    </View>
   );
 }
 
-const styles = {
-  header: {},
-  
-  verticalLayout: {
-    gap: 0,
-  },
-  
-  horizontalLayout: {
-    flexDirection: 'row' as const,
-    gap: 24,
-  },
-  
-  gridLayout: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 16,
-  },
-  
-  dataPoint: {},
-  
-  dataPointHorizontal: {
-    flex: 1,
-  },
-  
-  dataPointGrid: {
-    width: '48%',
-  },
-  
-  dataPointHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    marginBottom: 4,
-  },
-  
-  dataValue: {
-    flexDirection: 'row' as const,
-    alignItems: 'baseline' as const,
-  },
-  
-  changeIndicator: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-};
+// Specialized cards for common patterns
+interface MetricCardProps {
+  title: string;
+  metrics: React.ReactNode[];
+  variant?: DataCardProps['variant'];
+  onPress?: () => void;
+  style?: ViewStyle;
+}
+
+export function MetricCard({ 
+  title, 
+  metrics, 
+  variant = 'default',
+  onPress,
+  style 
+}: MetricCardProps) {
+  const theme = getTheme(useColorScheme() ?? 'light');
+
+  return (
+    <DataCard
+      title={title}
+      variant={variant}
+      onPress={onPress}
+      style={style}
+      accessibilityLabel={`${title} metrics`}
+    >
+      <View style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: theme.layout.card.gap.md,
+      }}>
+        {metrics.map((metric, index) => (
+          <View key={index} style={{ flex: 1, minWidth: 80 }}>
+            {metric}
+          </View>
+        ))}
+      </View>
+    </DataCard>
+  );
+}
+
+interface InfoCardProps {
+  title: string;
+  items: { label: string; value: string; }[];
+  variant?: DataCardProps['variant'];
+  onPress?: () => void;
+  style?: ViewStyle;
+}
+
+export function InfoCard({ 
+  title, 
+  items, 
+  variant = 'default',
+  onPress,
+  style 
+}: InfoCardProps) {
+  const theme = getTheme(useColorScheme() ?? 'light');
+
+  return (
+    <DataCard
+      title={title}
+      variant={variant}
+      onPress={onPress}
+      style={style}
+      accessibilityLabel={`${title} information`}
+    >
+      <View style={{ gap: theme.spacing[3] }}>
+        {items.map((item, index) => (
+          <View
+            key={index}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <DataText variant="small" color="secondary">
+              {item.label}
+            </DataText>
+            <DataText variant="small" color="primary" weight="medium">
+              {item.value}
+            </DataText>
+          </View>
+        ))}
+      </View>
+    </DataCard>
+  );
+}

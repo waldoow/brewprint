@@ -1,6 +1,8 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { getTheme } from "@/constants/ProfessionalDesign";
+import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
+import { DataCard, InfoCard } from "@/components/ui/DataCard";
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
+import { getTheme } from "@/constants/DataFirstDesign";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ExportService } from "@/lib/services/export";
 import * as FileSystem from "expo-file-system";
@@ -8,7 +10,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Share, StyleSheet, View } from "react-native";
+import { Alert, Share, View } from "react-native";
 import { toast } from "sonner-native";
 
 export default function DataPrivacyScreen() {
@@ -197,412 +199,220 @@ export default function DataPrivacyScreen() {
   };
 
   return (
-    <Container scrollable>
-      <PageHeader
-        title="Data & Privacy"
-        subtitle="Export and manage your coffee data"
-        action={{
-          title: "Back",
-          onPress: () => router.back(),
-        }}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Data Overview */}
-        <View
-          style={[styles.section, { backgroundColor: colors.cardBackground }]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.text }]}
-          >
-            Your Data
-          </ThemedText>
-
+    <DataLayout
+      title="Data & Privacy"
+      subtitle="Export and manage your coffee data"
+      scrollable
+    >
+      {/* Data Overview */}
+      <DataSection title="Your Data" subtitle="Overview of your coffee information" spacing="lg">
+        <DataCard>
           {backupStats ? (
-            <View style={styles.statsGrid}>
-              <View
-                style={[styles.statItem, { backgroundColor: colors.surface }]}
-              >
-                <ThemedText
-                  type="caption"
-                  style={[styles.statLabel, { color: colors.textSecondary }]}
-                >
+            <DataGrid columns={2} gap="md">
+              <View style={styles.statItem}>
+                <DataText variant="caption" color="secondary" style={styles.statLabel}>
                   Total Items
-                </ThemedText>
-                <ThemedText
-                  type="title"
-                  style={[styles.statValue, { color: colors.text }]}
-                >
+                </DataText>
+                <DataText variant="h3" weight="bold" style={styles.statValue}>
                   {backupStats.total_items}
-                </ThemedText>
+                </DataText>
               </View>
 
               {Object.entries(backupStats.tables).map(([table, count]) => (
-                <View
-                  key={table}
-                  style={[styles.statItem, { backgroundColor: colors.surface }]}
-                >
-                  <ThemedText
-                    type="caption"
-                    style={[styles.statLabel, { color: colors.textSecondary }]}
-                  >
+                <View key={table} style={styles.statItem}>
+                  <DataText variant="caption" color="secondary" style={styles.statLabel}>
                     {table
                       .replace("_", " ")
                       .replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </ThemedText>
-                  <ThemedText
-                    type="subtitle"
-                    style={[styles.statValue, { color: colors.text }]}
-                  >
+                  </DataText>
+                  <DataText variant="h4" weight="semibold" style={styles.statValue}>
                     {count}
-                  </ThemedText>
+                  </DataText>
                 </View>
               ))}
-            </View>
+            </DataGrid>
           ) : (
             <View style={styles.loadingContainer}>
-              <ThemedText style={{ color: colors.textSecondary }}>
+              <DataText variant="body" color="secondary">
                 Loading data overview...
-              </ThemedText>
+              </DataText>
             </View>
           )}
-        </View>
+        </DataCard>
+      </DataSection>
 
-        {/* Export Section */}
-        <View
-          style={[styles.section, { backgroundColor: colors.cardBackground }]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.text }]}
-          >
-            Export Data
-          </ThemedText>
-          <ThemedText
-            type="caption"
-            style={[styles.sectionDescription, { color: colors.textSecondary }]}
-          >
-            Download your coffee data for backup or to use in other applications
-          </ThemedText>
-
-          <View style={styles.actionGrid}>
-            <ThemedButton
+      {/* Export Section */}
+      <DataSection 
+        title="Export Data" 
+        subtitle="Download your coffee data for backup or to use in other applications" 
+        spacing="lg"
+      >
+        <DataCard>
+          <DataGrid columns={1} gap="md">
+            <DataButton
               title="Complete Backup (JSON)"
               onPress={handleExportAllData}
-              variant="default"
-              size="default"
+              variant="primary"
               loading={exporting}
-              style={styles.exportButton}
+              fullWidth
             />
 
-            <ThemedButton
+            <DataButton
               title="Recipes (CSV)"
               onPress={handleExportBrewprintsCSV}
               variant="secondary"
-              size="default"
               loading={exporting}
-              style={styles.exportButton}
+              fullWidth
             />
 
-            <ThemedButton
+            <DataButton
               title="Bean Inventory (CSV)"
               onPress={handleExportBeansCSV}
               variant="secondary"
-              size="default"
               loading={exporting}
-              style={styles.exportButton}
+              fullWidth
             />
-          </View>
+          </DataGrid>
 
           <View style={styles.infoBox}>
-            <ThemedText
-              type="caption"
-              style={[styles.infoText, { color: colors.textSecondary }]}
-            >
-              • Complete backup includes all data in JSON format for maximum
-              compatibility
-              {"\n"}• CSV exports are ideal for spreadsheet applications like
-              Excel or Google Sheets
-              {"\n"}• All exports respect your privacy - no data is sent to
-              external servers
-            </ThemedText>
+            <DataText variant="caption" color="secondary" style={styles.infoText}>
+              • Complete backup includes all data in JSON format for maximum compatibility{"\n"}
+              • CSV exports are ideal for spreadsheet applications like Excel or Google Sheets{"\n"}
+              • All exports respect your privacy - no data is sent to external servers
+            </DataText>
           </View>
-        </View>
+        </DataCard>
+      </DataSection>
 
-        {/* Privacy Section */}
-        <View
-          style={[styles.section, { backgroundColor: colors.cardBackground }]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.text }]}
-          >
-            Privacy & Security
-          </ThemedText>
-
+      {/* Privacy Section */}
+      <DataSection title="Privacy & Security" spacing="lg">
+        <DataCard>
           <View style={styles.privacyList}>
             <View style={styles.privacyItem}>
-              <View
-                style={[
-                  styles.privacyIcon,
-                  { backgroundColor: colors.statusGreen },
-                ]}
-              >
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
+                <DataText style={styles.privacyIconText}>✓</DataText>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.privacyTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
                   Local Data Storage
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.privacyDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  All your coffee data is stored securely on your device and in
-                  your personal cloud account
-                </ThemedText>
+                </DataText>
+                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
+                  All your coffee data is stored securely on your device and in your personal cloud account
+                </DataText>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View
-                style={[
-                  styles.privacyIcon,
-                  { backgroundColor: colors.statusGreen },
-                ]}
-              >
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
+                <DataText style={styles.privacyIconText}>✓</DataText>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.privacyTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
                   No Analytics Tracking
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.privacyDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  We don&apos;t track your usage or collect personal data for
-                  analytics purposes
-                </ThemedText>
+                </DataText>
+                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
+                  We don&apos;t track your usage or collect personal data for analytics purposes
+                </DataText>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View
-                style={[
-                  styles.privacyIcon,
-                  { backgroundColor: colors.statusGreen },
-                ]}
-              >
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
+                <DataText style={styles.privacyIconText}>✓</DataText>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.privacyTitle, { color: colors.text }]}
-                >
+                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
                   Data Ownership
-                </ThemedText>
-                <ThemedText
-                  type="caption"
-                  style={[
-                    styles.privacyDescription,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  Your coffee data belongs to you. Export it anytime, no
-                  restrictions
-                </ThemedText>
+                </DataText>
+                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
+                  Your coffee data belongs to you. Export it anytime, no restrictions
+                </DataText>
               </View>
             </View>
           </View>
-        </View>
+        </DataCard>
+      </DataSection>
 
-        {/* Danger Zone */}
-        <View
-          style={[
-            styles.dangerSection,
-            {
-              backgroundColor: colors.cardBackground,
-              borderColor: colors.error,
-            },
-          ]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={[styles.sectionTitle, { color: colors.error }]}
-          >
-            Danger Zone
-          </ThemedText>
-          <ThemedText
-            type="caption"
-            style={[styles.sectionDescription, { color: colors.textSecondary }]}
-          >
-            These actions cannot be undone. Please be careful.
-          </ThemedText>
-
-          <ThemedButton
+      {/* Danger Zone */}
+      <DataSection 
+        title="Danger Zone" 
+        subtitle="These actions cannot be undone. Please be careful." 
+        spacing="lg"
+      >
+        <DataCard variant="error">
+          <DataButton
             title="Clear All Data"
             onPress={handleClearAllData}
             variant="destructive"
-            size="default"
             loading={clearing}
-            style={styles.dangerButton}
           />
 
           <View style={styles.warningBox}>
-            <ThemedText
-              type="caption"
-              style={[styles.warningText, { color: colors.error }]}
-            >
-              ⚠️ This will permanently delete all your coffee data including
-              recipes, brewing history, beans, equipment, and preferences. Make
-              sure to export your data first!
-            </ThemedText>
+            <DataText variant="caption" color="error" style={styles.warningText}>
+              ⚠️ This will permanently delete all your coffee data including recipes, brewing history, beans, equipment, and preferences. Make sure to export your data first!
+            </DataText>
           </View>
-        </View>
-
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-    </Container>
+        </DataCard>
+      </DataSection>
+    </DataLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  section: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  dangerSection: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  sectionDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 16,
-  },
+const styles = {
   loadingContainer: {
     padding: 20,
-    alignItems: "center",
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginTop: 8,
+    alignItems: "center" as const,
   },
   statItem: {
-    flex: 1,
-    minWidth: "30%",
-    maxWidth: "48%",
+    alignItems: "center" as const,
     padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
   },
   statLabel: {
-    fontSize: 11,
+    textAlign: "center" as const,
     marginBottom: 4,
-    textAlign: "center",
   },
   statValue: {
-    fontWeight: "700",
-  },
-  actionGrid: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  exportButton: {
-    alignSelf: "stretch",
+    textAlign: "center" as const,
   },
   infoBox: {
-    backgroundColor: "rgba(139, 92, 246, 0.1)",
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(139, 92, 246, 0.2)",
+    borderColor: "rgba(59, 130, 246, 0.2)",
+    marginTop: 16,
   },
   infoText: {
-    fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   privacyList: {
-    gap: 16,
+    gap: 20,
   },
   privacyItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
     gap: 12,
   },
   privacyIcon: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
   privacyIconText: {
     color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: 14,
+    fontWeight: "bold" as const,
   },
   privacyContent: {
     flex: 1,
   },
   privacyTitle: {
-    marginBottom: 2,
+    marginBottom: 4,
   },
   privacyDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  dangerButton: {
-    alignSelf: "flex-start",
-    marginBottom: 12,
+    lineHeight: 18,
   },
   warningBox: {
     backgroundColor: "rgba(220, 38, 38, 0.1)",
@@ -610,12 +420,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(220, 38, 38, 0.2)",
+    marginTop: 16,
   },
   warningText: {
-    fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 18,
   },
-  bottomSpacing: {
-    height: 20,
-  },
-});
+};

@@ -6,16 +6,16 @@ import {
   Platform,
   View,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-
-import { Container } from "@/components/ui/Container";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Section } from "@/components/ui/Section";
+import { getTheme } from '@/constants/DataFirstDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { DataCard } from '@/components/ui/DataCard';
+import { DataText } from '@/components/ui/DataText';
+import { DataButton } from '@/components/ui/DataButton';
+import { Input } from '@/components/ui/Input';
 import {
   Form,
   FormControl,
@@ -24,6 +24,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
+
+const { height } = Dimensions.get('window');
 
 // Zod schema for sign-up validation
 const signUpSchema = z
@@ -109,27 +111,60 @@ export default function SignUp({
     }
   };
 
-  return (
-    <Container scrollable>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
-        <View style={styles.content}>
-          <Section 
-            title="Join Brewprint"
-            subtitle="Create your account to start perfecting your coffee craft"
-            variant="accent"
-            spacing="xl"
-            style={{ marginBottom: 32 }}
-          />
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-          <Section 
-            title="Account Information"
-            variant="elevated"
-            spacing="lg"
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
+        {/* Clean App Header */}
+        <View style={styles.header}>
+          <DataText 
+            variant="display" 
+            weight="bold" 
+            color="primary"
+            style={{
+              textAlign: 'center',
+              marginBottom: theme.spacing[2]
+            }}
           >
-            <Card variant="elevated" style={styles.formCard}>
+            Brewprint
+          </DataText>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{
+              textAlign: 'center',
+            }}
+          >
+            Professional Coffee Recipe Management
+          </DataText>
+        </View>
+
+        {/* Clean Sign Up Card */}
+        <DataCard style={styles.authCard}>
+          <View style={{ gap: 16 }}>
+            <View style={styles.authHeader}>
+              <DataText 
+                variant="h1" 
+                weight="semibold" 
+                color="primary"
+                style={{ marginBottom: theme.spacing[2] }}
+              >
+                Create Account
+              </DataText>
+              <DataText 
+                variant="body" 
+                color="secondary"
+                style={{ textAlign: 'center' }}
+              >
+                Join the professional coffee community
+              </DataText>
+            </View>
+
             <Form {...form}>
               <View style={styles.form}>
                 {/* Username Input */}
@@ -139,13 +174,13 @@ export default function SignUp({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
+                        <DataText variant="small" weight="medium" color="primary">
                           Username
-                        </Text>
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Choose a username"
+                          placeholder="Choose a unique username"
                           value={field.value}
                           onChangeText={field.onChange}
                           onBlur={field.onBlur}
@@ -165,9 +200,9 @@ export default function SignUp({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
-                          Email
-                        </Text>
+                        <DataText variant="small" weight="medium" color="primary">
+                          Email Address
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -191,14 +226,14 @@ export default function SignUp({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
+                        <DataText variant="small" weight="medium" color="primary">
                           Password
-                        </Text>
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Create a password"
+                          placeholder="Create a secure password"
                           value={field.value}
                           onChangeText={field.onChange}
                           onBlur={field.onBlur}
@@ -217,9 +252,9 @@ export default function SignUp({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        <Text variant="label" weight="medium">
+                        <DataText variant="small" weight="medium" color="primary">
                           Confirm Password
-                        </Text>
+                        </DataText>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -236,76 +271,74 @@ export default function SignUp({
                   )}
                 />
 
-                {/* Sign Up Button */}
-                <Button
+                {/* Clean Create Account Button */}
+                <DataButton
                   title="Create Account"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
                   onPress={form.handleSubmit(onSubmit)}
                   disabled={isLoading}
                   loading={isLoading}
-                  style={styles.signUpButton}
+                  style={{
+                    marginTop: theme.spacing[6]
+                  }}
                 />
               </View>
             </Form>
-            </Card>
-          </Section>
+          </View>
+        </DataCard>
 
-          <Section 
-            title="Already Have an Account?"
-            subtitle="Sign in to continue your coffee journey"
-            variant="accent"
-            spacing="lg"
+        {/* Sign In Section */}
+        <View style={styles.signInSection}>
+          <DataText 
+            variant="body" 
+            color="secondary"
+            style={{ textAlign: 'center', marginBottom: theme.spacing[4] }}
           >
-            <Button
-              variant="secondary"
-              size="lg"
-              fullWidth
-              title="Sign In to Your Account"
-              onPress={onNavigateToSignIn}
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
-            />
-          </Section>
+            Already have an account?
+          </DataText>
+          <DataButton
+            variant="secondary"
+            size="lg"
+            fullWidth
+            title="Sign In"
+            onPress={onNavigateToSignIn}
+          />
         </View>
-      </KeyboardAvoidingView>
-    </Container>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardView: {
+  container: {
     flex: 1,
   },
   content: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingVertical: 40,
+    minHeight: height,
   },
   header: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 40,
+    paddingTop: 20,
   },
-  title: {
-    marginBottom: 8,
+  authCard: {
+    marginBottom: 32,
   },
-  subtitle: {
-    textAlign: "center",
-  },
-  formCard: {
+  authHeader: {
+    alignItems: 'center',
     marginBottom: 32,
   },
   form: {
-    width: "100%",
+    width: '100%',
+    gap: 16,
   },
-  signUpButton: {
-    marginTop: 8,
-  },
-  signInContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 4,
-  },
-  signInText: {
-    fontSize: 16,
+  signInSection: {
+    alignItems: 'center',
   },
 });

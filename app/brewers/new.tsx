@@ -1,9 +1,7 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { DataLayout } from "@/components/ui/DataLayout";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 
 export default function NewBrewerScreen() {
@@ -19,22 +17,15 @@ export default function NewBrewerScreen() {
   };
 
   return (
-    <Container>
-      <PageHeader
-        title="New Brewer"
-        subtitle="Add brewing equipment"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-      
+    <DataLayout
+      title="New Equipment"
+      subtitle="Add brewing equipment to your coffee arsenal"
+      scrollable
+    >
       <BrewerForm
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </Container>
+    </DataLayout>
   );
 }
-
-const styles = StyleSheet.create({});

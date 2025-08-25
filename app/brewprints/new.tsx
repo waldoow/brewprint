@@ -1,9 +1,7 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { DataLayout } from "@/components/ui/DataLayout";
 import { BrewprintForm } from "@/forms/BrewprintForm";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo } from "react";
-import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 
 export default function NewBrewprintScreen() {
@@ -37,23 +35,20 @@ export default function NewBrewprintScreen() {
   const title = initialData ? "Duplicate Recipe" : "New Recipe";
 
   return (
-    <Container>
-      <PageHeader
-        title={title}
-        subtitle={initialData ? "Duplicate existing recipe" : "Create new recipe"}
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-
+    <DataLayout
+      title={"coucou"}
+      subtitle={
+        initialData
+          ? "Duplicate and customize existing recipe"
+          : "Create your perfect brewing recipe"
+      }
+      scrollable
+    >
       <BrewprintForm
         initialData={initialData}
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </Container>
+    </DataLayout>
   );
 }
-
-const styles = StyleSheet.create({});

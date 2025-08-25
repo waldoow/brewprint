@@ -1,33 +1,25 @@
-// app/brewing/[id]/results.tsx
-import { Header } from "@/components/ui/Header";
-import { RatingInput } from "@/components/ui/RatingInput";
-import { ThemedButton } from "@/components/ui/ThemedButton";
+import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
+import { DataCard } from "@/components/ui/DataCard";
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
+import { Input } from "@/components/ui/Input";
 import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
-import { Colors } from "@/constants/Colors";
+import {
+  StyleSheet,
+
+  View} from "react-native";
 import { useAuth } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { supabase } from "@/lib/supabase";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
 import { toast } from "sonner-native";
 
 interface ResultsForm {
@@ -39,8 +31,6 @@ interface ResultsForm {
 
 export default function ResultsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
 
@@ -98,57 +88,49 @@ export default function ResultsScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <DataLayout
+      title="How was it?"
+      subtitle="Rate and review your brewing session"
+      scrollable
     >
-      <ThemedView style={styles.container}>
-        <Header title="How was it?" onBackPress={() => router.back()} />
 
-        <Form {...form}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* Rating Section */}
-            <View style={[styles.section, { backgroundColor: colors.surface }]}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>
-                Rate your brew
-              </ThemedText>
+      <Form {...form}>
+        {/* Rating Section */}
+        <DataSection title="Rate Your Brew" spacing="lg">
+          <DataCard>
 
-              <FormField
-                control={form.control}
-                name="rating"
-                rules={{ 
-                  required: "Please rate your brew",
-                  min: { value: 1, message: "Rating must be at least 1" },
-                  max: { value: 5, message: "Rating cannot exceed 5" }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RatingInput value={field.value} onChange={field.onChange} size="large" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="rating"
+              rules={{ 
+                required: "Please rate your brew",
+                min: { value: 1, message: "Rating must be at least 1" },
+                max: { value: 5, message: "Rating cannot exceed 5" }
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <ThemedInput value={field.value?.toString() || ''} onChangeText={(text) => field.onChange(parseInt(text) || 0)} placeholder="Rating 1-5" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <ThemedText type="caption" style={styles.ratingText}>
+            <DataText variant="caption" color="secondary" style={styles.ratingText}>
               {rating === 0 && "Tap to rate"}
               {rating === 1 && "Poor - Major issues"}
               {rating === 2 && "Below average"}
               {rating === 3 && "Good - Room for improvement"}
               {rating === 4 && "Very good - Minor tweaks needed"}
               {rating === 5 && "Excellent - Perfect brew!"}
-            </ThemedText>
-          </View>
+            </DataText>
+          </DataCard>
+        </DataSection>
 
-          {/* Notes Section */}
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Tasting notes
-            </ThemedText>
+        {/* Notes Section */}
+        <DataSection title="Tasting Notes" spacing="lg">
+          <DataCard>
 
             <FormField
               control={form.control}
@@ -156,39 +138,39 @@ export default function ResultsScreen() {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <ThemedTextArea
+                    <Input
                       value={field.value}
                       onChangeText={field.onChange}
                       onBlur={field.onBlur}
                       placeholder="Describe the taste, aroma, body, and any adjustments for next time..."
+                      multiline
                       numberOfLines={6}
-                      style={styles.textArea}
+                      variant="outline"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </View>
+          </DataCard>
+        </DataSection>
 
-          {/* Measurements Section (Optional) */}
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Measurements (Optional)
-            </ThemedText>
+        {/* Measurements Section (Optional) */}
+        <DataSection title="Measurements (Optional)" spacing="lg">
+          <DataCard>
 
-            <View style={styles.measurementsRow}>
+            <DataGrid columns={2} gap="md">
               <View style={styles.measurementItem}>
-                <ThemedText type="default" style={styles.measurementLabel}>
+                <DataText variant="body" weight="medium" style={styles.measurementLabel}>
                   TDS %
-                </ThemedText>
+                </DataText>
                 <FormField
                   control={form.control}
                   name="tds"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <ThemedInput
+                        <Input
                           value={field.value?.toString()}
                           onChangeText={(text) =>
                             field.onChange(parseFloat(text) || undefined)
@@ -196,6 +178,7 @@ export default function ResultsScreen() {
                           onBlur={field.onBlur}
                           keyboardType="decimal-pad"
                           placeholder="1.35"
+                          variant="outline"
                           style={styles.measurementInput}
                         />
                       </FormControl>
@@ -206,16 +189,16 @@ export default function ResultsScreen() {
               </View>
 
               <View style={styles.measurementItem}>
-                <ThemedText type="default" style={styles.measurementLabel}>
+                <DataText variant="body" weight="medium" style={styles.measurementLabel}>
                   Extraction %
-                </ThemedText>
+                </DataText>
                 <FormField
                   control={form.control}
                   name="extraction"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <ThemedInput
+                        <Input
                           value={field.value?.toString()}
                           onChangeText={(text) =>
                             field.onChange(parseFloat(text) || undefined)
@@ -223,6 +206,7 @@ export default function ResultsScreen() {
                           onBlur={field.onBlur}
                           keyboardType="decimal-pad"
                           placeholder="20.5"
+                          variant="outline"
                           style={styles.measurementInput}
                         />
                       </FormControl>
@@ -231,20 +215,24 @@ export default function ResultsScreen() {
                   )}
                 />
               </View>
-            </View>
-          </View>
+            </DataGrid>
+          </DataCard>
+        </DataSection>
 
-          {/* Actions */}
-          <View style={styles.actions}>
-            <ThemedButton
+        {/* Actions */}
+        <DataSection title="Save Results" spacing="xl">
+          <DataGrid columns={1} gap="md">
+            <DataButton
               title="Save & Finish"
               onPress={form.handleSubmit(onSubmit)}
               loading={saving}
               disabled={rating === 0}
-              variant="default"
+              variant="primary"
+              size="lg"
+              fullWidth
             />
 
-            <ThemedButton
+            <DataButton
               title="Save & Brew Again"
               onPress={form.handleSubmit(async (data) => {
                 await onSubmit(data);
@@ -253,59 +241,30 @@ export default function ResultsScreen() {
               loading={saving}
               disabled={rating === 0}
               variant="secondary"
+              size="lg"
+              fullWidth
             />
-          </View>
-        </ScrollView>
-        </Form>
-      </ThemedView>
-    </KeyboardAvoidingView>
+          </DataGrid>
+        </DataSection>
+      </Form>
+    </DataLayout>
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 50, // Reduced from 100 to 50
-  },
-  section: {
-    margin: 8, // Reduced from 16 to 8
-    padding: 10, // Reduced from 20 to 10
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontWeight: "600",
-    marginBottom: 8, // Reduced from 16 to 8
-  },
   ratingText: {
-    textAlign: "center",
-    marginTop: 6, // Reduced from 12 to 6
-    opacity: 0.6,
+    textAlign: "center" as const,
+    marginTop: 8,
   },
   textArea: {
     minHeight: 120,
-  },
-  measurementsRow: {
-    flexDirection: "row",
-    gap: 8, // Reduced from 16 to 8
   },
   measurementItem: {
     flex: 1,
   },
   measurementLabel: {
-    opacity: 0.6,
-    marginBottom: 4, // Reduced from 8 to 4
+    marginBottom: 8,
   },
   measurementInput: {
-    textAlign: "center",
-  },
-  actions: {
-    padding: 8, // Reduced from 16 to 8
-    gap: 6, // Reduced from 12 to 6
+    textAlign: "center" as const,
   },
 });

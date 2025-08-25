@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Card } from '@/components/ui/Card';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { Section } from '@/components/ui/Section';
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
+import { DataCard, InfoCard } from '@/components/ui/DataCard';
+import { DataText } from '@/components/ui/DataText';
+import { DataButton } from '@/components/ui/DataButton';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { BrewersService, type Brewer } from '@/lib/services/brewers';
 import { toast } from 'sonner-native';
@@ -20,11 +18,7 @@ export default function BrewerDetailScreen() {
   const [brewer, setBrewer] = useState<Brewer | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadBrewer();
-  }, [id]);
-
-  const loadBrewer = async () => {
+  const loadBrewer = React.useCallback(async () => {
     try {
       setLoading(true);
       const result = await BrewersService.getBrewerById(id as string);
@@ -33,376 +27,367 @@ export default function BrewerDetailScreen() {
       } else {
         toast.error('Brewer not found');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load brewer details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadBrewer();
+  }, [loadBrewer]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getConditionColor = (condition: Brewer['condition']) => {
+
+  const getConditionLabel = (condition: Brewer['condition']) => {
     switch (condition) {
-      case 'excellent': return theme.colors.success;
-      case 'good': return theme.colors.success;
-      case 'fair': return theme.colors.warning;
-      case 'needs-replacement': return theme.colors.error;
-      default: return theme.colors.gray[400];
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Good';
+      case 'fair': return 'Fair';
+      case 'needs-replacement': return 'Needs Replacement';
+      default: return 'Unknown';
     }
   };
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader 
-          title="Brewer Details"
-          action={{
-            title: 'Back',
-            onPress: () => router.back(),
-          }}
-        />
+      <DataLayout
+        title="Brewer Details"
+        subtitle="Loading equipment information..."
+        action={{
+          title: 'Back',
+          onPress: () => router.back(),
+        }}
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading brewer details...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   if (!brewer) {
     return (
-      <Container>
-        <PageHeader 
+      <DataLayout
+        title="Brewer Not Found"
+        subtitle="Equipment could not be found"
+        action={{
+          title: 'Back',
+          onPress: () => router.back(),
+        }}
+      >
+        <InfoCard
           title="Brewer Not Found"
+          message="The requested brewing equipment could not be found in your library."
+          variant="error"
           action={{
-            title: 'Back',
+            title: "Back to Library",
             onPress: () => router.back(),
+            variant: "primary"
           }}
         />
-        <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <Text 
-            variant="h4" 
-            weight="semibold" 
-            style={{ textAlign: 'center', marginBottom: 8 }}
-          >
-            Brewer Not Found
-          </Text>
-          <Text 
-            variant="body" 
-            color="secondary" 
-            style={{ textAlign: 'center', marginBottom: 24 }}
-          >
-            The requested brewer could not be found.
-          </Text>
-          <Button
-            title="Back to Library"
-            onPress={() => router.back()}
-            variant="primary"
-            fullWidth
-          />
-        </Card>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container scrollable>
-      <Section 
-        title={brewer.name}
-        subtitle={`${brewer.brand ? `${brewer.brand}${brewer.model ? ` ${brewer.model}` : ''}` : brewer.type.toUpperCase()} • ${brewer.material || 'Standard'}`}
-        spacing="xl"
-      >
-        <Button
-          title="Edit Brewer Details"
-          variant="secondary"
+    <DataLayout
+      title={brewer.name}
+      subtitle={`${brewer.brand || 'Brewing Equipment'} • ${brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}`}
+      scrollable
+    >
+      {/* Equipment Status Overview */}
+      <DataSection title="Equipment Status" spacing="lg">
+        <DataGrid columns={3} gap="md">
+          <DataCard>
+            <DataText variant="small" color="secondary" weight="medium">
+              Condition
+            </DataText>
+            <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
+              {getConditionLabel(brewer.condition)}
+            </DataText>
+          </DataCard>
+          
+          {brewer.capacity_ml && (
+            <DataCard>
+              <DataText variant="small" color="secondary" weight="medium">
+                Capacity
+              </DataText>
+              <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
+                {brewer.capacity_ml}ml
+              </DataText>
+            </DataCard>
+          )}
+          
+          {brewer.location && (
+            <DataCard>
+              <DataText variant="small" color="secondary" weight="medium">
+                Location
+              </DataText>
+              <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
+                {brewer.location}
+              </DataText>
+            </DataCard>
+          )}
+        </DataGrid>
+      </DataSection>
+
+      {/* Quick Actions */}
+      <DataSection spacing="lg">
+        <DataButton
+          title="Edit Equipment Details"
+          variant="primary"
           size="lg"
           fullWidth
           onPress={() => router.push(`/brewers/edit/${brewer.id}`)}
         />
-      </Section>
+      </DataSection>
 
-      <Section 
-        title="Status & Condition"
-        subtitle="Current condition and location information"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.statusRow}>
-            <View style={styles.statusItem}>
-              <Text variant="caption" color="secondary">
-                Condition
-              </Text>
-              <View style={[styles.statusBadge, { backgroundColor: getConditionColor(brewer.condition) }]}>
-                <Text variant="caption" color="inverse">
-                  {brewer.condition?.toUpperCase() || 'UNKNOWN'}
-                </Text>
-              </View>
-            </View>
-            
-            {brewer.location && (
-              <View style={styles.statusItem}>
-                <Text variant="caption" color="secondary">
-                  Location
-                </Text>
-                <Text variant="body" weight="medium">
-                  {brewer.location}
-                </Text>
-              </View>
-            )}
-            
-            {brewer.capacity_ml && (
-              <View style={styles.statusItem}>
-                <Text variant="caption" color="secondary">
-                  Capacity
-                </Text>
-                <Text variant="body" weight="medium">
-                  {brewer.capacity_ml}ml
-                </Text>
-              </View>
-            )}
-          </View>
-        </Card>
-      </Section>
-
-      <Section
-        title="Physical Specifications"
+      {/* Physical Specifications */}
+      <DataSection 
+        title="Physical Specifications" 
         subtitle="Type, material, and construction details"
         spacing="lg"
       >
-        <Card variant="default">
+        <DataCard>
           <View style={styles.detailsGrid}>
             <View style={styles.detailRow}>
-              <Text variant="caption" color="secondary">
+              <DataText variant="caption" color="secondary">
                 Type
-              </Text>
-              <Text variant="caption" weight="medium">
+              </DataText>
+              <DataText variant="caption" weight="medium">
                 {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
-              </Text>
+              </DataText>
             </View>
             
             {brewer.material && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <DataText variant="caption" color="secondary">
                   Material
-                </Text>
-                <Text variant="caption" weight="medium">
+                </DataText>
+                <DataText variant="caption" weight="medium">
                   {brewer.material.charAt(0).toUpperCase() + brewer.material.slice(1)}
-                </Text>
+                </DataText>
               </View>
             )}
             
             {brewer.filter_type && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <DataText variant="caption" color="secondary">
                   Filter Type
-                </Text>
-                <Text variant="caption" weight="medium">
+                </DataText>
+                <DataText variant="caption" weight="medium">
                   {brewer.filter_type}
-                </Text>
+                </DataText>
               </View>
             )}
             
             {brewer.size && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <DataText variant="caption" color="secondary">
                   Size
-                </Text>
-                <Text variant="caption" weight="medium">
+                </DataText>
+                <DataText variant="caption" weight="medium">
                   {brewer.size}
-                </Text>
+                </DataText>
               </View>
             )}
           </View>
-        </Card>
-      </Section>
+        </DataCard>
+      </DataSection>
 
+      {/* Optimal Brewing Parameters */}
       {(brewer.optimal_dose_range || brewer.optimal_ratio_range || 
         brewer.optimal_temp_range || brewer.optimal_grind_range) && (
-        <Section
+        <DataSection
           title="Optimal Brewing Parameters"
           subtitle="Recommended settings for best results"
           spacing="lg"
         >
-          <Card variant="default">
+          <DataCard>
             <View style={styles.detailsGrid}>
               {brewer.optimal_dose_range && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Coffee Dose
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {brewer.optimal_dose_range[0]}g - {brewer.optimal_dose_range[1]}g
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.optimal_ratio_range && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Brew Ratio
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     1:{brewer.optimal_ratio_range[0]} - 1:{brewer.optimal_ratio_range[1]}
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.optimal_temp_range && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Water Temperature
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {brewer.optimal_temp_range[0]}°C - {brewer.optimal_temp_range[1]}°C
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.optimal_grind_range && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Grind Setting
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {brewer.optimal_grind_range[0]} - {brewer.optimal_grind_range[1]}
-                  </Text>
+                  </DataText>
                 </View>
               )}
             </View>
-          </Card>
-        </Section>
+          </DataCard>
+        </DataSection>
       )}
 
+      {/* Purchase & Maintenance */}
       {(brewer.purchase_date || brewer.purchase_price || brewer.maintenance_schedule || 
         brewer.last_maintenance) && (
-        <Section
+        <DataSection
           title="Purchase & Maintenance"
           subtitle="Purchase information and maintenance schedule"
           spacing="lg"
         >
-          <Card variant="default">
+          <DataCard>
             <View style={styles.detailsGrid}>
               {brewer.purchase_date && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Purchase Date
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {formatDate(brewer.purchase_date)}
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.purchase_price && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Purchase Price
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     ${brewer.purchase_price.toFixed(2)}
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.maintenance_schedule && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Maintenance Schedule
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {brewer.maintenance_schedule.charAt(0).toUpperCase() + brewer.maintenance_schedule.slice(1)}
-                  </Text>
+                  </DataText>
                 </View>
               )}
 
               {brewer.last_maintenance && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <DataText variant="caption" color="secondary">
                     Last Maintenance
-                  </Text>
-                  <Text variant="caption" weight="medium">
+                  </DataText>
+                  <DataText variant="caption" weight="medium">
                     {formatDate(brewer.last_maintenance)}
-                  </Text>
+                  </DataText>
                 </View>
               )}
             </View>
-          </Card>
+          </DataCard>
           
           {brewer.maintenance_notes && (
-            <Card variant="default" style={{ marginTop: 16 }}>
-              <Text variant="body" weight="medium" style={{ marginBottom: 8 }}>
+            <DataCard style={{ marginTop: 16 }}>
+              <DataText variant="body" weight="medium" style={{ marginBottom: 8 }}>
                 Maintenance Notes
-              </Text>
-              <Text variant="body" color="secondary" style={{ lineHeight: 20 }}>
+              </DataText>
+              <DataText variant="body" color="secondary" style={{ lineHeight: 20 }}>
                 {brewer.maintenance_notes}
-              </Text>
-            </Card>
+              </DataText>
+            </DataCard>
           )}
-        </Section>
+        </DataSection>
       )}
 
+      {/* Brewing Tips */}
       {brewer.brewing_tips && brewer.brewing_tips.length > 0 && (
-        <Section
+        <DataSection
           title="Brewing Tips"
           subtitle="Expert techniques for optimal results"
           spacing="lg"
         >
-          <Card variant="default">
+          <DataCard>
             <View style={styles.tipsGrid}>
               {brewer.brewing_tips.map((tip, index) => (
                 <View key={index} style={styles.tipRow}>
-                  <Text variant="body" weight="medium" style={{ color: theme.colors.success, marginRight: 8 }}>
+                  <DataText variant="body" weight="medium" style={{ color: theme.colors.text.tertiary, marginRight: 8 }}>
                     •
-                  </Text>
-                  <Text variant="body" style={{ flex: 1, lineHeight: 20 }}>
+                  </DataText>
+                  <DataText variant="body" style={{ flex: 1, lineHeight: 20 }}>
                     {tip}
-                  </Text>
+                  </DataText>
                 </View>
               ))}
             </View>
-          </Card>
-        </Section>
+          </DataCard>
+        </DataSection>
       )}
 
+      {/* Personal Notes */}
       {brewer.notes && (
-        <Section
+        <DataSection
           title="Notes"
           subtitle="Personal observations and preferences"
           spacing="lg"
         >
-          <Card variant="default">
-            <Text variant="body" style={{ lineHeight: 20 }}>
+          <DataCard>
+            <DataText variant="body" style={{ lineHeight: 20 }}>
               {brewer.notes}
-            </Text>
-          </Card>
-        </Section>
+            </DataText>
+          </DataCard>
+        </DataSection>
       )}
 
-      <Section
-        title="Quick Actions"
-        subtitle="Edit details or manage this brewer"
+      {/* Actions */}
+      <DataSection
+        title="Actions"
+        subtitle="Manage equipment or start brewing"
         spacing="xl"
       >
-        <View style={styles.actionsRow}>
-          <Button
-            title="Edit Brewer"
+        <DataGrid columns={2} gap="md">
+          <DataButton
+            title="Edit Equipment"
             variant="secondary"
             onPress={() => router.push(`/brewers/edit/${brewer.id}`)}
-            style={{ flex: 1, marginRight: 8 }}
           />
-          <Button
-            title="New Recipe"
+          <DataButton
+            title="Create Recipe"
             variant="primary"
             onPress={() => router.push(`/brewprints/new?brewer_id=${brewer.id}`)}
-            style={{ flex: 1, marginLeft: 8 }}
           />
-        </View>
-      </Section>
-    </Container>
+        </DataGrid>
+      </DataSection>
+    </DataLayout>
   );
 }
 
@@ -414,10 +399,50 @@ const styles = {
     padding: 32,
   },
   
+  heroSection: {
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    overflow: 'hidden' as const,
+  },
+  
+  heroContent: {
+    padding: 24,
+    paddingTop: 32,
+    paddingBottom: 28,
+  },
+  
   statusRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+  },
+  
+  heroStatusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignItems: 'center' as const,
+  },
+  
+  modernStatusGrid: {
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'flex-start' as const,
+    gap: 16,
+  },
+  
+  modernStatusItem: {
+    flex: 1,
+    alignItems: 'center' as const,
+    gap: 8,
+  },
+  
+  modernStatusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    alignItems: 'center' as const,
+    minWidth: 80,
   },
   
   statusItem: {
@@ -453,5 +478,6 @@ const styles = {
   
   actionsRow: {
     flexDirection: 'row' as const,
+    gap: 12,
   },
 };

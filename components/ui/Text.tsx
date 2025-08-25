@@ -1,15 +1,17 @@
 import React from 'react';
 import { Text as RNText, TextStyle } from 'react-native';
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface TextProps {
   children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'label' | 'lg' | 'xl' | '2xl' | '3xl';
-  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'label' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   color?: 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'accent';
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right' | 'justify';
   style?: TextStyle;
+  letterSpacing?: number;
+  lineHeight?: number;
 }
 
 export function Text({
@@ -19,6 +21,8 @@ export function Text({
   color = 'primary',
   align = 'left',
   style,
+  letterSpacing,
+  lineHeight,
 }: TextProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
@@ -26,86 +30,107 @@ export function Text({
   const getTextStyle = (): TextStyle => {
     const baseStyle: TextStyle = {
       fontFamily: 'System',
-      fontWeight: theme.typography.fontWeight[weight],
-      color: theme.colors.text[color],
+      fontWeight: theme.typography.fontWeight[weight] as TextStyle['fontWeight'],
+      color: color === 'accent' ? theme.colors.text.accent : theme.colors.text[color],
       textAlign: align,
+      ...(letterSpacing && { letterSpacing }),
+    };
+
+    const getVariantStyle = (fontSize: number, defaultLineHeight: number, defaultWeight?: string) => {
+      return {
+        ...baseStyle,
+        fontSize,
+        lineHeight: lineHeight || fontSize * defaultLineHeight,
+        ...(defaultWeight && { fontWeight: theme.typography.fontWeight[defaultWeight as keyof typeof theme.typography.fontWeight] as TextStyle['fontWeight'] }),
+      };
     };
 
     switch (variant) {
       case 'h1':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['5xl'],
-          lineHeight: theme.typography.fontSize['5xl'] * theme.typography.lineHeight.tight,
-          fontWeight: theme.typography.fontWeight.bold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['5xl'], // Hero text - 48px
+          theme.typography.lineHeight.tight,
+          'extrabold'
+        );
       case 'h2':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['4xl'],
-          lineHeight: theme.typography.fontSize['4xl'] * theme.typography.lineHeight.tight,
-          fontWeight: theme.typography.fontWeight.bold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['4xl'], // Display text - 36px
+          theme.typography.lineHeight.tight,
+          'bold'
+        );
       case 'h3':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['3xl'],
-          lineHeight: theme.typography.fontSize['3xl'] * theme.typography.lineHeight.normal,
-          fontWeight: theme.typography.fontWeight.semibold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['3xl'], // Large headings - 30px
+          theme.typography.lineHeight.snug,
+          'semibold'
+        );
       case 'h4':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['2xl'],
-          lineHeight: theme.typography.fontSize['2xl'] * theme.typography.lineHeight.normal,
-          fontWeight: theme.typography.fontWeight.semibold,
-        };
-      case 'body':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize.base,
-          lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.normal,
-        };
-      case 'caption':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize.sm,
-          lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.normal,
-        };
-      case 'label':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize.sm,
-          lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.normal,
-          fontWeight: theme.typography.fontWeight.medium,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['2xl'], // Medium headings - 24px
+          theme.typography.lineHeight.snug,
+          'semibold'
+        );
+      case 'sm':
+        return getVariantStyle(
+          theme.typography.fontSize.sm,
+          theme.typography.lineHeight.normal
+        );
+      case 'md':
+        return getVariantStyle(
+          theme.typography.fontSize.md,
+          theme.typography.lineHeight.normal
+        );
       case 'lg':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize.lg,
-          lineHeight: theme.typography.fontSize.lg * theme.typography.lineHeight.normal,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize.lg,
+          theme.typography.lineHeight.normal
+        );
       case 'xl':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize.xl,
-          lineHeight: theme.typography.fontSize.xl * theme.typography.lineHeight.normal,
-          fontWeight: theme.typography.fontWeight.semibold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize.xl,
+          theme.typography.lineHeight.normal,
+          'medium'
+        );
       case '2xl':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['2xl'],
-          lineHeight: theme.typography.fontSize['2xl'] * theme.typography.lineHeight.tight,
-          fontWeight: theme.typography.fontWeight.bold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['2xl'],
+          theme.typography.lineHeight.snug,
+          'semibold'
+        );
       case '3xl':
-        return {
-          ...baseStyle,
-          fontSize: theme.typography.fontSize['3xl'],
-          lineHeight: theme.typography.fontSize['3xl'] * theme.typography.lineHeight.tight,
-          fontWeight: theme.typography.fontWeight.bold,
-        };
+        return getVariantStyle(
+          theme.typography.fontSize['3xl'],
+          theme.typography.lineHeight.tight,
+          'bold'
+        );
+      case '4xl':
+        return getVariantStyle(
+          theme.typography.fontSize['4xl'],
+          theme.typography.lineHeight.tight,
+          'bold'
+        );
+      case '5xl':
+        return getVariantStyle(
+          theme.typography.fontSize['5xl'],
+          theme.typography.lineHeight.none,
+          'extrabold'
+        );
+      case 'body':
+        return getVariantStyle(
+          theme.typography.fontSize.base, // 15px for better readability
+          theme.typography.lineHeight.normal // 1.5 for improved reading
+        );
+      case 'caption':
+        return getVariantStyle(
+          theme.typography.fontSize.sm, // 13px for metadata
+          theme.typography.lineHeight.relaxed
+        );
+      case 'label':
+        return getVariantStyle(
+          theme.typography.fontSize.sm, // 13px for labels
+          theme.typography.lineHeight.normal,
+          'medium' // Medium weight for emphasis
+        );
       default:
         return baseStyle;
     }

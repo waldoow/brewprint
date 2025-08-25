@@ -7,13 +7,11 @@ import { View } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
 
-// Professional UI Components
-import { Container } from "@/components/ui/Container";
-import { Section } from "@/components/ui/Section";
-import { Card } from "@/components/ui/Card";
-import { Text } from "@/components/ui/Text";
-import { Button } from "@/components/ui/Button";
+// Data-First UI Components
+import { DataText } from "@/components/ui/DataText";
+import { DataButton } from "@/components/ui/DataButton";
 import { Input } from "@/components/ui/Input";
+import { ThemedSelect } from "@/components/ui/ThemedSelect";
 
 // Grinder form validation schema
 const grinderFormSchema = z.object({
@@ -159,14 +157,17 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
   };
 
   return (
-    <Container scrollable>
-      <Section
-        title="Basic Information"
-        subtitle="Essential grinding equipment details"
-        spacing="xl"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+      {/* Basic Information */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Basic Information
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Essential grinding equipment details
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Grinder Name"
               placeholder="Morning Grinder"
@@ -198,69 +199,44 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               />
             </View>
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Grinder Type *
-              </Text>
-              <View style={styles.selectOptions}>
-                {typeOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("type") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("type", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
-          </View>
-        </Card>
-      </Section>
+            <ThemedSelect
+              label="Grinder Type *"
+              options={typeOptions}
+              value={watch("type")}
+              onValueChange={(value) => setValue("type", value as any)}
+              placeholder="Select grinder type"
+              error={errors.type?.message}
+            />
+        </View>
+      </View>
 
-      <Section
-        title="Technical Specifications"
-        subtitle="Burr and grinding characteristics"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Burr Type
-              </Text>
-              <View style={styles.selectOptions}>
-                {burrTypeOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("burr_type") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("burr_type", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+      {/* Technical Specifications */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Technical Specifications
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Burr and grinding characteristics
+        </DataText>
 
-            <View style={styles.selectField}>
-              <Text variant="caption" color="secondary" style={styles.selectLabel}>
-                Burr Material
-              </Text>
-              <View style={styles.selectOptions}>
-                {burrMaterialOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    variant={watch("burr_material") === option.value ? "primary" : "secondary"}
-                    size="sm"
-                    onPress={() => setValue("burr_material", option.value as any)}
-                    style={styles.optionButton}
-                  />
-                ))}
-              </View>
-            </View>
+        <View style={styles.fieldGroup}>
+            <ThemedSelect
+              label="Burr Type"
+              options={burrTypeOptions}
+              value={watch("burr_type")}
+              onValueChange={(value) => setValue("burr_type", value as any)}
+              placeholder="Select burr type"
+              error={errors.burr_type?.message}
+            />
+
+            <ThemedSelect
+              label="Burr Material"
+              options={burrMaterialOptions}
+              value={watch("burr_material")}
+              onValueChange={(value) => setValue("burr_material", value as any)}
+              placeholder="Select burr material"
+              error={errors.burr_material?.message}
+            />
 
             <Input
               label="Microns per Step"
@@ -270,17 +246,19 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               onChangeText={(value) => setValue("microns_per_step", value)}
               error={errors.microns_per_step?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Settings Configuration"
-        subtitle="Grind settings and calibration"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Settings Configuration */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Settings Configuration
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Grind settings and calibration
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Default Setting"
               placeholder="15"
@@ -320,17 +298,19 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               onChangeText={(value) => setValue("setting_range_increment", value)}
               error={errors.setting_range_increment?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Maintenance Schedule"
-        subtitle="Cleaning and maintenance tracking"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Maintenance Schedule */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Maintenance Schedule
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Cleaning and maintenance tracking
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Last Cleaned"
               placeholder="YYYY-MM-DD"
@@ -348,17 +328,19 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               onChangeText={(value) => setValue("cleaning_frequency", value)}
               error={errors.cleaning_frequency?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Additional Details"
-        subtitle="Optional notes and settings"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.fieldGroup}>
+      {/* Additional Details */}
+      <View style={styles.section}>
+        <DataText variant="h3" weight="semibold">
+          Additional Details
+        </DataText>
+        <DataText variant="small" color="secondary">
+          Optional notes and settings
+        </DataText>
+
+        <View style={styles.fieldGroup}>
             <Input
               label="Notes"
               placeholder="Any additional notes about this grinder..."
@@ -368,17 +350,13 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
               onChangeText={(value) => setValue("notes", value)}
               error={errors.notes?.message}
             />
-          </View>
-        </Card>
-      </Section>
+        </View>
+      </View>
 
-      <Section
-        title="Actions"
-        subtitle="Save or cancel your changes"
-        spacing="xl"
-      >
+      {/* Actions */}
+      <View style={styles.section}>
         <View style={styles.actions}>
-          <Button
+          <DataButton
             title="Add Grinder"
             onPress={handleSubmit(onSubmit)}
             variant="primary"
@@ -387,7 +365,7 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             loading={isLoading}
             disabled={isLoading}
           />
-          <Button
+          <DataButton
             title="Cancel"
             variant="secondary"
             size="lg"
@@ -396,32 +374,20 @@ export function GrinderForm({ onSuccess, onCancel, initialData }: GrinderFormPro
             disabled={isLoading}
           />
         </View>
-      </Section>
-    </Container>
+      </View>
+    </View>
   );
 }
 
 const styles = {
+  section: {
+    gap: 16,
+  },
   fieldGroup: {
     gap: 16,
   },
   row: {
     flexDirection: 'row' as const,
-  },
-  selectField: {
-    gap: 8,
-  },
-  selectLabel: {
-    marginBottom: 4,
-  },
-  selectOptions: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 8,
-  },
-  optionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   actions: {
     gap: 12,

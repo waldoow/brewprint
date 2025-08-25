@@ -1,8 +1,8 @@
 import React from 'react';
 import { Redirect } from 'expo-router';
 import { View } from 'react-native';
-import { Text } from '@/components/ui/Text';
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { DataText } from '@/components/ui/DataText';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useAuth } from '@/context/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -20,9 +20,9 @@ export default function Index() {
         backgroundColor: theme.colors.background,
         padding: 32 
       }}>
-        <Text variant="body" color="secondary">
+        <DataText variant="body" color="secondary">
           Loading...
-        </Text>
+        </DataText>
       </View>
     );
   }

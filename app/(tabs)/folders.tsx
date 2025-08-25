@@ -1,38 +1,34 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { RefreshControl, TouchableOpacity, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Card } from '@/components/ui/Card';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { Section } from '@/components/ui/Section';
-import { getTheme } from '@/constants/ProfessionalDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { DataButton } from "@/components/ui/DataButton";
+import { DataCard } from "@/components/ui/DataCard";
+import { DataGrid, DataLayout, DataSection } from "@/components/ui/DataLayout";
+import { DataText } from "@/components/ui/DataText";
+import { DataMetric } from "@/components/ui/DataMetric";
+import { getTheme } from "@/constants/DataFirstDesign";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import {
   FoldersService,
   TagsService,
   type Folder,
   type Tag,
-} from '@/lib/services/folders';
-import { toast } from 'sonner-native';
+} from "@/lib/services/folders";
+import * as Haptics from "expo-haptics";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshControl, View } from "react-native";
+import { toast } from "sonner-native";
 
 export default function FoldersScreen() {
   const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
+  const theme = getTheme(colorScheme ?? "light");
 
   const [folders, setFolders] = useState<Folder[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadOrganizationData();
-  }, []);
-
-  const loadOrganizationData = async () => {
+  const loadOrganizationData = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const [foldersResult, tagsResult] = await Promise.all([
         FoldersService.getAllFolders(),
         TagsService.getAllTags(),
@@ -41,26 +37,36 @@ export default function FoldersScreen() {
       if (foldersResult.success && foldersResult.data) {
         setFolders(foldersResult.data);
       } else {
-        toast.error('Failed to load folders');
+        toast.error("Failed to load folders");
       }
 
       if (tagsResult.success && tagsResult.data) {
         setTags(tagsResult.data);
       }
-    } catch (error) {
-      toast.error('Failed to load organization data');
+    } catch {
+      toast.error("Error loading organization data");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, []);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
+  useEffect(() => {
+    loadOrganizationData();
+  }, [loadOrganizationData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOrganizationData();
+    }, [loadOrganizationData])
+  );
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
     await loadOrganizationData();
-    setRefreshing(false);
-  };
+  }, [loadOrganizationData]);
 
-  // Sort folders and tags for display
+  // Organize and analyze data
   const organizedData = useMemo(() => {
     // Sort folders by usage (default first, then by recipe count, then by name)
     const sortedFolders = folders.sort((a, b) => {
@@ -84,246 +90,397 @@ export default function FoldersScreen() {
     return { folders: sortedFolders, tags: sortedTags };
   }, [folders, tags]);
 
+  // Calculate organization statistics
+  const organizationStats = useMemo(() => {
+    const totalRecipes = folders.reduce(
+      (sum, folder) => sum + (folder.brewprints_count || 0),
+      0
+    );
+    const totalTagUsage = tags.reduce(
+      (sum, tag) => sum + (tag.usage_count || 0),
+      0
+    );
+    const defaultFolder = folders.find((folder) => folder.is_default);
+    const mostPopularTag = tags.length > 0 ? tags[0] : null;
+
+    return {
+      totalFolders: folders.length,
+      totalTags: tags.length,
+      totalRecipes,
+      totalTagUsage,
+      defaultFolder,
+      mostPopularTag,
+      averageRecipesPerFolder:
+        folders.length > 0 ? Math.round(totalRecipes / folders.length) : 0,
+    };
+  }, [folders, tags]);
+
   const handleCreateFolder = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    toast.success('Folder creation coming soon');
+    if (Haptics.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push('/folders/new');
   };
 
-  const handleFolderPress = (folderId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    toast.success('Folder details coming soon');
+  const handleFolderPress = (folderId: string, folderName: string) => {
+    if (Haptics.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    toast.success(`Opening ${folderName} folder`);
   };
 
   const handleTagPress = (tagName: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    toast.success('Tag filtering coming soon');
+    if (Haptics.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    toast.success(`Filtering by #${tagName}`);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <Container>
-        <PageHeader title="Organization" />
-        <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
-            Loading organization data...
-          </Text>
-        </View>
-      </Container>
+      <DataLayout title="Organization" subtitle="Loading organization data...">
+        <DataCard>
+          <DataText variant="body" color="secondary">
+            Loading folders and tags...
+          </DataText>
+        </DataCard>
+      </DataLayout>
     );
   }
 
   return (
-    <Container 
-      scrollable 
+    <DataLayout
+      title="Organization"
+      subtitle={`${organizationStats.totalFolders} folders and ${organizationStats.totalTags} tags organizing ${organizationStats.totalRecipes} recipes`}
+      scrollable
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={theme.colors.primary}
-        />
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
       }
     >
-      <Section 
-        title="Recipe Organization"
-        subtitle={`Organize your brewing recipes with ${organizedData.folders.length} folders and ${organizedData.tags.length} tags`}
-        spacing="xl"
-      >
-        <Button
-          title="Create New Folder"
-          variant="secondary"
-          size="lg"
-          fullWidth
-          onPress={handleCreateFolder}
-        />
-      </Section>
+      {/* Quick Actions */}
+      <DataSection title="Quick Actions" spacing="lg">
+        <DataGrid columns={2} gap="sm">
+          <DataButton
+            title="New Folder"
+            variant="primary"
+            size="md"
+            onPress={handleCreateFolder}
+          />
+          <DataButton
+            title="Browse Tags"
+            variant="secondary"
+            size="md"
+            onPress={() => toast.success("Browse tags feature coming soon")}
+          />
+        </DataGrid>
+      </DataSection>
 
-      <Section
-        title={`Recipe Folders`}
-        subtitle={`${organizedData.folders.length} folder${organizedData.folders.length === 1 ? '' : 's'} for organizing your recipes`}
+      {/* Organization Statistics */}
+      <DataSection title="Organization Overview" spacing="lg">
+        <DataGrid columns={2} gap="md">
+          <DataCard>
+            <DataText variant="small" color="secondary" weight="medium">
+              Total Folders
+            </DataText>
+            <DataText
+              variant="h2"
+              color="primary"
+              weight="bold"
+              style={{ marginVertical: theme.spacing[1] }}
+            >
+              {organizationStats.totalFolders}
+            </DataText>
+            <DataText variant="tiny" color="tertiary">
+              Recipe collections
+            </DataText>
+          </DataCard>
+
+          <DataCard>
+            <DataText variant="small" color="secondary" weight="medium">
+              Total Tags
+            </DataText>
+            <DataText
+              variant="h2"
+              color="primary"
+              weight="bold"
+              style={{ marginVertical: theme.spacing[1] }}
+            >
+              {organizationStats.totalTags}
+            </DataText>
+            <DataText variant="tiny" color="tertiary">
+              Classification labels
+            </DataText>
+          </DataCard>
+
+          <DataCard>
+            <DataText variant="small" color="secondary" weight="medium">
+              Organized Recipes
+            </DataText>
+            <DataText
+              variant="h2"
+              color="primary"
+              weight="bold"
+              style={{ marginVertical: theme.spacing[1] }}
+            >
+              {organizationStats.totalRecipes}
+            </DataText>
+            <DataText variant="tiny" color="tertiary">
+              In folders
+            </DataText>
+          </DataCard>
+
+          <DataCard>
+            <DataText variant="small" color="secondary" weight="medium">
+              Avg per Folder
+            </DataText>
+            <DataText
+              variant="h2"
+              color="primary"
+              weight="bold"
+              style={{ marginVertical: theme.spacing[1] }}
+            >
+              {organizationStats.averageRecipesPerFolder}
+            </DataText>
+            <DataText variant="tiny" color="tertiary">
+              Recipes/folder
+            </DataText>
+          </DataCard>
+        </DataGrid>
+      </DataSection>
+
+      {/* Folders Section */}
+      <DataSection
+        title="Recipe Folders"
+        subtitle={`${organizedData.folders.length} folder${
+          organizedData.folders.length === 1 ? "" : "s"
+        } organizing your brewing collection`}
         spacing="lg"
       >
         {organizedData.folders.length === 0 ? (
-          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
-            <Text 
-              variant="2xl" 
-              weight="bold" 
-              style={{ textAlign: 'center', marginBottom: 12 }}
-            >
-              📁
-            </Text>
-            <Text 
-              variant="lg" 
-              color="secondary" 
-              style={{ textAlign: 'center', marginBottom: 32 }}
-            >
-              Create folders to organize your brewing recipes by style, beans, or methods
-            </Text>
-            <Button
-              title="Create Your First Folder"
-              onPress={handleCreateFolder}
-              variant="primary"
-              size="lg"
-              fullWidth
-            />
-          </Card>
+          <DataCard
+            title="No Folders Yet"
+            message="Create folders to organize your brewing recipes by style, bean origin, or brewing method."
+            action={{
+              title: "Create First Folder",
+              onPress: handleCreateFolder,
+            }}
+          />
         ) : (
-          organizedData.folders.map((folder) => (
-            <Card
-              key={folder.id}
-              variant="default"
-              onPress={() => handleFolderPress(folder.id)}
-            >
-              <View style={styles.folderHeader}>
-                <View style={{ flex: 1 }}>
-                  <View style={styles.folderTitleRow}>
-                    <Text variant="h4" weight="semibold">
-                      {folder.name}
-                    </Text>
-                    {folder.is_default && (
-                      <View style={styles.defaultBadge}>
-                        <Text variant="caption" color="inverse">
-                          DEFAULT
-                        </Text>
-                      </View>
+          <DataGrid columns={1} gap="md">
+            {organizedData.folders.map((folder) => (
+              <DataCard
+                key={folder.id}
+                onPress={() => handleFolderPress(folder.id, folder.name)}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: theme.spacing[3],
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: theme.spacing[2],
+                        marginBottom: theme.spacing[1],
+                      }}
+                    >
+                      <DataText variant="h4" color="primary" weight="semibold">
+                        {folder.name}
+                      </DataText>
+                      {folder.is_default && (
+                        <View
+                          style={{
+                            paddingHorizontal: theme.spacing[2],
+                            paddingVertical: theme.spacing[1],
+                            borderRadius: theme.layout.card.radius.sm,
+                            backgroundColor: theme.colors.success,
+                          }}
+                        >
+                          <DataText
+                            variant="tiny"
+                            color="inverse"
+                            weight="medium"
+                          >
+                            DEFAULT
+                          </DataText>
+                        </View>
+                      )}
+                    </View>
+                    {folder.description && (
+                      <DataText variant="small" color="secondary">
+                        {folder.description}
+                      </DataText>
                     )}
                   </View>
-                  {folder.description && (
-                    <Text variant="caption" color="secondary" style={{ marginTop: 4 }}>
-                      {folder.description}
-                    </Text>
-                  )}
                 </View>
-              </View>
 
-              <View style={styles.folderStats}>
-                <View style={styles.statItem}>
-                  <Text variant="caption" color="secondary">
-                    Recipes
-                  </Text>
-                  <Text variant="caption" weight="medium">
-                    {folder.brewprints_count || 0}
-                  </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: theme.spacing[4],
+                    paddingTop: theme.spacing[3],
+                    borderTopWidth: 1,
+                    borderTopColor: theme.colors.borderLight,
+                  }}
+                >
+                  <DataMetric
+                    label="Recipes"
+                    value={folder.brewprints_count || 0}
+                    size="sm"
+                  />
+                  <DataMetric
+                    label="Created"
+                    value={new Date(folder.created_at).toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year:
+                          new Date(folder.created_at).getFullYear() !==
+                          new Date().getFullYear()
+                            ? "numeric"
+                            : undefined,
+                      }
+                    )}
+                    size="sm"
+                  />
                 </View>
-                
-                <View style={styles.statItem}>
-                  <Text variant="caption" color="secondary">
-                    Created
-                  </Text>
-                  <Text variant="caption" weight="medium">
-                    {new Date(folder.created_at).toLocaleDateString()}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-          ))
+              </DataCard>
+            ))}
+          </DataGrid>
         )}
-      </Section>
+      </DataSection>
 
-      <Section
-        title="Popular Tags"
-        subtitle={`${organizedData.tags.length} tag${organizedData.tags.length === 1 ? '' : 's'} to filter and discover recipes`}
-        spacing="xl"
+      {/* Tags Section */}
+      <DataSection
+        title="Recipe Tags"
+        subtitle={`${organizedData.tags.length} tag${
+          organizedData.tags.length === 1 ? "" : "s"
+        } for filtering and discovery`}
+        spacing="lg"
       >
         {organizedData.tags.length === 0 ? (
-          <Card variant="outlined" style={{ alignItems: 'center', padding: 24 }}>
-            <Text 
-              variant="2xl" 
-              weight="bold" 
-              style={{ textAlign: 'center', marginBottom: 12 }}
-            >
-              🏷️
-            </Text>
-            <Text 
-              variant="lg" 
-              color="secondary" 
-              style={{ textAlign: 'center' }}
-            >
-              Tags will appear automatically as you create and categorize your recipes
-            </Text>
-          </Card>
+          <DataCard
+            title="No Tags Yet"
+            message="Tags appear automatically as you create and categorize your brewing recipes. Use tags to filter by origin, roast level, or brewing method."
+          />
         ) : (
-          <Card variant="default">
-            <View style={styles.tagsGrid}>
-              {organizedData.tags.map((tag) => (
+          <DataCard>
+            <DataText
+              variant="h4"
+              color="primary"
+              weight="semibold"
+              style={{ marginBottom: theme.spacing[4] }}
+            >
+              Popular Tags
+            </DataText>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: theme.spacing[2],
+              }}
+            >
+              {organizedData.tags.slice(0, 12).map((tag) => (
                 <TouchableOpacity
                   key={tag.id}
-                  style={[styles.tagChip, { backgroundColor: theme.colors.gray[100] }]}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: theme.spacing[1],
+                    paddingHorizontal: theme.spacing[3],
+                    paddingVertical: theme.spacing[2],
+                    borderRadius: theme.layout.card.radius.md,
+                    backgroundColor: theme.colors.surface,
+                    borderWidth: 1,
+                    borderColor: theme.colors.border,
+                  }}
                   onPress={() => handleTagPress(tag.name)}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filter by ${tag.name} tag, used ${
+                    tag.usage_count || 0
+                  } times`}
                 >
-                  <Text variant="caption" weight="medium">
+                  <DataText variant="small" weight="medium">
                     #{tag.name}
-                  </Text>
-                  <Text variant="caption" color="secondary">
+                  </DataText>
+                  <DataText variant="tiny" color="secondary">
                     {tag.usage_count || 0}
-                  </Text>
+                  </DataText>
                 </TouchableOpacity>
               ))}
             </View>
-          </Card>
+
+            {organizedData.tags.length > 12 && (
+              <View
+                style={{
+                  marginTop: theme.spacing[4],
+                  paddingTop: theme.spacing[4],
+                  borderTopWidth: 1,
+                  borderTopColor: theme.colors.borderLight,
+                  alignItems: "center",
+                }}
+              >
+                <DataButton
+                  title={`View All ${organizedData.tags.length} Tags`}
+                  variant="secondary"
+                  size="sm"
+                  onPress={() =>
+                    toast.success("View all tags feature coming soon")
+                  }
+                />
+              </View>
+            )}
+          </DataCard>
         )}
-      </Section>
-    </Container>
+      </DataSection>
+
+      {/* Organization Insights */}
+      {organizationStats.mostPopularTag && (
+        <DataSection title="Organization Insights" spacing="lg">
+          <DataCard>
+            <DataText
+              variant="h4"
+              color="primary"
+              weight="semibold"
+              style={{ marginBottom: theme.spacing[3] }}
+            >
+              Most Popular Tag
+            </DataText>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <DataText variant="body" weight="medium">
+                  #{organizationStats.mostPopularTag.name}
+                </DataText>
+                <DataText variant="small" color="secondary">
+                  Used {organizationStats.mostPopularTag.usage_count || 0} times
+                </DataText>
+              </View>
+              <DataButton
+                title="Browse"
+                variant="secondary"
+                size="sm"
+                onPress={() =>
+                  handleTagPress(organizationStats.mostPopularTag!.name)
+                }
+              />
+            </View>
+          </DataCard>
+        </DataSection>
+      )}
+
+    </DataLayout>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    padding: 32,
-  },
-  
-  sectionHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    marginBottom: 12,
-  },
-  
-  folderHeader: {
-    marginBottom: 12,
-  },
-  
-  folderTitleRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 8,
-  },
-  
-  defaultBadge: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  
-  folderStats: {
-    flexDirection: 'row' as const,
-    gap: 24,
-    paddingTop: 12,
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(156, 163, 175, 0.2)',
-  },
-  
-  statItem: {
-    flex: 1,
-    gap: 2,
-  },
-  
-  tagsGrid: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
-    gap: 8,
-  },
-  
-  tagChip: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-};

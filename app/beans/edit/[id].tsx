@@ -1,9 +1,8 @@
-import { Container } from "@/components/ui/Container";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Text } from "@/components/ui/Text";
+import { DataLayout } from "@/components/ui/DataLayout";
+import { DataText } from "@/components/ui/DataText";
 import { BeanForm } from "@/forms/BeanForm";
 import { BeansService } from "@/lib/services/beans";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { toast } from "sonner-native";
@@ -11,12 +10,12 @@ import { toast } from "sonner-native";
 export default function EditBeanScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  
+
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadBean = useCallback(async () => {
-    if (!id || typeof id !== 'string') {
+    if (!id || typeof id !== "string") {
       router.back();
       return;
     }
@@ -39,7 +38,7 @@ export default function EditBeanScreen() {
           price: bean.price?.toString() || "",
           notes: bean.notes || "",
           rating: bean.rating?.toString() || "",
-          flavor_notes: bean.flavor_notes?.join('\n') || "",
+          flavor_notes: bean.flavor_notes?.join("\n") || "",
         });
       } else {
         toast.error("Failed to load bean");
@@ -69,34 +68,25 @@ export default function EditBeanScreen() {
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader
-          title="Loading..."
-          action={{
-            title: "Back",
-            onPress: handleCancel,
-          }}
-        />
+      <DataLayout
+        title="Loading Bean Details..."
+        subtitle="Retrieving coffee information for editing"
+      >
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <DataText variant="body" color="secondary">
             Loading bean details...
-          </Text>
+          </DataText>
         </View>
-      </Container>
+      </DataLayout>
     );
   }
 
   return (
-    <Container>
-      <PageHeader
-        title="Edit Bean"
-        subtitle="Update coffee inventory"
-        action={{
-          title: "Cancel",
-          onPress: handleCancel,
-        }}
-      />
-      
+    <DataLayout
+      title="Edit Bean"
+      subtitle={`Update ${initialData?.name || "coffee"} inventory details`}
+      scrollable
+    >
       {initialData && (
         <BeanForm
           onSuccess={handleSuccess}
@@ -105,15 +95,28 @@ export default function EditBeanScreen() {
           isEditing={true}
         />
       )}
-    </Container>
+    </DataLayout>
   );
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
+  },
+
+  heroSection: {
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    overflow: "hidden",
+  },
+
+  heroContent: {
+    padding: 24,
+    paddingTop: 32,
+    paddingBottom: 28,
   },
 });

@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from './Text';
+import { Card } from './Card';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -10,6 +12,11 @@ interface SectionProps {
   children: React.ReactNode;
   spacing?: 'sm' | 'md' | 'lg' | 'xl';
   style?: ViewStyle;
+  variant?: 'default' | 'elevated' | 'gradient' | 'glass';
+  headerAction?: {
+    title: string;
+    onPress: () => void;
+  };
 }
 
 export function Section({
@@ -18,6 +25,8 @@ export function Section({
   children,
   spacing = 'lg',
   style,
+  variant = 'default',
+  headerAction,
 }: SectionProps) {
   const colorScheme = useColorScheme();
   const theme = getTheme(colorScheme ?? 'light');
@@ -36,29 +45,92 @@ export function Section({
     marginBottom: getSpacingValue(),
   };
 
-  return (
-    <View style={[sectionStyle, style]}>
-      {title && (
-        <View style={{ marginBottom: theme.spacing.lg }}>
+  const renderHeader = () => {
+    if (!title) return null;
+    
+    return (
+      <View style={{ 
+        marginBottom: theme.spacing.lg,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+      }}>
+        <View style={{ flex: 1, marginRight: headerAction ? theme.spacing.md : 0 }}>
           <Text 
-            variant="xl" 
-            weight="semibold" 
+            variant="2xl" 
+            weight="bold" 
             color="primary"
-            style={{ marginBottom: subtitle ? theme.spacing.xs : 0 }}
+            style={{ 
+              marginBottom: subtitle ? theme.spacing.xs : 0,
+              letterSpacing: -0.5
+            }}
           >
             {title}
           </Text>
           {subtitle && (
             <Text 
-              variant="body" 
+              variant="md" 
               color="secondary"
+              style={{ lineHeight: 22 }}
             >
               {subtitle}
             </Text>
           )}
         </View>
-      )}
-      {children}
+        {headerAction && (
+          <Text
+            variant="md"
+            weight="semibold"
+            color="accent"
+            style={{ marginTop: 4 }}
+            onPress={headerAction.onPress}
+          >
+            {headerAction.title}
+          </Text>
+        )}
+      </View>
+    );
+  };
+
+  const renderContent = () => {
+    switch (variant) {
+      case 'elevated':
+        return (
+          <Card variant="elevated" padding="xl" style={{ marginTop: title ? 0 : theme.spacing.lg }}>
+            {renderHeader()}
+            {children}
+          </Card>
+        );
+      
+      case 'glass':
+        return (
+          <Card variant="glass" padding="xl" style={{ marginTop: title ? 0 : theme.spacing.lg }}>
+            {renderHeader()}
+            {children}
+          </Card>
+        );
+        
+      case 'gradient':
+        return (
+          <Card variant="gradient" padding="xl" style={{ marginTop: title ? 0 : theme.spacing.lg }}>
+            {renderHeader()}
+            {children}
+          </Card>
+        );
+        
+      default:
+        return (
+          <View>
+            {renderHeader()}
+            {children}
+          </View>
+        );
+    }
+  };
+
+  return (
+    <View style={[sectionStyle, style]}>
+      {renderContent()}
     </View>
   );
 }

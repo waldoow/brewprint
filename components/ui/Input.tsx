@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 
-import { getTheme } from '@/constants/ProfessionalDesign';
+import { getTheme } from '@/constants/DataFirstDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Text } from './Text';
 
@@ -18,9 +18,10 @@ export type InputProps = TextInputProps & {
   label?: string;
   error?: string;
   type?: 'text' | 'email' | 'password' | 'number';
-  size?: 'default' | 'sm' | 'lg';
-  variant?: 'default' | 'outline';
+  size?: 'default' | 'sm' | 'lg' | 'xl';
+  variant?: 'default' | 'outline' | 'modern' | 'glass';
   containerStyle?: ViewStyle;
+  glass?: boolean;
 };
 
 export const Input = forwardRef<TextInput, InputProps>(({
@@ -28,7 +29,7 @@ export const Input = forwardRef<TextInput, InputProps>(({
   error,
   type = 'text',
   size = 'default',
-  variant = 'default',
+  variant = 'modern',
   style,
   containerStyle,
   ...rest
@@ -81,8 +82,8 @@ export const Input = forwardRef<TextInput, InputProps>(({
   const getInputStyles = (): ViewStyle => {
     const baseStyle = {
       ...styles.base,
-      backgroundColor: theme.colors.white,
-      borderColor: error ? theme.colors.error : theme.colors.gray[200],
+      backgroundColor: theme.colors.card,
+      borderColor: error ? theme.colors.error : theme.colors.border,
     };
     
     const sizeStyle = styles[`size_${size}`];
@@ -100,7 +101,7 @@ export const Input = forwardRef<TextInput, InputProps>(({
     return {
       ...baseTextStyle,
       ...sizeTextStyle,
-      color: theme.colors.gray[900],
+      color: theme.colors.text.primary,
     };
   };
 
@@ -115,7 +116,7 @@ export const Input = forwardRef<TextInput, InputProps>(({
         <TextInput
           ref={ref}
           style={[getInputStyles(), getTextStyles(), style, type === 'password' && styles.passwordInput]}
-          placeholderTextColor={theme.colors.gray[400]}
+          placeholderTextColor={theme.colors.text.tertiary}
           {...getInputProps()}
         />
         {type === 'password' && (
@@ -124,9 +125,9 @@ export const Input = forwardRef<TextInput, InputProps>(({
             onPress={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
-              <EyeOff size={18} color={theme.colors.gray[400]} />
+              <EyeOff size={18} color={theme.colors.text.tertiary} />
             ) : (
-              <Eye size={18} color={theme.colors.gray[400]} />
+              <Eye size={18} color={theme.colors.text.tertiary} />
             )}
           </TouchableOpacity>
         )}
@@ -158,12 +159,12 @@ const styles = StyleSheet.create({
   },
   
   base: {
-    borderRadius: 6,
-    paddingHorizontal: 16,
+    borderRadius: 8,
+    paddingHorizontal: 12,
     fontFamily: 'System',
     flex: 1,
     borderWidth: 1,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
   },
   
@@ -178,30 +179,30 @@ const styles = StyleSheet.create({
   },
   
   size_default: {
-    height: 48,
+    height: 44,
     paddingVertical: 12,
   },
   size_sm: {
-    height: 40,
+    height: 36,
     paddingVertical: 8,
   },
   size_lg: {
-    height: 56,
+    height: 52,
     paddingVertical: 16,
   },
   
   text: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '400',
   },
   text_default: {
-    fontSize: 16,
+    fontSize: 15,
   },
   text_sm: {
-    fontSize: 14,
+    fontSize: 13,
   },
   text_lg: {
-    fontSize: 18,
+    fontSize: 16,
   },
   
   error: {
