@@ -5,15 +5,19 @@ import {
   RefreshControlProps,
   SafeAreaView,
   ScrollView,
+  TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
 import { DataText } from "./DataText";
+import { ChevronLeft } from "lucide-react-native";
 
 interface DataLayoutProps {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
   scrollable?: boolean;
   padding?: boolean;
   style?: ViewStyle;
@@ -25,6 +29,8 @@ export function DataLayout({
   children,
   title,
   subtitle,
+  showBackButton,
+  onBackPress,
   scrollable = true,
   padding = true,
   style,
@@ -58,6 +64,29 @@ export function DataLayout({
           paddingHorizontal: padding ? 0 : theme.spacing[4],
         }}
       >
+        {/* Back Button - Above the title */}
+        {showBackButton && onBackPress && (
+          <TouchableOpacity
+            onPress={onBackPress}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: theme.spacing[4],
+              paddingVertical: theme.spacing[2],
+            }}
+            activeOpacity={0.7}
+          >
+            <ChevronLeft size={24} color={theme.colors.text.primary} />
+            <DataText
+              variant="body"
+              weight="medium"
+              style={{ marginLeft: theme.spacing[1] }}
+            >
+              Back
+            </DataText>
+          </TouchableOpacity>
+        )}
+
         {title && (
           <DataText
             variant="h1"

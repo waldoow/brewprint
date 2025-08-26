@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
 import { DataCard, InfoCard } from '@/components/ui/DataCard';
 import { DataText } from '@/components/ui/DataText';
@@ -58,10 +58,8 @@ export default function BrewerDetailScreen() {
       <DataLayout
         title="Brewer Details"
         subtitle="Loading equipment information..."
-        action={{
-          title: 'Back',
-          onPress: () => router.back(),
-        }}
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -77,10 +75,8 @@ export default function BrewerDetailScreen() {
       <DataLayout
         title="Brewer Not Found"
         subtitle="Equipment could not be found"
-        action={{
-          title: 'Back',
-          onPress: () => router.back(),
-        }}
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <InfoCard
           title="Brewer Not Found"
@@ -100,6 +96,8 @@ export default function BrewerDetailScreen() {
     <DataLayout
       title={brewer.name}
       subtitle={`${brewer.brand || 'Brewing Equipment'} • ${brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}`}
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Equipment Status Overview */}
@@ -140,13 +138,14 @@ export default function BrewerDetailScreen() {
 
       {/* Quick Actions */}
       <DataSection spacing="lg">
-        <DataButton
-          title="Edit Equipment Details"
-          variant="primary"
-          size="lg"
-          fullWidth
-          onPress={() => router.push(`/brewers/edit/${brewer.id}`)}
-        />
+        <Link href={`/(tabs)/brewers/edit/${brewer.id}`}>
+          <DataButton
+            title="Edit Equipment Details"
+            variant="primary"
+            size="lg"
+            fullWidth
+          />
+        </Link>
       </DataSection>
 
       {/* Physical Specifications */}
@@ -375,16 +374,18 @@ export default function BrewerDetailScreen() {
         spacing="xl"
       >
         <DataGrid columns={2} gap="md">
-          <DataButton
-            title="Edit Equipment"
-            variant="secondary"
-            onPress={() => router.push(`/brewers/edit/${brewer.id}`)}
-          />
-          <DataButton
-            title="Create Recipe"
-            variant="primary"
-            onPress={() => router.push(`/brewprints/new?brewer_id=${brewer.id}`)}
-          />
+          <Link href={`/(tabs)/brewers/edit/${brewer.id}`}>
+            <DataButton
+              title="Edit Equipment"
+              variant="secondary"
+            />
+          </Link>
+          <Link href={`/brewprints/new?brewer_id=${brewer.id}`}>
+            <DataButton
+              title="Create Recipe"
+              variant="primary"
+            />
+          </Link>
         </DataGrid>
       </DataSection>
     </DataLayout>

@@ -20,6 +20,8 @@ export default function NewBeanScreen() {
     <DataLayout
       title="Add New Bean"
       subtitle="Expand your coffee inventory with detailed tracking"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <BeanForm onSuccess={handleSuccess} onCancel={handleCancel} />

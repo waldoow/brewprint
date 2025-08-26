@@ -99,6 +99,8 @@ export default function AboutScreen() {
     <DataLayout
       title="About Brewprint"
       subtitle="App information and support"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* App Info */}

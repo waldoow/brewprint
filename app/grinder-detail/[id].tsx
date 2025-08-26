@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Container } from '@/components/ui/Container';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -59,10 +59,8 @@ export default function GrinderDetailScreen() {
       <Container>
         <PageHeader 
           title="Grinder Details"
-          action={{
-            title: 'Back',
-            onPress: () => router.back(),
-          }}
+          showBackButton={true}
+          onBackPress={() => router.back()}
         />
         <View style={styles.loadingContainer}>
           <Text variant="body" color="secondary">
@@ -78,10 +76,8 @@ export default function GrinderDetailScreen() {
       <Container>
         <PageHeader 
           title="Grinder Not Found"
-          action={{
-            title: 'Back',
-            onPress: () => router.back(),
-          }}
+          showBackButton={true}
+          onBackPress={() => router.back()}
         />
         <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
           <Text 
@@ -111,18 +107,26 @@ export default function GrinderDetailScreen() {
 
   return (
     <Container scrollable>
-      <Section 
+      <PageHeader 
         title={grinder.name}
+        subtitle="Grinder Details"
+        showBackButton={true}
+        onBackPress={() => router.back()}
+      />
+
+      <Section 
+        title="Status & Overview"
         subtitle={`${grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()} • ${grinder.burr_material || 'Steel'} Burrs`}
-        spacing="xl"
+        spacing="lg"
       >
-        <Button
-          title="Edit Grinder Details"
-          variant="secondary"
-          size="lg"
-          fullWidth
-          onPress={() => router.push(`/grinders/edit/${grinder.id}`)}
-        />
+        <Link href={`/(tabs)/grinders/edit/${grinder.id}`}>
+          <Button
+            title="Edit Grinder Details"
+            variant="secondary"
+            size="lg"
+            fullWidth
+          />
+        </Link>
       </Section>
 
       <Section 
@@ -333,12 +337,12 @@ export default function GrinderDetailScreen() {
         spacing="xl"
       >
         <View style={styles.actionsRow}>
-          <Button
-            title="Edit Grinder"
-            variant="secondary"
-            onPress={() => router.push(`/grinders/edit/${grinder.id}`)}
-            style={{ flex: 1, marginRight: 8 }}
-          />
+          <Link href={`/(tabs)/grinders/edit/${grinder.id}`} style={{ flex: 1, marginRight: 8 }}>
+            <Button
+              title="Edit Grinder"
+              variant="secondary"
+            />
+          </Link>
           <Button
             title="New Recipe"
             variant="primary"

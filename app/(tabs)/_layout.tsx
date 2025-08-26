@@ -32,8 +32,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.colors.interactive.default, // Clean active state
-        tabBarInactiveTintColor: theme.colors.text.secondary, // Professional gray inactive
+        tabBarActiveTintColor: theme.colors.interactive.default,
+        tabBarInactiveTintColor: theme.colors.text.secondary,
         tabBarStyle: {
           backgroundColor:
             colorScheme === "dark" ? theme.colors.surface : theme.colors.card,
@@ -42,10 +42,10 @@ export default function TabLayout() {
           paddingTop: 8,
           paddingBottom: Platform.OS === "ios" ? 34 : 16,
           height: Platform.OS === "ios" ? 88 : 70,
-          borderRadius: 0,
-          marginHorizontal: 0,
-          marginBottom: 0,
-          position: "relative",
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
           elevation: 8,
           ...theme.shadows.lg,
         },
@@ -56,7 +56,6 @@ export default function TabLayout() {
           letterSpacing: 0.3,
         },
         headerShown: false,
-        headerTitle: "",
         tabBarButton: HapticTab,
         tabBarBackground: () => (
           <BlurView
@@ -66,6 +65,11 @@ export default function TabLayout() {
           />
         ),
         animation: "shift",
+        tabBarHideOnKeyboard: false,
+        tabBarVisibilityAnimationConfig: {
+          show: { animation: "timing", config: { duration: 200 } },
+          hide: { animation: "timing", config: { duration: 200 } },
+        },
       }}
     >
       <Tabs.Screen

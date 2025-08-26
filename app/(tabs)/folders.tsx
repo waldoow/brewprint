@@ -14,7 +14,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, View } from "react-native";
+import { RefreshControl, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 
 export default function FoldersScreen() {

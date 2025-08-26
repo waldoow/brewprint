@@ -199,6 +199,8 @@ export default function BrewprintDetailScreen() {
       <DataLayout
         title="Loading Recipe"
         subtitle="Retrieving brewing details..."
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -214,6 +216,8 @@ export default function BrewprintDetailScreen() {
       <DataLayout
         title="Recipe Not Found"
         subtitle="Unable to load brewing recipe"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <InfoCard
           title="Recipe Not Available"
@@ -238,6 +242,8 @@ export default function BrewprintDetailScreen() {
     <DataLayout
       title={brewprint.name}
       subtitle={`${brewprint.method.replace('-', ' ')} Recipe • ${brewprint.status}`}
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Recipe Overview */}

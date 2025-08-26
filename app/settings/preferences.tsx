@@ -118,6 +118,8 @@ export default function PreferencesScreen() {
       <DataLayout
         title="Preferences"
         subtitle="Customize your brewing experience"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -132,6 +134,8 @@ export default function PreferencesScreen() {
     <DataLayout
       title="Preferences"
       subtitle="Customize your brewing experience"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Units Section */}

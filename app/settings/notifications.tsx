@@ -91,6 +91,8 @@ export default function NotificationsScreen() {
       <DataLayout
         title="Notifications"
         subtitle="Configure your notification preferences"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -105,6 +107,8 @@ export default function NotificationsScreen() {
     <DataLayout
       title="Notifications"
       subtitle="Configure your notification preferences"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Info Banner */}

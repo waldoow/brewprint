@@ -91,6 +91,8 @@ export default function ResultsScreen() {
     <DataLayout
       title="How was it?"
       subtitle="Rate and review your brewing session"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
 

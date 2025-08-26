@@ -84,6 +84,8 @@ export default function EditBrewerScreen() {
       <DataLayout
         title="Loading Equipment Details..."
         subtitle="Retrieving brewing equipment information for editing"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -98,6 +100,8 @@ export default function EditBrewerScreen() {
     <DataLayout
       title="Edit Equipment"
       subtitle="Update brewing equipment specifications"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {initialData && (

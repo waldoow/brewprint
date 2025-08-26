@@ -36,12 +36,14 @@ export default function NewBrewprintScreen() {
 
   return (
     <DataLayout
-      title={"coucou"}
+      title={title}
       subtitle={
         initialData
           ? "Duplicate and customize existing recipe"
           : "Create your perfect brewing recipe"
       }
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <BrewprintForm

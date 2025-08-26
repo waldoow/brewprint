@@ -20,6 +20,8 @@ export default function NewBrewerScreen() {
     <DataLayout
       title="New Equipment"
       subtitle="Add brewing equipment to your coffee arsenal"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <BrewerForm

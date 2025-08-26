@@ -18,6 +18,8 @@ export default function NewFolderScreen() {
     <DataLayout
       title="New Folder"
       subtitle="Create a new folder to organize your brewing recipes"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <FolderForm onSuccess={handleSuccess} onCancel={handleCancel} />

@@ -47,6 +47,8 @@ export default function BrewingScreen() {
       <DataLayout
         title="Invalid Brewing Session"
         subtitle="Recipe ID is required"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.centerContent}>
           <DataText variant="body" color="secondary">
@@ -148,6 +150,8 @@ export default function BrewingScreen() {
       <DataLayout
         title="Brewing Session"
         subtitle="Loading recipe for brewing..."
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.centerContent}>
           <DataText variant="body" color="secondary">
@@ -163,6 +167,8 @@ export default function BrewingScreen() {
       <DataLayout
         title="Recipe Not Available"
         subtitle="Brewing recipe could not be loaded"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <InfoCard
           title="Recipe Not Available"
@@ -195,6 +201,8 @@ export default function BrewingScreen() {
         brewprint.method.charAt(0).toUpperCase() +
         brewprint.method.slice(1).replace("-", " ")
       } Brewing • ${formatTime(time)}`}
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Current Brewing Status */}

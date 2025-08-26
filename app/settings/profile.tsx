@@ -118,6 +118,8 @@ export default function ProfileSyncScreen() {
       <DataLayout
         title="Profile & Sync"
         subtitle="Manage your account and sync preferences"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -132,6 +134,8 @@ export default function ProfileSyncScreen() {
     <DataLayout
       title="Profile & Sync"
       subtitle="Manage your account and sync preferences"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Account Information */}

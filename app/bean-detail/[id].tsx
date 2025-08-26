@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Container } from '@/components/ui/Container';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card } from '@/components/ui/Card';
@@ -44,10 +44,8 @@ export default function BeanDetailScreen() {
       <Container>
         <PageHeader 
           title="Bean Details"
-          action={{
-            title: 'Back',
-            onPress: () => router.back(),
-          }}
+          showBackButton={true}
+          onBackPress={() => router.back()}
         />
         <View style={styles.loadingContainer}>
           <Text variant="body" color="secondary">
@@ -63,10 +61,8 @@ export default function BeanDetailScreen() {
       <Container>
         <PageHeader 
           title="Bean Not Found"
-          action={{
-            title: 'Back',
-            onPress: () => router.back(),
-          }}
+          showBackButton={true}
+          onBackPress={() => router.back()}
         />
         <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
           <Text 
@@ -98,10 +94,8 @@ export default function BeanDetailScreen() {
       <PageHeader 
         title={bean.name}
         subtitle="Bean Details"
-        action={{
-          title: 'Back',
-          onPress: () => router.back(),
-        }}
+        showBackButton={true}
+        onBackPress={() => router.back()}
       />
 
       <Card variant="default" style={styles.card}>
@@ -158,12 +152,13 @@ export default function BeanDetailScreen() {
       </Card>
 
       <View style={styles.actionsContainer}>
-        <Button
-          title="Edit Bean"
-          onPress={() => router.push(`/beans/edit/${bean.id}`)}
-          variant="primary"
-          style={styles.actionButton}
-        />
+        <Link href={`/(tabs)/beans/edit/${bean.id}`} style={styles.actionButton}>
+          <Button
+            title="Edit Bean"
+            variant="primary"
+            style={styles.actionButton}
+          />
+        </Link>
         <Button
           title="Back to Library"
           onPress={() => router.back()}

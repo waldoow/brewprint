@@ -202,6 +202,8 @@ export default function DataPrivacyScreen() {
     <DataLayout
       title="Data & Privacy"
       subtitle="Export and manage your coffee data"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {/* Data Overview */}

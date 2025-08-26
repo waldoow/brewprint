@@ -71,6 +71,8 @@ export default function EditBeanScreen() {
       <DataLayout
         title="Loading Bean Details..."
         subtitle="Retrieving coffee information for editing"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -85,6 +87,8 @@ export default function EditBeanScreen() {
     <DataLayout
       title="Edit Bean"
       subtitle={`Update ${initialData?.name || "coffee"} inventory details`}
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       {initialData && (

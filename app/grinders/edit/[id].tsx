@@ -51,6 +51,8 @@ export default function EditGrinderScreen() {
       <DataLayout
         title="Loading Grinder Details..."
         subtitle="Retrieving grinding equipment information for editing"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -66,6 +68,8 @@ export default function EditGrinderScreen() {
       <DataLayout
         title="Grinder Not Found"
         subtitle="Grinding equipment could not be located"
+        showBackButton={true}
+        onBackPress={() => router.back()}
       >
         <View style={styles.loadingContainer}>
           <DataText variant="body" color="secondary">
@@ -80,6 +84,8 @@ export default function EditGrinderScreen() {
     <DataLayout
       title="Edit Grinder"
       subtitle="Update grinding equipment specifications"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <GrinderForm

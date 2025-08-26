@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshControl, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
+import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
 import { DataCard } from '@/components/ui/DataCard';
@@ -109,29 +109,14 @@ export default function LibraryScreen() {
     };
   }, [beans, brewers, grinders]);
 
-  const handleItemPress = (type: 'bean' | 'brewer' | 'grinder', id: string) => {
+  const handleHapticFeedback = () => {
     if (Haptics.impactAsync) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    
-    switch (type) {
-      case 'bean':
-        router.push(`/bean-detail/${id}`);
-        break;
-      case 'brewer':
-        router.push(`/brewer-detail/${id}`);
-        break;
-      case 'grinder':
-        router.push(`/grinder-detail/${id}`);
-        break;
     }
   };
 
-  const handleAddNew = (type: 'beans' | 'brewers' | 'grinders') => {
-    if (Haptics.impactAsync) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push(`/${type}/new`);
+  const handleAddNew = (type: string) => {
+    toast.success(`Navigate to add new ${type} screen`);
   };
 
   const renderViewTabs = () => {
@@ -227,24 +212,27 @@ export default function LibraryScreen() {
           {/* Quick Actions */}
           <DataSection title="Quick Actions" spacing="lg">
             <DataGrid columns={3} gap="sm">
-              <DataButton
-                title="Add Bean"
-                variant="secondary"
-                size="sm"
-                onPress={() => handleAddNew('beans')}
-              />
-              <DataButton
-                title="Add Brewer"
-                variant="secondary"
-                size="sm"
-                onPress={() => handleAddNew('brewers')}
-              />
-              <DataButton
-                title="Add Grinder"
-                variant="secondary"
-                size="sm"
-                onPress={() => handleAddNew('grinders')}
-              />
+              <Link href="/beans/new" onPress={handleHapticFeedback}>
+                <DataButton
+                  title="Add Bean"
+                  variant="secondary"
+                  size="sm"
+                />
+              </Link>
+              <Link href="/brewers/new" onPress={handleHapticFeedback}>
+                <DataButton
+                  title="Add Brewer"
+                  variant="secondary"
+                  size="sm"
+                />
+              </Link>
+              <Link href="/grinders/new" onPress={handleHapticFeedback}>
+                <DataButton
+                  title="Add Grinder"
+                  variant="secondary"
+                  size="sm"
+                />
+              </Link>
             </DataGrid>
           </DataSection>
 
@@ -304,33 +292,34 @@ export default function LibraryScreen() {
           {/* Recent Items */}
           <DataSection title="Recent Items" subtitle="Recently added equipment" spacing="lg">
             <DataGrid columns={1} gap="sm">
-              {[...inventoryData.beans.slice(0, 2), ...inventoryData.brewers.slice(0, 1)].map((item, index) => (
-                <DataCard
-                  key={`recent-${index}`}
-                  onPress={() => handleItemPress(
-                    'name' in item && 'roast_date' in item ? 'bean' : 'type' in item && 'material' in item ? 'brewer' : 'grinder',
-                    item.id
-                  )}
-                >
-                  <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}>
-                    <View style={{ flex: 1 }}>
-                      <DataText variant="h4" color="primary" weight="semibold">
-                        {item.name}
-                      </DataText>
-                      <DataText variant="small" color="secondary">
-                        {'roast_date' in item ? 'Bean' : 'type' in item ? 'Brewer' : 'Grinder'}
-                      </DataText>
-                    </View>
-                    <DataText variant="small" color="tertiary">
-                      →
-                    </DataText>
-                  </View>
-                </DataCard>
-              ))}
+              {[...inventoryData.beans.slice(0, 2), ...inventoryData.brewers.slice(0, 1)].map((item, index) => {
+                const itemType = 'name' in item && 'roast_date' in item ? 'bean' : 'type' in item && 'material' in item ? 'brewer' : 'grinder';
+                const href = `/${itemType}-detail/${item.id}`;
+                
+                return (
+                  <Link key={`recent-${index}`} href={href} onPress={handleHapticFeedback}>
+                    <DataCard>
+                      <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                        <View style={{ flex: 1 }}>
+                          <DataText variant="h4" color="primary" weight="semibold">
+                            {item.name}
+                          </DataText>
+                          <DataText variant="small" color="secondary">
+                            {'roast_date' in item ? 'Bean' : 'type' in item ? 'Brewer' : 'Grinder'}
+                          </DataText>
+                        </View>
+                        <DataText variant="small" color="tertiary">
+                          →
+                        </DataText>
+                      </View>
+                    </DataCard>
+                  </Link>
+                );
+              })}
             </DataGrid>
           </DataSection>
         </>
@@ -340,13 +329,14 @@ export default function LibraryScreen() {
       {activeView === 'beans' && (
         <>
           <DataSection title="Bean Management" spacing="lg">
-            <DataButton
-              title="Add New Bean"
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={() => handleAddNew('beans')}
-            />
+            <Link href="/beans/new" onPress={handleHapticFeedback}>
+              <DataButton
+                title="Add New Bean"
+                variant="primary"
+                size="lg"
+                fullWidth
+              />
+            </Link>
           </DataSection>
 
           {inventoryData.beans.length === 0 ? (
@@ -373,10 +363,8 @@ export default function LibraryScreen() {
                     freshnessDays <= 21 ? 'fading' : 'stale';
 
                   return (
-                    <DataCard
-                      key={bean.id}
-                      onPress={() => handleItemPress('bean', bean.id)}
-                    >
+                    <Link key={bean.id} href={`/bean-detail/${bean.id}`} onPress={handleHapticFeedback}>
+                      <DataCard>
                       <View style={{
                         flexDirection: 'row',
                         justifyContent: 'space-between',
@@ -443,6 +431,7 @@ export default function LibraryScreen() {
                         </DataText>
                       )}
                     </DataCard>
+                    </Link>
                   );
                 })}
               </DataGrid>
@@ -455,13 +444,14 @@ export default function LibraryScreen() {
       {activeView === 'brewers' && (
         <>
           <DataSection title="Brewer Management" spacing="lg">
-            <DataButton
-              title="Add New Brewer"
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={() => handleAddNew('brewers')}
-            />
+            <Link href="/brewers/new" onPress={handleHapticFeedback}>
+              <DataButton
+                title="Add New Brewer"
+                variant="primary"
+                size="lg"
+                fullWidth
+              />
+            </Link>
           </DataSection>
 
           {inventoryData.brewers.length === 0 ? (
@@ -479,10 +469,8 @@ export default function LibraryScreen() {
             <DataSection title={`Brewing Equipment (${inventoryData.brewers.length})`} spacing="lg">
               <DataGrid columns={1} gap="md">
                 {inventoryData.brewers.map((brewer) => (
-                  <DataCard
-                    key={brewer.id}
-                    onPress={() => handleItemPress('brewer', brewer.id)}
-                  >
+                  <Link key={brewer.id} href={`/brewer-detail/${brewer.id}`} onPress={handleHapticFeedback}>
+                    <DataCard>
                     <View style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
@@ -536,6 +524,7 @@ export default function LibraryScreen() {
                       )}
                     </View>
                   </DataCard>
+                  </Link>
                 ))}
               </DataGrid>
             </DataSection>
@@ -547,13 +536,14 @@ export default function LibraryScreen() {
       {activeView === 'grinders' && (
         <>
           <DataSection title="Grinder Management" spacing="lg">
-            <DataButton
-              title="Add New Grinder"
-              variant="primary"
-              size="lg"
-              fullWidth
-              onPress={() => handleAddNew('grinders')}
-            />
+            <Link href="/grinders/new" onPress={handleHapticFeedback}>
+              <DataButton
+                title="Add New Grinder"
+                variant="primary"
+                size="lg"
+                fullWidth
+              />
+            </Link>
           </DataSection>
 
           {inventoryData.grinders.length === 0 ? (
@@ -571,10 +561,8 @@ export default function LibraryScreen() {
             <DataSection title={`Grinding Equipment (${inventoryData.grinders.length})`} spacing="lg">
               <DataGrid columns={1} gap="md">
                 {inventoryData.grinders.map((grinder) => (
-                  <DataCard
-                    key={grinder.id}
-                    onPress={() => handleItemPress('grinder', grinder.id)}
-                  >
+                  <Link key={grinder.id} href={`/grinder-detail/${grinder.id}`} onPress={handleHapticFeedback}>
+                    <DataCard>
                     <View style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
@@ -628,6 +616,7 @@ export default function LibraryScreen() {
                       )}
                     </View>
                   </DataCard>
+                  </Link>
                 ))}
               </DataGrid>
             </DataSection>

@@ -19,6 +19,8 @@ export default function NewGrinderScreen() {
     <DataLayout
       title="New Grinder"
       subtitle="Add precision grinding equipment to your setup"
+      showBackButton={true}
+      onBackPress={() => router.back()}
       scrollable
     >
       <GrinderForm 
