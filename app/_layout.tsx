@@ -15,7 +15,7 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
 
 export default function RootLayout() {
@@ -56,12 +56,8 @@ export default function RootLayout() {
               }}
               initialRouteName="index"
             >
-              <SafeAreaView
-                edges={["bottom", "left", "right"]}
-                style={{ flex: 1, backgroundColor: "red" }}
-              >
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              </SafeAreaView>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="brewprints" />
               <Stack.Screen name="brewing/[id]" />
