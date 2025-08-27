@@ -1,3 +1,7 @@
+// Initialize RNUI configuration first (must be before any RNUI imports)
+import "@/config/rnui-config";
+
+import { initializeRNUITheme } from "@/constants/RNUITheme";
 import { AuthProvider } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
@@ -7,10 +11,11 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
 
 export default function RootLayout() {
@@ -18,6 +23,11 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+
+  // Initialize RNUI theme on mount and when color scheme changes
+  useEffect(() => {
+    initializeRNUITheme();
+  }, [colorScheme]);
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -46,8 +56,12 @@ export default function RootLayout() {
               }}
               initialRouteName="index"
             >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <SafeAreaView
+                edges={["bottom", "left", "right"]}
+                style={{ flex: 1, backgroundColor: "red" }}
+              >
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </SafeAreaView>
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="brewprints" />
               <Stack.Screen name="brewing/[id]" />

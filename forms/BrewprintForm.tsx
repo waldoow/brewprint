@@ -1,8 +1,16 @@
-// Data-First UI Components
-import { DataButton } from "@/components/ui/DataButton";
-import { DataText } from "@/components/ui/DataText";
-import { Input } from "@/components/ui/Input";
-import { ThemedSelect } from "@/components/ui/ThemedSelect";
+import React, { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
+import { toast } from "sonner-native";
+import {
+  View,
+  Text,
+  TextField,
+  Button,
+  Picker,
+  Colors,
+} from "react-native-ui-lib";
+
+// Services and Context
 import { useAuth } from "@/context/AuthContext";
 import {
   BeansService,
@@ -12,12 +20,6 @@ import {
   type BrewprintInput,
   type BrewStep,
 } from "@/lib/services";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { View } from "react-native";
-import { toast } from "sonner-native";
-import { z } from "zod";
 
 interface BrewprintFormProps {
   onSuccess: (brewprint: any) => void;
@@ -25,29 +27,30 @@ interface BrewprintFormProps {
   initialData?: Partial<BrewprintInput>;
 }
 
-interface FormData {
+// Form data interface
+interface BrewprintFormData {
   // Basic info
   name: string;
   description: string;
   method: string;
   brewer_id: string;
   bean_id: string;
-  grinder_id?: string;
+  grinder_id: string;
   difficulty: string;
 
   // Parameters
   coffee_grams: string;
   water_grams: string;
   water_temp: string;
-  grind_setting?: string;
-  bloom_time?: string;
-  total_time?: string;
+  grind_setting: string;
+  bloom_time: string;
+  total_time: string;
 
   // Target metrics
-  target_tds?: string;
-  target_extraction?: string;
-  target_strength?: string;
-  target_time?: string;
+  target_tds: string;
+  target_extraction: string;
+  target_strength: string;
+  target_time: string;
 
   // Steps
   steps: {
@@ -56,7 +59,7 @@ interface FormData {
     duration: string;
     water_amount: string;
     technique: string;
-    temperature?: string;
+    temperature: string;
   }[];
 }
 
@@ -88,38 +91,6 @@ const techniqueOptions = [
   { label: "Immersion", value: "immersion" },
 ];
 
-// Validation schema
-const brewprintFormSchema = z.object({
-  name: z.string().min(1, "Brewprint name is required"),
-  description: z.string().optional(),
-  method: z.enum(["v60", "chemex", "french-press", "aeropress", "espresso", "cold-brew", "siphon", "percolator", "turkish", "moka"], {
-    errorMap: () => ({ message: "Please select a valid brewing method" })
-  }),
-  brewer_id: z.string().min(1, "Brewer is required"),
-  bean_id: z.string().min(1, "Bean is required"),
-  grinder_id: z.string().optional(),
-  difficulty: z.string().min(1, "Difficulty is required"),
-  coffee_grams: z.string().min(1, "Coffee amount is required"),
-  water_grams: z.string().min(1, "Water amount is required"),
-  water_temp: z.string().min(1, "Water temperature is required"),
-  grind_setting: z.string().optional(),
-  bloom_time: z.string().optional(),
-  total_time: z.string().optional(),
-  target_tds: z.string().optional(),
-  target_extraction: z.string().optional(),
-  target_strength: z.string().optional(),
-  target_time: z.string().optional(),
-  steps: z.array(
-    z.object({
-      title: z.string().min(1, "Step title is required"),
-      description: z.string().min(1, "Step description is required"),
-      duration: z.string().min(1, "Duration is required"),
-      water_amount: z.string().min(1, "Water amount is required"),
-      technique: z.string().min(1, "Technique is required"),
-      temperature: z.string().optional(),
-    })
-  ),
-});
 
 export function BrewprintForm({
   onSuccess,
@@ -128,79 +99,112 @@ export function BrewprintForm({
 }: BrewprintFormProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [brewers, setBrewers] = useState<{ label: string; value: string }[]>(
-    []
-  );
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [brewers, setBrewers] = useState<{ label: string; value: string }[]>([]);
   const [beans, setBeans] = useState<{ label: string; value: string }[]>([]);
-  const [grinders, setGrinders] = useState<{ label: string; value: string }[]>(
-    []
-  );
+  const [grinders, setGrinders] = useState<{ label: string; value: string }[]>([]);
   const [selectedGrinder, setSelectedGrinder] = useState<any>(null);
 
-  // Initialize form with validation
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    getValues,
-    formState: { errors },
-    reset,
-    control,
-  } = useForm<FormData>({
-    resolver: zodResolver(brewprintFormSchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      method: initialData?.method || "v60",
-      brewer_id: initialData?.brewer_id || "",
-      bean_id: initialData?.bean_id || "",
-      grinder_id: initialData?.grinder_id || "",
-      difficulty: initialData?.difficulty?.toString() || "1",
-      coffee_grams: initialData?.parameters?.coffee_grams?.toString() || "",
-      water_grams: initialData?.parameters?.water_grams?.toString() || "",
-      water_temp: initialData?.parameters?.water_temp?.toString() || "",
-      grind_setting: initialData?.parameters?.grind_setting?.toString() || "",
-      bloom_time: initialData?.parameters?.bloom_time?.toString() || "",
-      total_time: initialData?.parameters?.total_time?.toString() || "",
-      target_tds: initialData?.target_metrics?.target_tds?.toString() || "",
-      target_extraction:
-        initialData?.target_metrics?.target_extraction?.toString() || "",
-      target_strength:
-        initialData?.target_metrics?.target_strength?.toString() || "",
-      target_time: initialData?.target_metrics?.target_time?.toString() || "",
-      steps: initialData?.steps?.map((step) => ({
-        title: step.title,
-        description: step.description,
-        duration: step.duration.toString(),
-        water_amount: step.water_amount.toString(),
-        technique: step.technique,
-        temperature: step.temperature?.toString() || "",
-      })) || [
-        {
-          title: "Bloom",
-          description: "Initial pour to degas the coffee",
-          duration: "30",
-          water_amount: "50",
-          technique: "circular",
-          temperature: "",
-        },
-      ],
-    },
+  // Form state
+  const [formData, setFormData] = useState<BrewprintFormData>({
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    method: initialData?.method || "v60",
+    brewer_id: initialData?.brewer_id || "",
+    bean_id: initialData?.bean_id || "",
+    grinder_id: initialData?.grinder_id || "",
+    difficulty: initialData?.difficulty?.toString() || "1",
+    coffee_grams: initialData?.parameters?.coffee_grams?.toString() || "",
+    water_grams: initialData?.parameters?.water_grams?.toString() || "",
+    water_temp: initialData?.parameters?.water_temp?.toString() || "",
+    grind_setting: initialData?.parameters?.grind_setting?.toString() || "",
+    bloom_time: initialData?.parameters?.bloom_time?.toString() || "",
+    total_time: initialData?.parameters?.total_time?.toString() || "",
+    target_tds: initialData?.target_metrics?.target_tds?.toString() || "",
+    target_extraction: initialData?.target_metrics?.target_extraction?.toString() || "",
+    target_strength: initialData?.target_metrics?.target_strength?.toString() || "",
+    target_time: initialData?.target_metrics?.target_time?.toString() || "",
+    steps: initialData?.steps?.map((step) => ({
+      title: step.title,
+      description: step.description,
+      duration: step.duration.toString(),
+      water_amount: step.water_amount.toString(),
+      technique: step.technique,
+      temperature: step.temperature?.toString() || "",
+    })) || [
+      {
+        title: "Bloom",
+        description: "Initial pour to degas the coffee",
+        duration: "30",
+        water_amount: "50",
+        technique: "circular",
+        temperature: "",
+      },
+    ],
   });
 
-  const {
-    fields: stepFields,
-    append: appendStep,
-    remove: removeStep,
-  } = useFieldArray({
-    control,
-    name: "steps",
-  });
+  const updateField = (field: keyof BrewprintFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
 
-  const watchedCoffeeGrams = watch("coffee_grams");
-  const watchedWaterGrams = watch("water_grams");
-  const watchedGrinderId = watch("grinder_id");
+  const updateStep = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: prev.steps.map((step, i) => 
+        i === index ? { ...step, [field]: value } : step
+      )
+    }));
+  };
+
+  const addStep = () => {
+    setFormData(prev => ({
+      ...prev,
+      steps: [...prev.steps, {
+        title: "",
+        description: "",
+        duration: "30",
+        water_amount: "0",
+        technique: "circular",
+        temperature: "",
+      }]
+    }));
+  };
+
+  const removeStep = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      steps: prev.steps.filter((_, i) => i !== index)
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) newErrors.name = "Recipe name is required";
+    if (!formData.method.trim()) newErrors.method = "Brewing method is required";
+    if (!formData.brewer_id.trim()) newErrors.brewer_id = "Brewer is required";
+    if (!formData.bean_id.trim()) newErrors.bean_id = "Bean is required";
+    if (!formData.difficulty.trim()) newErrors.difficulty = "Difficulty is required";
+    if (!formData.coffee_grams.trim()) newErrors.coffee_grams = "Coffee amount is required";
+    if (!formData.water_grams.trim()) newErrors.water_grams = "Water amount is required";
+    if (!formData.water_temp.trim()) newErrors.water_temp = "Water temperature is required";
+    
+    // Validate steps
+    formData.steps.forEach((step, index) => {
+      if (!step.title.trim()) newErrors[`step_${index}_title`] = `Step ${index + 1} title is required`;
+      if (!step.description.trim()) newErrors[`step_${index}_description`] = `Step ${index + 1} description is required`;
+      if (!step.duration.trim()) newErrors[`step_${index}_duration`] = `Step ${index + 1} duration is required`;
+      if (!step.water_amount.trim()) newErrors[`step_${index}_water_amount`] = `Step ${index + 1} water amount is required`;
+      if (!step.technique.trim()) newErrors[`step_${index}_technique`] = `Step ${index + 1} technique is required`;
+    });
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Load brewers, beans, and grinders
   useEffect(() => {
@@ -250,15 +254,15 @@ export function BrewprintForm({
   // Load selected grinder details
   useEffect(() => {
     const loadGrinderDetails = async () => {
-      if (watchedGrinderId) {
+      if (formData.grinder_id) {
         try {
-          const result = await GrindersService.getGrinderById(watchedGrinderId);
+          const result = await GrindersService.getGrinderById(formData.grinder_id);
           if (result.success && result.data) {
             setSelectedGrinder(result.data);
 
             // Auto-populate grind setting if grinder has a default and current setting is empty
-            if (result.data.default_setting && !getValues("grind_setting")) {
-              setValue("grind_setting", result.data.default_setting.toString());
+            if (result.data.default_setting && !formData.grind_setting) {
+              updateField("grind_setting", result.data.default_setting.toString());
             }
           }
         } catch (error) {
@@ -270,12 +274,12 @@ export function BrewprintForm({
     };
 
     loadGrinderDetails();
-  }, [watchedGrinderId, setValue, getValues]);
+  }, [formData.grinder_id]);
 
   // Calculate ratio automatically
   const calculateRatio = () => {
-    const coffee = parseFloat(watchedCoffeeGrams);
-    const water = parseFloat(watchedWaterGrams);
+    const coffee = parseFloat(formData.coffee_grams);
+    const water = parseFloat(formData.water_grams);
     if (coffee && water && coffee > 0) {
       const ratio = water / coffee;
       return `1:${ratio.toFixed(1)}`;
@@ -283,7 +287,8 @@ export function BrewprintForm({
     return "";
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
+    if (!validateForm()) return;
     if (!user?.id) {
       toast.error("User not authenticated");
       return;
@@ -294,36 +299,36 @@ export function BrewprintForm({
     try {
       // Convert form data to BrewprintInput format
       const brewprintData: BrewprintInput = {
-        name: data.name,
-        description: data.description || undefined,
-        method: data.method as any,
-        brewer_id: data.brewer_id,
-        bean_id: data.bean_id,
-        grinder_id: data.grinder_id || undefined,
-        difficulty: parseInt(data.difficulty) as 1 | 2 | 3,
+        name: formData.name,
+        description: formData.description || undefined,
+        method: formData.method as any,
+        brewer_id: formData.brewer_id,
+        bean_id: formData.bean_id,
+        grinder_id: formData.grinder_id || undefined,
+        difficulty: parseInt(formData.difficulty) as 1 | 2 | 3,
         parameters: {
-          coffee_grams: parseFloat(data.coffee_grams),
-          water_grams: parseFloat(data.water_grams),
-          water_temp: parseFloat(data.water_temp),
-          grind_setting: data.grind_setting
-            ? parseFloat(data.grind_setting)
+          coffee_grams: parseFloat(formData.coffee_grams),
+          water_grams: parseFloat(formData.water_grams),
+          water_temp: parseFloat(formData.water_temp),
+          grind_setting: formData.grind_setting
+            ? parseFloat(formData.grind_setting)
             : undefined,
-          bloom_time: data.bloom_time ? parseFloat(data.bloom_time) : undefined,
-          total_time: data.total_time ? parseFloat(data.total_time) : undefined,
+          bloom_time: formData.bloom_time ? parseFloat(formData.bloom_time) : undefined,
+          total_time: formData.total_time ? parseFloat(formData.total_time) : undefined,
         },
         target_metrics: {
-          target_tds: data.target_tds ? parseFloat(data.target_tds) : undefined,
-          target_extraction: data.target_extraction
-            ? parseFloat(data.target_extraction)
+          target_tds: formData.target_tds ? parseFloat(formData.target_tds) : undefined,
+          target_extraction: formData.target_extraction
+            ? parseFloat(formData.target_extraction)
             : undefined,
-          target_strength: data.target_strength
-            ? parseFloat(data.target_strength)
+          target_strength: formData.target_strength
+            ? parseFloat(formData.target_strength)
             : undefined,
-          target_time: data.target_time
-            ? parseFloat(data.target_time)
+          target_time: formData.target_time
+            ? parseFloat(formData.target_time)
             : undefined,
         },
-        steps: data.steps.map(
+        steps: formData.steps.map(
           (step, index): BrewStep => ({
             id: index + 1,
             order: index + 1,
@@ -343,7 +348,6 @@ export function BrewprintForm({
 
       if (result.success && result.data) {
         toast.success("Brewprint created successfully!");
-        reset();
         onSuccess(result.data);
       } else {
         console.error("Error creating brewprint:", result.error);
@@ -359,333 +363,347 @@ export function BrewprintForm({
     }
   };
 
-  const addStep = () => {
-    appendStep({
-      title: "",
-      description: "",
-      duration: "30",
-      water_amount: "0",
-      technique: "circular",
-      temperature: "",
-    });
-  };
-
   const handleCancel = () => {
-    reset();
     onCancel();
   };
 
-  if (isLoading) {
+  if (isLoading && brewers.length === 0) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 32,
-        }}
-      >
-        <DataText variant="body" color="secondary">
+      <View flex center paddingH-page>
+        <Text body textSecondary>
           Loading brewprint data...
-        </DataText>
+        </Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+    <View style={styles.container}>
       {/* Basic Information */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Basic Information
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Recipe details and brewing method
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <Input
-              label="Recipe Name"
-              placeholder="My V60 Recipe"
-              value={watch("name")}
-              onChangeText={(value) => setValue("name", value)}
-              error={errors.name?.message}
-              required
-            />
+          <TextField
+            label="Recipe Name *"
+            placeholder="My V60 Recipe"
+            value={formData.name}
+            onChangeText={(value) => updateField("name", value)}
+            enableErrors={!!errors.name}
+            errorMessage={errors.name}
+            fieldStyle={styles.textField}
+          />
 
-            <Input
-              label="Description"
-              placeholder="Description of this recipe..."
-              multiline
-              numberOfLines={3}
-              value={watch("description")}
-              onChangeText={(value) => setValue("description", value)}
-              error={errors.description?.message}
-            />
+          <TextField
+            label="Description"
+            placeholder="Description of this recipe..."
+            multiline
+            numberOfLines={3}
+            value={formData.description}
+            onChangeText={(value) => updateField("description", value)}
+            fieldStyle={styles.textField}
+          />
 
-            <ThemedSelect
-              label="Brewing Method *"
-              options={methodOptions}
-              value={watch("method")}
-              onValueChange={(value) => setValue("method", value)}
-              placeholder="Select brewing method"
-              error={errors.method?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Brewing Method *</Text>
+            <Picker
+              value={formData.method}
+              onChange={(value) => updateField("method", value as string)}
+              topBarProps={{ title: "Select Brewing Method" }}
+              style={styles.picker}
+            >
+              {methodOptions.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
 
-            <ThemedSelect
-              label="Difficulty *"
-              options={difficultyOptions}
-              value={watch("difficulty")}
-              onValueChange={(value) => setValue("difficulty", value)}
-              placeholder="Select difficulty"
-              error={errors.difficulty?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Difficulty *</Text>
+            <Picker
+              value={formData.difficulty}
+              onChange={(value) => updateField("difficulty", value as string)}
+              topBarProps={{ title: "Select Difficulty" }}
+              style={styles.picker}
+            >
+              {difficultyOptions.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
         </View>
       </View>
 
       {/* Equipment Selection */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Equipment Selection
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Choose your brewing equipment
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <ThemedSelect
-              label="Brewer *"
-              options={brewers}
-              value={watch("brewer_id")}
-              onValueChange={(value) => setValue("brewer_id", value)}
-              placeholder="Select a brewer"
-              error={errors.brewer_id?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Brewer *</Text>
+            <Picker
+              value={formData.brewer_id}
+              onChange={(value) => updateField("brewer_id", value as string)}
+              topBarProps={{ title: "Select Brewer" }}
+              style={styles.picker}
+            >
+              {brewers.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
 
-            <ThemedSelect
-              label="Coffee Bean *"
-              options={beans}
-              value={watch("bean_id")}
-              onValueChange={(value) => setValue("bean_id", value)}
-              placeholder="Select a coffee bean"
-              error={errors.bean_id?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Coffee Bean *</Text>
+            <Picker
+              value={formData.bean_id}
+              onChange={(value) => updateField("bean_id", value as string)}
+              topBarProps={{ title: "Select Coffee Bean" }}
+              style={styles.picker}
+            >
+              {beans.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
 
-            <ThemedSelect
-              label="Grinder (Optional)"
-              options={grinders}
-              value={watch("grinder_id")}
-              onValueChange={(value) => setValue("grinder_id", value)}
-              placeholder="Select a grinder"
-              error={errors.grinder_id?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Grinder (Optional)</Text>
+            <Picker
+              value={formData.grinder_id}
+              onChange={(value) => updateField("grinder_id", value as string)}
+              topBarProps={{ title: "Select Grinder" }}
+              style={styles.picker}
+            >
+              {grinders.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
         </View>
       </View>
 
       {/* Recipe Parameters */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Recipe Parameters
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Brewing ratios and temperatures
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <View style={styles.row}>
-              <Input
-                label="Coffee (g)"
+          <View row gap-md>
+            <View flex>
+              <TextField
+                label="Coffee (g) *"
                 placeholder="20"
-                type="number"
-                value={watch("coffee_grams")}
-                onChangeText={(value) => setValue("coffee_grams", value)}
-                error={errors.coffee_grams?.message}
-                style={{ flex: 1, marginRight: 8 }}
-                required
-              />
-
-              <Input
-                label="Water (g)"
-                placeholder="320"
-                type="number"
-                value={watch("water_grams")}
-                onChangeText={(value) => setValue("water_grams", value)}
-                error={errors.water_grams?.message}
-                style={{ flex: 1, marginLeft: 8 }}
-                required
+                keyboardType="numeric"
+                value={formData.coffee_grams}
+                onChangeText={(value) => updateField("coffee_grams", value)}
+                enableErrors={!!errors.coffee_grams}
+                errorMessage={errors.coffee_grams}
+                fieldStyle={styles.textField}
               />
             </View>
-
-            {calculateRatio() && (
-              <View style={{ alignItems: "center", marginVertical: 8 }}>
-                <DataText variant="body" weight="semibold">
-                  Ratio: {calculateRatio()}
-                </DataText>
-              </View>
-            )}
-
-            <View style={styles.row}>
-              <Input
-                label="Water Temp (°C)"
-                placeholder="92"
-                type="number"
-                value={watch("water_temp")}
-                onChangeText={(value) => setValue("water_temp", value)}
-                error={errors.water_temp?.message}
-                style={{ flex: 1, marginRight: 8 }}
-                required
+            <View flex>
+              <TextField
+                label="Water (g) *"
+                placeholder="320"
+                keyboardType="numeric"
+                value={formData.water_grams}
+                onChangeText={(value) => updateField("water_grams", value)}
+                enableErrors={!!errors.water_grams}
+                errorMessage={errors.water_grams}
+                fieldStyle={styles.textField}
               />
+            </View>
+          </View>
 
-              <Input
+          {calculateRatio() && (
+            <View centerH marginV-sm>
+              <Text body textColor weight="semibold">
+                Ratio: {calculateRatio()}
+              </Text>
+            </View>
+          )}
+
+          <View row gap-md>
+            <View flex>
+              <TextField
+                label="Water Temp (°C) *"
+                placeholder="92"
+                keyboardType="numeric"
+                value={formData.water_temp}
+                onChangeText={(value) => updateField("water_temp", value)}
+                enableErrors={!!errors.water_temp}
+                errorMessage={errors.water_temp}
+                fieldStyle={styles.textField}
+              />
+            </View>
+            <View flex>
+              <TextField
                 label="Grind Setting"
                 placeholder="15"
-                type="number"
-                value={watch("grind_setting")}
-                onChangeText={(value) => setValue("grind_setting", value)}
-                error={errors.grind_setting?.message}
-                style={{ flex: 1, marginLeft: 8 }}
+                keyboardType="numeric"
+                value={formData.grind_setting}
+                onChangeText={(value) => updateField("grind_setting", value)}
+                fieldStyle={styles.textField}
               />
             </View>
+          </View>
 
-            <View style={styles.row}>
-              <Input
+          <View row gap-md>
+            <View flex>
+              <TextField
                 label="Bloom Time (s)"
                 placeholder="30"
-                type="number"
-                value={watch("bloom_time")}
-                onChangeText={(value) => setValue("bloom_time", value)}
-                error={errors.bloom_time?.message}
-                style={{ flex: 1, marginRight: 8 }}
-              />
-
-              <Input
-                label="Total Time (s)"
-                placeholder="240"
-                type="number"
-                value={watch("total_time")}
-                onChangeText={(value) => setValue("total_time", value)}
-                error={errors.total_time?.message}
-                style={{ flex: 1, marginLeft: 8 }}
+                keyboardType="numeric"
+                value={formData.bloom_time}
+                onChangeText={(value) => updateField("bloom_time", value)}
+                fieldStyle={styles.textField}
               />
             </View>
+            <View flex>
+              <TextField
+                label="Total Time (s)"
+                placeholder="240"
+                keyboardType="numeric"
+                value={formData.total_time}
+                onChangeText={(value) => updateField("total_time", value)}
+                fieldStyle={styles.textField}
+              />
+            </View>
+          </View>
         </View>
       </View>
 
       {/* Brewing Steps */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Brewing Steps
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Step-by-step brewing instructions
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            {stepFields.map((field, index) => (
-              <View key={field.id} style={styles.stepCard}>
-                <View style={styles.stepHeader}>
-                  <DataText variant="body" weight="semibold">
-                    Step {index + 1}
-                  </DataText>
-                  {stepFields.length > 1 && (
-                    <DataButton
-                      title="Remove"
-                      variant="secondary"
-                      size="sm"
-                      onPress={() => removeStep(index)}
-                    />
-                  )}
-                </View>
-
-                <Input
-                  label="Title"
-                  placeholder="Bloom"
-                  value={watch(`steps.${index}.title`)}
-                  onChangeText={(value) =>
-                    setValue(`steps.${index}.title`, value)
-                  }
-                  error={errors.steps?.[index]?.title?.message}
-                  required
-                />
-
-                <Input
-                  label="Description"
-                  placeholder="Initial pour to degas the coffee"
-                  multiline
-                  numberOfLines={2}
-                  value={watch(`steps.${index}.description`)}
-                  onChangeText={(value) =>
-                    setValue(`steps.${index}.description`, value)
-                  }
-                  error={errors.steps?.[index]?.description?.message}
-                  required
-                />
-
-                <View style={styles.row}>
-                  <Input
-                    label="Duration (s)"
-                    placeholder="30"
-                    type="number"
-                    value={watch(`steps.${index}.duration`)}
-                    onChangeText={(value) =>
-                      setValue(`steps.${index}.duration`, value)
-                    }
-                    error={errors.steps?.[index]?.duration?.message}
-                    style={{ flex: 1, marginRight: 8 }}
-                    required
+          {formData.steps.map((step, index) => (
+            <View key={index} style={styles.stepCard}>
+              <View style={styles.stepHeader}>
+                <Text body textColor weight="semibold">
+                  Step {index + 1}
+                </Text>
+                {formData.steps.length > 1 && (
+                  <Button
+                    label="Remove"
+                    backgroundColor={Colors.grey40}
+                    size="small"
+                    onPress={() => removeStep(index)}
                   />
-
-                  <Input
-                    label="Water (g)"
-                    placeholder="50"
-                    type="number"
-                    value={watch(`steps.${index}.water_amount`)}
-                    onChangeText={(value) =>
-                      setValue(`steps.${index}.water_amount`, value)
-                    }
-                    error={errors.steps?.[index]?.water_amount?.message}
-                    style={{ flex: 1, marginLeft: 8 }}
-                    required
-                  />
-                </View>
-
-                <ThemedSelect
-                  label="Technique *"
-                  options={techniqueOptions}
-                  value={watch(`steps.${index}.technique`)}
-                  onValueChange={(value) => setValue(`steps.${index}.technique`, value)}
-                  placeholder="Select technique"
-                  error={errors.steps?.[index]?.technique?.message}
-                />
+                )}
               </View>
-            ))}
 
-            <DataButton
-              title="Add Step"
-              variant="secondary"
-              onPress={addStep}
-            />
+              <TextField
+                label="Title *"
+                placeholder="Bloom"
+                value={step.title}
+                onChangeText={(value) => updateStep(index, "title", value)}
+                enableErrors={!!errors[`step_${index}_title`]}
+                errorMessage={errors[`step_${index}_title`]}
+                fieldStyle={styles.textField}
+              />
+
+              <TextField
+                label="Description *"
+                placeholder="Initial pour to degas the coffee"
+                multiline
+                numberOfLines={2}
+                value={step.description}
+                onChangeText={(value) => updateStep(index, "description", value)}
+                enableErrors={!!errors[`step_${index}_description`]}
+                errorMessage={errors[`step_${index}_description`]}
+                fieldStyle={styles.textField}
+              />
+
+              <View row gap-md>
+                <View flex>
+                  <TextField
+                    label="Duration (s) *"
+                    placeholder="30"
+                    keyboardType="numeric"
+                    value={step.duration}
+                    onChangeText={(value) => updateStep(index, "duration", value)}
+                    enableErrors={!!errors[`step_${index}_duration`]}
+                    errorMessage={errors[`step_${index}_duration`]}
+                    fieldStyle={styles.textField}
+                  />
+                </View>
+                <View flex>
+                  <TextField
+                    label="Water (g) *"
+                    placeholder="50"
+                    keyboardType="numeric"
+                    value={step.water_amount}
+                    onChangeText={(value) => updateStep(index, "water_amount", value)}
+                    enableErrors={!!errors[`step_${index}_water_amount`]}
+                    errorMessage={errors[`step_${index}_water_amount`]}
+                    fieldStyle={styles.textField}
+                  />
+                </View>
+              </View>
+
+              <View>
+                <Text body textColor marginB-sm>Technique *</Text>
+                <Picker
+                  value={step.technique}
+                  onChange={(value) => updateStep(index, "technique", value as string)}
+                  topBarProps={{ title: "Select Technique" }}
+                  style={styles.picker}
+                >
+                  {techniqueOptions.map(option => (
+                    <Picker.Item key={option.value} value={option.value} label={option.label} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          ))}
+
+          <Button
+            label="Add Step"
+            backgroundColor={Colors.grey40}
+            onPress={addStep}
+          />
         </View>
       </View>
 
       {/* Actions */}
       <View style={styles.section}>
         <View style={styles.actions}>
-          <DataButton
-            title={initialData ? "Duplicate Recipe" : "Create Recipe"}
-            onPress={handleSubmit(onSubmit)}
-            variant="primary"
-            size="lg"
+          <Button
+            label={initialData ? "Duplicate Recipe" : "Create Recipe"}
+            onPress={onSubmit}
+            backgroundColor={Colors.blue30}
+            size="large"
             fullWidth
-            loading={isLoading}
             disabled={isLoading}
           />
-          <DataButton
-            title="Cancel"
-            variant="secondary"
-            size="lg"
-            fullWidth
+          <Button
+            label="Cancel"
             onPress={handleCancel}
+            backgroundColor={Colors.grey40}
+            size="large"
+            fullWidth
             disabled={isLoading}
           />
         </View>
@@ -694,18 +712,35 @@ export function BrewprintForm({
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    gap: 24,
+  },
   section: {
     gap: 16,
   },
   fieldGroup: {
     gap: 16,
   },
-  row: {
-    flexDirection: "row" as const,
+  textField: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    backgroundColor: Colors.white,
+    height: 44,
   },
   stepCard: {
-    backgroundColor: "rgba(0, 0, 0, 0.02)",
+    backgroundColor: Colors.grey50,
     padding: 16,
     borderRadius: 12,
     gap: 16,
@@ -721,4 +756,4 @@ const styles = {
     gap: 12,
     marginTop: 8,
   },
-};
+});

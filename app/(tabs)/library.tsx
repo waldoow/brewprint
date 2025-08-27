@@ -1,29 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshControl, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
-import { DataCard } from '@/components/ui/DataCard';
-import { DataMetric } from '@/components/ui/DataMetric';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import {
+  View,
+  Text,
+  Button,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
 import { BeansService, type Bean } from '@/lib/services/beans';
 import { BrewersService, type Brewer } from '@/lib/services/brewers';
 import { GrindersService, type Grinder } from '@/lib/services/grinders';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { toast } from 'sonner-native';
 
 export default function LibraryScreen() {
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
-  
   const [beans, setBeans] = useState<Bean[]>([]);
   const [brewers, setBrewers] = useState<Brewer[]>([]);
   const [grinders, setGrinders] = useState<Grinder[]>([]);
   const [activeView, setActiveView] = useState<'overview' | 'beans' | 'brewers' | 'grinders'>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   useEffect(() => {
     loadInventoryData();
@@ -119,6 +120,180 @@ export default function LibraryScreen() {
     toast.success(`Navigate to add new ${type} screen`);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    content: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    tabContainer: {
+      flexDirection: 'row',
+      gap: 1,
+      marginBottom: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    activeTab: {
+      borderBottomColor: theme.colors.text.primary,
+    },
+    tabText: {
+      fontSize: 11,
+      fontWeight: '500',
+      textAlign: 'center',
+    },
+    activeTabText: {
+      color: theme.colors.text.primary,
+    },
+    inactiveTabText: {
+      color: theme.colors.text.secondary,
+    },
+    section: {
+      marginBottom: 32,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 16,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      gap: 16,
+      marginBottom: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 12,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+    },
+    quickActionRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    quickActionButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    quickActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    inventoryItem: {
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    itemRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 4,
+    },
+    itemName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      flex: 1,
+      marginRight: 8,
+    },
+    itemBrand: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 8,
+    },
+    itemParams: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    paramItem: {
+      alignItems: 'flex-start',
+    },
+    paramLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 2,
+    },
+    paramValue: {
+      fontSize: 11,
+      color: theme.colors.text.primary,
+      fontWeight: '500',
+    },
+    statusBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+    },
+    statusText: {
+      fontSize: 8,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    emptyState: {
+      paddingVertical: 32,
+      alignItems: 'center',
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    emptyDescription: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 16,
+      lineHeight: 18,
+    },
+  });
+
   const renderViewTabs = () => {
     const views = [
       { key: 'overview' as const, label: 'Overview', count: inventoryStats.totalItems },
@@ -128,28 +303,14 @@ export default function LibraryScreen() {
     ];
 
     return (
-      <View style={{
-        flexDirection: 'row',
-        gap: theme.spacing[2],
-        marginBottom: theme.spacing[6],
-      }}>
+      <View style={styles.tabContainer}>
         {views.map((view) => (
           <TouchableOpacity
             key={view.key}
-            style={{
-              flex: 1,
-              paddingVertical: theme.spacing[2],
-              paddingHorizontal: theme.spacing[3],
-              borderRadius: theme.layout.card.radius.md,
-              backgroundColor: activeView === view.key 
-                ? theme.colors.interactive.default 
-                : theme.colors.surface,
-              borderWidth: 1,
-              borderColor: activeView === view.key 
-                ? theme.colors.interactive.default 
-                : theme.colors.border,
-              alignItems: 'center',
-            }}
+            style={[
+              styles.tab,
+              activeView === view.key ? styles.activeTab : {},
+            ]}
             onPress={() => {
               if (Haptics.impactAsync) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -160,22 +321,14 @@ export default function LibraryScreen() {
             accessibilityRole="button"
             accessibilityLabel={`View ${view.label}, ${view.count} items`}
           >
-            <DataText
-              variant="small"
-              color={activeView === view.key ? 'inverse' : 'secondary'}
-              weight="medium"
-              style={{ textAlign: 'center' }}
+            <Text
+              style={[
+                styles.tabText,
+                activeView === view.key ? styles.activeTabText : styles.inactiveTabText,
+              ]}
             >
-              {view.label}
-            </DataText>
-            <DataText
-              variant="tiny"
-              color={activeView === view.key ? 'inverse' : 'tertiary'}
-              weight="medium"
-              style={{ textAlign: 'center' }}
-            >
-              {view.count}
-            </DataText>
+              {view.label} {view.count}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -184,175 +337,196 @@ export default function LibraryScreen() {
 
   if (isLoading) {
     return (
-      <DataLayout title="Equipment Library" subtitle="Loading your brewing equipment...">
-        <DataCard>
-          <DataText variant="body" color="secondary">
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>
+            Library
+          </Text>
+          <Text style={{ fontSize: 12, color: theme.colors.text.secondary, marginTop: 2 }}>
+            Loading your brewing equipment...
+          </Text>
+        </View>
+        
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ fontSize: 14, color: theme.colors.text.secondary }}>
             Loading equipment library...
-          </DataText>
-        </DataCard>
-      </DataLayout>
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Equipment Library"
-      subtitle={`${inventoryStats.totalItems} items in your brewing arsenal`}
-      scrollable
-      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-    >
-      {/* View Navigation */}
-      <DataSection spacing="lg">
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>
+          Library
+        </Text>
+        <Text style={{ fontSize: 12, color: theme.colors.text.secondary, marginTop: 2 }}>
+          {inventoryStats.totalItems} items in your collection
+        </Text>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+      >
+        {/* View Navigation */}
         {renderViewTabs()}
-      </DataSection>
 
-      {/* Overview View */}
-      {activeView === 'overview' && (
-        <>
-          {/* Quick Actions */}
-          <DataSection title="Quick Actions" spacing="lg">
-            <DataGrid columns={3} gap="sm">
-              <Link href="/beans/new" onPress={handleHapticFeedback}>
-                <DataButton
-                  title="Add Bean"
-                  variant="secondary"
-                  size="sm"
-                />
-              </Link>
-              <Link href="/brewers/new" onPress={handleHapticFeedback}>
-                <DataButton
-                  title="Add Brewer"
-                  variant="secondary"
-                  size="sm"
-                />
-              </Link>
-              <Link href="/grinders/new" onPress={handleHapticFeedback}>
-                <DataButton
-                  title="Add Grinder"
-                  variant="secondary"
-                  size="sm"
-                />
-              </Link>
-            </DataGrid>
-          </DataSection>
+        {/* Overview View */}
+        {activeView === 'overview' && (
+          <>
+            {/* Quick Actions */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                Quick Actions
+              </Text>
+              <View style={styles.quickActionRow}>
+                <Link href="/beans/new" onPress={handleHapticFeedback} asChild>
+                  <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.7}>
+                    <Text style={styles.quickActionText}>Add Bean</Text>
+                  </TouchableOpacity>
+                </Link>
+                <Link href="/brewers/new" onPress={handleHapticFeedback} asChild>
+                  <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.7}>
+                    <Text style={styles.quickActionText}>Add Brewer</Text>
+                  </TouchableOpacity>
+                </Link>
+                <Link href="/grinders/new" onPress={handleHapticFeedback} asChild>
+                  <TouchableOpacity style={styles.quickActionButton} activeOpacity={0.7}>
+                    <Text style={styles.quickActionText}>Add Grinder</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            </View>
 
-          {/* Library Statistics */}
-          <DataSection title="Library Overview" spacing="lg">
-            <DataGrid columns={2} gap="md">
-              <DataCard>
-                <DataText variant="small" color="secondary" weight="medium">
-                  Total Items
-                </DataText>
-                <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                  {inventoryStats.totalItems}
-                </DataText>
-                <DataText variant="tiny" color="tertiary">
-                  Equipment pieces
-                </DataText>
-              </DataCard>
-              
-              <DataCard>
-                <DataText variant="small" color="secondary" weight="medium">
-                  Bean Weight
-                </DataText>
-                <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                  {inventoryStats.totalWeight}g
-                </DataText>
-                <DataText variant="tiny" color="tertiary">
-                  Total inventory
-                </DataText>
-              </DataCard>
-              
-              <DataCard>
-                <DataText variant="small" color="secondary" weight="medium">
-                  Fresh Beans
-                </DataText>
-                <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                  {inventoryStats.freshBeans}
-                </DataText>
-                <DataText variant="tiny" color="tertiary">
-                  ≤14 days old
-                </DataText>
-              </DataCard>
-              
-              <DataCard>
-                <DataText variant="small" color="secondary" weight="medium">
-                  Inventory Value
-                </DataText>
-                <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                  ${inventoryStats.totalValue.toFixed(0)}
-                </DataText>
-                <DataText variant="tiny" color="tertiary">
-                  Estimated
-                </DataText>
-              </DataCard>
-            </DataGrid>
-          </DataSection>
+            {/* Library Statistics */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                Overview
+              </Text>
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {inventoryStats.totalItems}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    Total Items
+                  </Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {inventoryStats.totalWeight}g
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    Bean Weight
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.statsRow}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    {inventoryStats.freshBeans}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    Fresh Beans
+                  </Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statValue}>
+                    ${inventoryStats.totalValue.toFixed(0)}
+                  </Text>
+                  <Text style={styles.statLabel}>
+                    Estimated Value
+                  </Text>
+                </View>
+              </View>
+            </View>
 
           {/* Recent Items */}
-          <DataSection title="Recent Items" subtitle="Recently added equipment" spacing="lg">
-            <DataGrid columns={1} gap="sm">
+          <View marginB-xxl>
+            <Text h3 textColor marginB-xs>
+              Recent Items
+            </Text>
+            <Text body textSecondary marginB-md>
+              Recently added equipment
+            </Text>
+            <View gap-sm>
               {[...inventoryData.beans.slice(0, 2), ...inventoryData.brewers.slice(0, 1)].map((item, index) => {
                 const itemType = 'name' in item && 'roast_date' in item ? 'bean' : 'type' in item && 'material' in item ? 'brewer' : 'grinder';
                 const href = `/${itemType}-detail/${item.id}`;
                 
                 return (
-                  <Link key={`recent-${index}`} href={href} onPress={handleHapticFeedback}>
-                    <DataCard>
-                      <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}>
-                        <View style={{ flex: 1 }}>
-                          <DataText variant="h4" color="primary" weight="semibold">
-                            {item.name}
-                          </DataText>
-                          <DataText variant="small" color="secondary">
-                            {'roast_date' in item ? 'Bean' : 'type' in item ? 'Brewer' : 'Grinder'}
-                          </DataText>
+                  <Link key={`recent-${index}`} href={href} onPress={handleHapticFeedback} asChild>
+                    <TouchableOpacity>
+                      <Card padding-md>
+                        <View row spread centerV>
+                          <View flex>
+                            <Text h4 textColor>
+                              {item.name}
+                            </Text>
+                            <Text caption textSecondary>
+                              {'roast_date' in item ? 'Bean' : 'type' in item ? 'Brewer' : 'Grinder'}
+                            </Text>
+                          </View>
+                          <Text caption textTertiary>
+                            →
+                          </Text>
                         </View>
-                        <DataText variant="small" color="tertiary">
-                          →
-                        </DataText>
-                      </View>
-                    </DataCard>
+                      </Card>
+                    </TouchableOpacity>
                   </Link>
                 );
               })}
-            </DataGrid>
-          </DataSection>
+            </View>
+          </View>
         </>
       )}
 
       {/* Beans View */}
       {activeView === 'beans' && (
         <>
-          <DataSection title="Bean Management" spacing="lg">
-            <Link href="/beans/new" onPress={handleHapticFeedback}>
-              <DataButton
-                title="Add New Bean"
-                variant="primary"
-                size="lg"
+          <View marginB-xxl>
+            <Text h3 textColor marginB-md>
+              Bean Management
+            </Text>
+            <Link href="/beans/new" onPress={handleHapticFeedback} asChild>
+              <Button
+                label="Add New Bean"
+                backgroundColor={Colors.blue30}
+                size="large"
                 fullWidth
               />
             </Link>
-          </DataSection>
+          </View>
 
           {inventoryData.beans.length === 0 ? (
-            <DataSection title="No Beans Found" spacing="lg">
-              <DataCard
-                title="Start Your Bean Collection"
-                message="Add your first coffee beans to begin tracking freshness and flavor profiles."
-                action={{
-                  title: "Add First Bean",
-                  onPress: () => handleAddNew('beans'),
-                }}
-              />
-            </DataSection>
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                No Beans Found
+              </Text>
+              <Card padding-lg centerH>
+                <Text h4 textColor marginB-sm>
+                  Start Your Bean Collection
+                </Text>
+                <Text body textSecondary marginB-md centerH>
+                  Add your first coffee beans to begin tracking freshness and flavor profiles.
+                </Text>
+                <Button
+                  label="Add First Bean"
+                  onPress={() => handleAddNew('beans')}
+                  backgroundColor={Colors.blue30}
+                />
+              </Card>
+            </View>
           ) : (
-            <DataSection title={`Bean Inventory (${inventoryData.beans.length})`} spacing="lg">
-              <DataGrid columns={1} gap="md">
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                Bean Inventory ({inventoryData.beans.length})
+              </Text>
+              <View gap-md>
                 {inventoryData.beans.map((bean) => {
                   const freshnessDays = bean.roast_date ? 
                     Math.floor((new Date().getTime() - new Date(bean.roast_date).getTime()) / (1000 * 60 * 60 * 24)) : null;
@@ -361,81 +535,91 @@ export default function LibraryScreen() {
                     freshnessDays <= 7 ? 'peak' : 
                     freshnessDays <= 14 ? 'good' : 
                     freshnessDays <= 21 ? 'fading' : 'stale';
+                  
+                  const statusColor = 
+                    freshnessStatus === 'peak' || freshnessStatus === 'good'
+                      ? Colors.green30
+                      : freshnessStatus === 'fading'
+                      ? Colors.yellow30
+                      : Colors.red30;
 
                   return (
-                    <Link key={bean.id} href={`/bean-detail/${bean.id}`} onPress={handleHapticFeedback}>
-                      <DataCard>
-                      <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        marginBottom: theme.spacing[3],
-                      }}>
-                        <View style={{ flex: 1 }}>
-                          <DataText variant="h4" color="primary" weight="semibold">
-                            {bean.name}
-                          </DataText>
-                          <DataText variant="small" color="secondary">
-                            {bean.supplier || 'Independent Roaster'}
-                          </DataText>
-                        </View>
-                        
-                        <View style={{
-                          paddingHorizontal: theme.spacing[2],
-                          paddingVertical: theme.spacing[1],
-                          borderRadius: theme.layout.card.radius.sm,
-                          backgroundColor: 
-                            freshnessStatus === 'peak' || freshnessStatus === 'good'
-                              ? theme.colors.success
-                              : freshnessStatus === 'fading'
-                              ? theme.colors.warning
-                              : theme.colors.error,
-                        }}>
-                          <DataText variant="tiny" color="inverse" weight="medium">
-                            {freshnessStatus.toUpperCase()}
-                          </DataText>
-                        </View>
-                      </View>
+                    <Link key={bean.id} href={`/bean-detail/${bean.id}`} onPress={handleHapticFeedback} asChild>
+                      <TouchableOpacity>
+                        <Card padding-md>
+                          <View row spread marginB-md>
+                            <View flex>
+                              <Text h4 textColor marginB-xs>
+                                {bean.name}
+                              </Text>
+                              <Text body textSecondary>
+                                {bean.supplier || 'Independent Roaster'}
+                              </Text>
+                            </View>
+                            
+                            <View
+                              style={{
+                                paddingHorizontal: 8,
+                                paddingVertical: 4,
+                                borderRadius: 4,
+                                backgroundColor: statusColor,
+                              }}
+                            >
+                              <Text tiny white>
+                                {freshnessStatus.toUpperCase()}
+                              </Text>
+                            </View>
+                          </View>
 
-                      <View style={{
-                        flexDirection: 'row',
-                        gap: theme.spacing[4],
-                        marginBottom: theme.spacing[3],
-                      }}>
-                        <DataMetric
-                          label="Weight"
-                          value={bean.remaining_grams || 0}
-                          unit="g"
-                          size="sm"
-                        />
-                        {freshnessDays !== null && (
-                          <DataMetric
-                            label="Age"
-                            value={freshnessDays}
-                            unit="days"
-                            size="sm"
-                          />
-                        )}
-                        {bean.roast_level && (
-                          <DataMetric
-                            label="Roast"
-                            value={bean.roast_level.charAt(0).toUpperCase() + bean.roast_level.slice(1)}
-                            size="sm"
-                          />
-                        )}
-                      </View>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              gap: 16,
+                              marginBottom: 12,
+                            }}
+                          >
+                            <View>
+                              <Text caption textTertiary>
+                                Weight
+                              </Text>
+                              <Text body textColor>
+                                {bean.remaining_grams || 0}g
+                              </Text>
+                            </View>
+                            {freshnessDays !== null && (
+                              <View>
+                                <Text caption textTertiary>
+                                  Age
+                                </Text>
+                                <Text body textColor>
+                                  {freshnessDays} days
+                                </Text>
+                              </View>
+                            )}
+                            {bean.roast_level && (
+                              <View>
+                                <Text caption textTertiary>
+                                  Roast
+                                </Text>
+                                <Text body textColor>
+                                  {bean.roast_level.charAt(0).toUpperCase() + bean.roast_level.slice(1)}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
 
-                      {bean.origin && (
-                        <DataText variant="small" color="secondary">
-                          {bean.origin}
-                        </DataText>
-                      )}
-                    </DataCard>
+                          {bean.origin && (
+                            <Text caption textSecondary>
+                              {bean.origin}
+                            </Text>
+                          )}
+                        </Card>
+                      </TouchableOpacity>
                     </Link>
                   );
                 })}
-              </DataGrid>
-            </DataSection>
+              </View>
+            </View>
           )}
         </>
       )}
@@ -443,91 +627,114 @@ export default function LibraryScreen() {
       {/* Brewers View */}
       {activeView === 'brewers' && (
         <>
-          <DataSection title="Brewer Management" spacing="lg">
-            <Link href="/brewers/new" onPress={handleHapticFeedback}>
-              <DataButton
-                title="Add New Brewer"
-                variant="primary"
-                size="lg"
+          <View marginB-xxl>
+            <Text h3 textColor marginB-md>
+              Brewer Management
+            </Text>
+            <Link href="/brewers/new" onPress={handleHapticFeedback} asChild>
+              <Button
+                label="Add New Brewer"
+                backgroundColor={Colors.blue30}
+                size="large"
                 fullWidth
               />
             </Link>
-          </DataSection>
+          </View>
 
           {inventoryData.brewers.length === 0 ? (
-            <DataSection title="No Brewers Found" spacing="lg">
-              <DataCard
-                title="Add Your First Brewer"
-                message="Start building your brewing equipment collection with pour-over, espresso, and other brewing methods."
-                action={{
-                  title: "Add First Brewer",
-                  onPress: () => handleAddNew('brewers'),
-                }}
-              />
-            </DataSection>
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                No Brewers Found
+              </Text>
+              <Card padding-lg centerH>
+                <Text h4 textColor marginB-sm>
+                  Add Your First Brewer
+                </Text>
+                <Text body textSecondary marginB-md centerH>
+                  Start building your brewing equipment collection with pour-over, espresso, and other brewing methods.
+                </Text>
+                <Button
+                  label="Add First Brewer"
+                  onPress={() => handleAddNew('brewers')}
+                  backgroundColor={Colors.blue30}
+                />
+              </Card>
+            </View>
           ) : (
-            <DataSection title={`Brewing Equipment (${inventoryData.brewers.length})`} spacing="lg">
-              <DataGrid columns={1} gap="md">
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                Brewing Equipment ({inventoryData.brewers.length})
+              </Text>
+              <View gap-md>
                 {inventoryData.brewers.map((brewer) => (
-                  <Link key={brewer.id} href={`/brewer-detail/${brewer.id}`} onPress={handleHapticFeedback}>
-                    <DataCard>
-                    <View style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: theme.spacing[3],
-                    }}>
-                      <View style={{ flex: 1 }}>
-                        <DataText variant="h4" color="primary" weight="semibold">
-                          {brewer.name}
-                        </DataText>
-                        <DataText variant="small" color="secondary">
-                          {brewer.brand ? `${brewer.brand}${brewer.model ? ` ${brewer.model}` : ''}` : brewer.type}
-                        </DataText>
-                      </View>
-                      
-                      <View style={{
-                        paddingHorizontal: theme.spacing[2],
-                        paddingVertical: theme.spacing[1],
-                        borderRadius: theme.layout.card.radius.sm,
-                        backgroundColor: theme.colors.success,
-                      }}>
-                        <DataText variant="tiny" color="inverse" weight="medium">
-                          ACTIVE
-                        </DataText>
-                      </View>
-                    </View>
+                  <Link key={brewer.id} href={`/brewer-detail/${brewer.id}`} onPress={handleHapticFeedback} asChild>
+                    <TouchableOpacity>
+                      <Card padding-md>
+                        <View row spread marginB-md>
+                          <View flex>
+                            <Text h4 textColor marginB-xs>
+                              {brewer.name}
+                            </Text>
+                            <Text body textSecondary>
+                              {brewer.brand ? `${brewer.brand}${brewer.model ? ` ${brewer.model}` : ''}` : brewer.type}
+                            </Text>
+                          </View>
+                          
+                          <View
+                            style={{
+                              paddingHorizontal: 8,
+                              paddingVertical: 4,
+                              borderRadius: 4,
+                              backgroundColor: Colors.green30,
+                            }}
+                          >
+                            <Text tiny white>
+                              ACTIVE
+                            </Text>
+                          </View>
+                        </View>
 
-                    <View style={{
-                      flexDirection: 'row',
-                      gap: theme.spacing[4],
-                    }}>
-                      <DataMetric
-                        label="Type"
-                        value={brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1)}
-                        size="sm"
-                      />
-                      {brewer.capacity_ml && (
-                        <DataMetric
-                          label="Capacity"
-                          value={brewer.capacity_ml}
-                          unit="ml"
-                          size="sm"
-                        />
-                      )}
-                      {brewer.material && (
-                        <DataMetric
-                          label="Material"
-                          value={brewer.material}
-                          size="sm"
-                        />
-                      )}
-                    </View>
-                  </DataCard>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            gap: 16,
+                          }}
+                        >
+                          <View>
+                            <Text caption textTertiary>
+                              Type
+                            </Text>
+                            <Text body textColor>
+                              {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1)}
+                            </Text>
+                          </View>
+                          {brewer.capacity_ml && (
+                            <View>
+                              <Text caption textTertiary>
+                                Capacity
+                              </Text>
+                              <Text body textColor>
+                                {brewer.capacity_ml}ml
+                              </Text>
+                            </View>
+                          )}
+                          {brewer.material && (
+                            <View>
+                              <Text caption textTertiary>
+                                Material
+                              </Text>
+                              <Text body textColor>
+                                {brewer.material}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </Card>
+                    </TouchableOpacity>
                   </Link>
                 ))}
-              </DataGrid>
-            </DataSection>
+              </View>
+            </View>
           )}
         </>
       )}
@@ -535,95 +742,119 @@ export default function LibraryScreen() {
       {/* Grinders View */}
       {activeView === 'grinders' && (
         <>
-          <DataSection title="Grinder Management" spacing="lg">
-            <Link href="/grinders/new" onPress={handleHapticFeedback}>
-              <DataButton
-                title="Add New Grinder"
-                variant="primary"
-                size="lg"
+          <View marginB-xxl>
+            <Text h3 textColor marginB-md>
+              Grinder Management
+            </Text>
+            <Link href="/grinders/new" onPress={handleHapticFeedback} asChild>
+              <Button
+                label="Add New Grinder"
+                backgroundColor={Colors.blue30}
+                size="large"
                 fullWidth
               />
             </Link>
-          </DataSection>
+          </View>
 
           {inventoryData.grinders.length === 0 ? (
-            <DataSection title="No Grinders Found" spacing="lg">
-              <DataCard
-                title="Add Your First Grinder"
-                message="Track your grinder settings and maintain consistent grind profiles for optimal extraction."
-                action={{
-                  title: "Add First Grinder",
-                  onPress: () => handleAddNew('grinders'),
-                }}
-              />
-            </DataSection>
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                No Grinders Found
+              </Text>
+              <Card padding-lg centerH>
+                <Text h4 textColor marginB-sm>
+                  Add Your First Grinder
+                </Text>
+                <Text body textSecondary marginB-md centerH>
+                  Track your grinder settings and maintain consistent grind profiles for optimal extraction.
+                </Text>
+                <Button
+                  label="Add First Grinder"
+                  onPress={() => handleAddNew('grinders')}
+                  backgroundColor={Colors.blue30}
+                />
+              </Card>
+            </View>
           ) : (
-            <DataSection title={`Grinding Equipment (${inventoryData.grinders.length})`} spacing="lg">
-              <DataGrid columns={1} gap="md">
+            <View marginB-xxl>
+              <Text h3 textColor marginB-md>
+                Grinding Equipment ({inventoryData.grinders.length})
+              </Text>
+              <View gap-md>
                 {inventoryData.grinders.map((grinder) => (
-                  <Link key={grinder.id} href={`/grinder-detail/${grinder.id}`} onPress={handleHapticFeedback}>
-                    <DataCard>
-                    <View style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: theme.spacing[3],
-                    }}>
-                      <View style={{ flex: 1 }}>
-                        <DataText variant="h4" color="primary" weight="semibold">
-                          {grinder.name}
-                        </DataText>
-                        <DataText variant="small" color="secondary">
-                          {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type}
-                        </DataText>
-                      </View>
-                      
-                      <View style={{
-                        paddingHorizontal: theme.spacing[2],
-                        paddingVertical: theme.spacing[1],
-                        borderRadius: theme.layout.card.radius.sm,
-                        backgroundColor: theme.colors.success,
-                      }}>
-                        <DataText variant="tiny" color="inverse" weight="medium">
-                          ACTIVE
-                        </DataText>
-                      </View>
-                    </View>
+                  <Link key={grinder.id} href={`/grinder-detail/${grinder.id}`} onPress={handleHapticFeedback} asChild>
+                    <TouchableOpacity>
+                      <Card padding-md>
+                        <View row spread marginB-md>
+                          <View flex>
+                            <Text h4 textColor marginB-xs>
+                              {grinder.name}
+                            </Text>
+                            <Text body textSecondary>
+                              {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type}
+                            </Text>
+                          </View>
+                          
+                          <View
+                            style={{
+                              paddingHorizontal: 8,
+                              paddingVertical: 4,
+                              borderRadius: 4,
+                              backgroundColor: Colors.green30,
+                            }}
+                          >
+                            <Text tiny white>
+                              ACTIVE
+                            </Text>
+                          </View>
+                        </View>
 
-                    <View style={{
-                      flexDirection: 'row',
-                      gap: theme.spacing[4],
-                    }}>
-                      <DataMetric
-                        label="Type"
-                        value={grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1)}
-                        size="sm"
-                      />
-                      {grinder.burr_size && (
-                        <DataMetric
-                          label="Burr Size"
-                          value={grinder.burr_size}
-                          unit="mm"
-                          size="sm"
-                        />
-                      )}
-                      {grinder.burr_material && (
-                        <DataMetric
-                          label="Burr Material"
-                          value={grinder.burr_material}
-                          size="sm"
-                        />
-                      )}
-                    </View>
-                  </DataCard>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            gap: 16,
+                          }}
+                        >
+                          <View>
+                            <Text caption textTertiary>
+                              Type
+                            </Text>
+                            <Text body textColor>
+                              {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1)}
+                            </Text>
+                          </View>
+                          {grinder.burr_size && (
+                            <View>
+                              <Text caption textTertiary>
+                                Burr Size
+                              </Text>
+                              <Text body textColor>
+                                {grinder.burr_size}mm
+                              </Text>
+                            </View>
+                          )}
+                          {grinder.burr_material && (
+                            <View>
+                              <Text caption textTertiary>
+                                Burr Material
+                              </Text>
+                              <Text body textColor>
+                                {grinder.burr_material}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </Card>
+                    </TouchableOpacity>
                   </Link>
                 ))}
-              </DataGrid>
-            </DataSection>
+              </View>
+            </View>
           )}
         </>
       )}
-    </DataLayout>
+      </ScrollView>
+    </View>
   );
 }
 

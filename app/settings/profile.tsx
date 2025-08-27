@@ -1,17 +1,19 @@
-import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
-import { DataCard } from "@/components/ui/DataCard";
-import { DataText } from "@/components/ui/DataText";
-import { DataButton } from "@/components/ui/DataButton";
-import { Input } from "@/components/ui/Input";
-import { getTheme } from "@/constants/DataFirstDesign";
 import { useAuth } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Switch, View } from "react-native";
+import { Alert, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextField,
+  Switch,
+  TouchableOpacity,
+} from "react-native-ui-lib";
 import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface ProfileSettings {
   displayName: string;
@@ -28,9 +30,9 @@ const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
 };
 
 export default function ProfileSyncScreen() {
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? "light");
   const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [settings, setSettings] = useState<ProfileSettings>(
     DEFAULT_PROFILE_SETTINGS
@@ -113,226 +115,412 @@ export default function ProfileSyncScreen() {
     );
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    accountInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      marginBottom: 16,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: theme.colors.info,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    avatarText: {
+      color: theme.colors.text.inverse,
+      fontSize: 18,
+      fontWeight: '600',
+    },
+    accountDetails: {
+      flex: 1,
+    },
+    displayName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    email: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    fieldLabel: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 4,
+    },
+    textField: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 14,
+      color: theme.colors.text.primary,
+      backgroundColor: theme.colors.background,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    settingInfo: {
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTitle: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    settingDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    statusRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+    },
+    statusLabel: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+    },
+    statusValue: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    primaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginTop: 16,
+    },
+    primaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    dangerButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    dangerButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.error,
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    secondaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <DataLayout
-        title="Profile & Sync"
-        subtitle="Manage your account and sync preferences"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading profile settings...
-          </DataText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Profile & Sync
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Manage your account and sync preferences
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading profile settings...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Profile & Sync"
-      subtitle="Manage your account and sync preferences"
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Account Information */}
-      <DataSection title="Account Information" spacing="lg">
-        <DataCard>
+    <View style={styles.container}>
+      {/* Professional Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Profile & Sync
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Manage your account and sync preferences
+        </Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Account Information */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Account Information
+          </Text>
+          
           <View style={styles.accountInfo}>
             <View style={styles.avatar}>
-              <DataText variant="h2" weight="bold" style={styles.avatarText}>
+              <Text style={styles.avatarText}>
                 {user?.email?.charAt(0).toUpperCase() || "U"}
-              </DataText>
+              </Text>
             </View>
             
             <View style={styles.accountDetails}>
-              <DataText variant="h4" weight="semibold">
+              <Text style={styles.displayName}>
                 {settings.displayName || "User"}
-              </DataText>
-              <DataText variant="body" color="secondary">
+              </Text>
+              <Text style={styles.email}>
                 {user?.email || "No email available"}
-              </DataText>
+              </Text>
             </View>
           </View>
 
-          <View style={styles.formField}>
-            <DataText variant="body" weight="medium" style={styles.fieldLabel}>
+          <View>
+            <Text style={styles.fieldLabel}>
               Display Name
-            </DataText>
-            <Input
+            </Text>
+            <TextField
               value={settings.displayName}
               onChangeText={(text) => updateSetting('displayName', text)}
               placeholder="Enter display name"
-              variant="outline"
+              style={styles.textField}
             />
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Sync Preferences */}
-      <DataSection title="Sync Preferences" subtitle="Control how your data syncs across devices" spacing="lg">
-        <DataCard>
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">
-                Auto Sync
-              </DataText>
-              <DataText variant="caption" color="secondary">
-                Automatically sync your data when changes are made
-              </DataText>
+        {/* Sync Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Sync Preferences
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Control how your data syncs across devices
+          </Text>
+          
+          <View>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Auto Sync
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Automatically sync your data when changes are made
+                </Text>
+              </View>
+              <Switch
+                value={settings.autoSync}
+                onValueChange={(value) => updateSetting('autoSync', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+              />
             </View>
-            <Switch
-              value={settings.autoSync}
-              onValueChange={(value) => updateSetting('autoSync', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-            />
-          </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">
-                Sync on Cellular
-              </DataText>
-              <DataText variant="caption" color="secondary">
-                Allow syncing when using cellular data (may use more data)
-              </DataText>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Sync on Cellular
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Allow syncing when using cellular data (may use more data)
+                </Text>
+              </View>
+              <Switch
+                value={settings.syncOnCellular}
+                onValueChange={(value) => updateSetting('syncOnCellular', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+                disabled={!settings.autoSync}
+              />
             </View>
-            <Switch
-              value={settings.syncOnCellular}
-              onValueChange={(value) => updateSetting('syncOnCellular', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-              disabled={!settings.autoSync}
-            />
-          </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">
-                Backup Before Sync
-              </DataText>
-              <DataText variant="caption" color="secondary">
-                Create local backups before syncing to prevent data loss
-              </DataText>
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Backup Before Sync
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Create local backups before syncing to prevent data loss
+                </Text>
+              </View>
+              <Switch
+                value={settings.backupBeforeSync}
+                onValueChange={(value) => updateSetting('backupBeforeSync', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+                disabled={!settings.autoSync}
+              />
             </View>
-            <Switch
-              value={settings.backupBeforeSync}
-              onValueChange={(value) => updateSetting('backupBeforeSync', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-              disabled={!settings.autoSync}
-            />
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Sync Status */}
-      <DataSection title="Sync Status" spacing="lg">
-        <DataCard>
-          <View style={styles.syncStatus}>
-            <View style={styles.statusItem}>
-              <DataText variant="body" weight="medium">Last Sync</DataText>
-              <DataText variant="caption" color="secondary">Never</DataText>
+        {/* Sync Status */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Sync Status
+          </Text>
+          
+          <View>
+            <View style={styles.statusRow}>
+              <Text style={styles.statusLabel}>Last Sync</Text>
+              <Text style={styles.statusValue}>Never</Text>
             </View>
             
-            <View style={styles.statusItem}>
-              <DataText variant="body" weight="medium">Sync Status</DataText>
-              <DataText variant="caption" color="secondary">
+            <View style={styles.statusRow}>
+              <Text style={styles.statusLabel}>Sync Status</Text>
+              <Text style={styles.statusValue}>
                 {settings.autoSync ? "Enabled" : "Disabled"}
-              </DataText>
+              </Text>
             </View>
           </View>
           
-          <DataButton
-            title="Sync Now"
+          <TouchableOpacity
+            style={styles.primaryButton}
             onPress={() => toast.info("Manual sync coming soon")}
-            variant="secondary"
             disabled={!settings.autoSync}
-          />
-        </DataCard>
-      </DataSection>
+            activeOpacity={0.7}
+          >
+            <Text style={styles.primaryButtonText}>
+              Sync Now
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Account Actions */}
-      <DataSection title="Account Actions" spacing="xl">
-        <DataCard>
-          <DataGrid columns={1} gap="md">
-            <DataButton
-              title="Change Password"
-              onPress={() => toast.info("Password change coming soon")}
-              variant="outline"
-            />
-            
-            <DataButton
-              title="Sign Out"
-              onPress={handleSignOut}
-              variant="destructive"
-            />
-          </DataGrid>
-        </DataCard>
-      </DataSection>
-    </DataLayout>
+        {/* Account Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Account Actions
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => toast.info("Password change coming soon")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.secondaryButtonText}>
+              Change Password
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.dangerButton}
+            onPress={handleSignOut}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.dangerButtonText}>
+              Sign Out
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    padding: 32,
-  },
-  accountInfo: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#2563EB",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    marginRight: 16,
-  },
-  avatarText: {
-    color: "#fff",
-    fontSize: 24,
-  },
-  accountDetails: {
-    flex: 1,
-    gap: 4,
-  },
-  formField: {
-    gap: 8,
-  },
-  fieldLabel: {
-    marginBottom: 4,
-  },
-  settingRow: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.05)",
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: 16,
-    gap: 4,
-  },
-  syncStatus: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  statusItem: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-  },
-};

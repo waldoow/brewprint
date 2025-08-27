@@ -1,31 +1,20 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  View,
   StyleSheet,
-  Dimensions,
+  View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { DataCard } from '@/components/ui/DataCard';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
-
-const { height } = Dimensions.get('window');
+import { Button } from '@/components/ui/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Zod schema for sign-in validation
 const signInSchema = z.object({
@@ -53,29 +42,53 @@ export default function SignIn({
   onForgotPassword,
 }: SignInProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<Partial<SignInFormData>>({});
 
-  const form = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const onSubmit = async (data: SignInFormData) => {
+  const validateForm = (): SignInFormData | null => {
+    try {
+      const data = signInSchema.parse({ email, password });
+      setErrors({});
+      return data;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formErrors: Partial<SignInFormData> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            formErrors[err.path[0] as keyof SignInFormData] = err.message;
+          }
+        });
+        setErrors(formErrors);
+      }
+      return null;
+    }
+  };
+
+  const onSubmit = async () => {
+    const validatedData = validateForm();
+    if (!validatedData) return;
+
     try {
       setIsLoading(true);
 
       if (onSignIn) {
-        await onSignIn(data);
-        form.reset();
+        await onSignIn(validatedData);
+        setEmail("");
+        setPassword("");
+        setErrors({});
       } else {
         // Mock sign-in for demo
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast.success("Welcome back!", {
           description: "You have successfully signed in.",
         });
-        form.reset();
+        setEmail("");
+        setPassword("");
+        setErrors({});
       }
     } catch (error) {
       // Let the parent component handle the error toast
@@ -85,158 +98,111 @@ export default function SignIn({
     }
   };
 
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
-        {/* Clean App Header */}
-        <View style={styles.header}>
-          <DataText 
-            variant="display" 
-            weight="bold" 
-            color="primary"
-            style={{
-              textAlign: 'center',
-              marginBottom: theme.spacing[2]
-            }}
-          >
+      <Container>
+        {/* App Header */}
+        <View style={{
+          alignItems: 'center',
+          marginBottom: theme.spacing['5xl'],
+          marginTop: theme.spacing['2xl'],
+        }}>
+          <Text variant="4xl" weight="extrabold" style={{ marginBottom: theme.spacing.sm }}>
             Brewprint
-          </DataText>
-          <DataText 
-            variant="body" 
-            color="secondary"
-            style={{
-              textAlign: 'center',
-            }}
-          >
+          </Text>
+          <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
             Professional Coffee Recipe Management
-          </DataText>
+          </Text>
         </View>
 
-        {/* Clean Sign In Card */}
-        <DataCard style={styles.authCard}>
-          <View style={{ gap: 16 }}>
-            <View style={styles.authHeader}>
-              <DataText 
-                variant="h1" 
-                weight="semibold" 
-                color="primary"
-                style={{ marginBottom: theme.spacing[2] }}
-              >
-                Sign In
-              </DataText>
-              <DataText 
-                variant="body" 
-                color="secondary"
-                style={{ textAlign: 'center' }}
-              >
-                Access your brewing recipes and data
-              </DataText>
+        {/* Sign In Card */}
+        <Card variant="default" style={{ marginBottom: theme.spacing.xl }}>
+          <View style={{ alignItems: 'center', marginBottom: theme.spacing.xl }}>
+            <Text variant="2xl" weight="bold" style={{ marginBottom: theme.spacing.sm }}>
+              Sign In
+            </Text>
+            <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+              Access your brewing recipes and data
+            </Text>
+          </View>
+
+          <View>
+            {/* Email Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Email Address
+              </Text>
+              <Input
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                disabled={isLoading}
+                error={errors.email}
+              />
             </View>
 
-            <Form {...form}>
-              <View style={styles.form}>
-                {/* Email Input */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <DataText variant="small" weight="medium" color="primary">
-                          Email Address
-                        </DataText>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="Enter your email"
-                          value={field.value}
-                          onChangeText={field.onChange}
-                          onBlur={field.onBlur}
-                          editable={!isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Password Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Password
+              </Text>
+              <Input
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                disabled={isLoading}
+                error={errors.password}
+              />
+            </View>
 
-                {/* Password Input */}
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <DataText variant="small" weight="medium" color="primary">
-                          Password
-                        </DataText>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Enter your password"
-                          value={field.value}
-                          onChangeText={field.onChange}
-                          onBlur={field.onBlur}
-                          editable={!isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Forgot Password Link */}
+            <View style={{ alignItems: 'flex-end', marginBottom: theme.spacing.lg }}>
+              <Button
+                title="Forgot your password?"
+                onPress={onForgotPassword}
+                variant="ghost"
+                size="sm"
+                disabled={isLoading}
+              />
+            </View>
 
-                {/* Forgot Password Link */}
-                <DataButton
-                  variant="ghost"
-                  title="Forgot your password?"
-                  onPress={onForgotPassword}
-                  style={styles.forgotPassword}
-                />
-
-                {/* Clean Sign In Button */}
-                <DataButton
-                  title="Sign In"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  onPress={form.handleSubmit(onSubmit)}
-                  disabled={isLoading}
-                  loading={isLoading}
-                  style={{
-                    marginTop: theme.spacing[6]
-                  }}
-                />
-              </View>
-            </Form>
+            {/* Sign In Button */}
+            <Button
+              title="Sign In"
+              onPress={onSubmit}
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={isLoading}
+              style={{ marginTop: theme.spacing.lg }}
+            />
           </View>
-        </DataCard>
+        </Card>
 
         {/* Sign Up Section */}
-        <View style={styles.signUpSection}>
-          <DataText 
-            variant="body" 
-            color="secondary"
-            style={{ textAlign: 'center', marginBottom: theme.spacing[4] }}
-          >
+        <View style={{ alignItems: 'center' }}>
+          <Text variant="body" color="secondary" style={{ 
+            textAlign: 'center',
+            marginBottom: theme.spacing.lg,
+          }}>
             Don&apos;t have an account?
-          </DataText>
-          <DataButton
-            variant="secondary"
-            size="lg"
-            fullWidth
+          </Text>
+          <Button
             title="Create Account"
             onPress={onNavigateToSignUp}
+            variant="outline"
+            fullWidth
+            disabled={isLoading}
           />
         </View>
-      </View>
+      </Container>
     </KeyboardAvoidingView>
   );
 }
@@ -244,36 +210,5 @@ export default function SignIn({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-    minHeight: height,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 48,
-    paddingTop: 20,
-  },
-  authCard: {
-    marginBottom: 32,
-  },
-  authHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  form: {
-    width: '100%',
-    gap: 16,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  signUpSection: {
-    alignItems: 'center',
   },
 });

@@ -1,24 +1,25 @@
 import React, { useCallback, useState } from 'react';
-import { RefreshControl, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
-import { DataCard } from '@/components/ui/DataCard';
-import { DataMetric, TimeMetric } from '@/components/ui/DataMetric';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import {
+  View,
+  Text,
+  TouchableOpacity as UITouchableOpacity,
+} from 'react-native-ui-lib';
 import { BrewprintsService, type Brewprint } from '@/lib/services';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { toast } from 'sonner-native';
 
 export default function BrewprintsTab() {
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
   const [brewprints, setBrewprints] = useState<Brewprint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'experimenting' | 'final' | 'archived'>('all');
+  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const loadBrewprints = useCallback(async () => {
     try {
@@ -65,6 +66,255 @@ export default function BrewprintsTab() {
   const filteredBrewprints = getFilteredBrewprints();
   const counts = getCounts();
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    createButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    createButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    filterTabs: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      overflow: 'hidden',
+    },
+    filterTab: {
+      flex: 1,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+      borderRightWidth: 1,
+      borderRightColor: theme.colors.border,
+    },
+    activeFilterTab: {
+      backgroundColor: theme.colors.surface,
+    },
+    firstTab: {
+      borderTopLeftRadius: 6,
+      borderBottomLeftRadius: 6,
+    },
+    lastTab: {
+      borderRightWidth: 0,
+      borderTopRightRadius: 6,
+      borderBottomRightRadius: 6,
+    },
+    filterTabText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+      marginBottom: 2,
+    },
+    activeFilterTabText: {
+      color: theme.colors.text.primary,
+    },
+    filterTabCount: {
+      fontSize: 10,
+      color: theme.colors.text.tertiary,
+    },
+    activeFilterTabCount: {
+      color: theme.colors.text.secondary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 18,
+    },
+    emptyButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+    },
+    emptyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    recipeItem: {
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    lastRecipeItem: {
+      borderBottomWidth: 0,
+    },
+    recipeHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 12,
+    },
+    recipeInfo: {
+      flex: 1,
+      marginRight: 12,
+    },
+    recipeName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    recipeMethod: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    statusBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+      backgroundColor: theme.colors.surface,
+    },
+    finalBadge: {
+      backgroundColor: theme.colors.success,
+    },
+    experimentingBadge: {
+      backgroundColor: theme.colors.warning,
+    },
+    draftBadge: {
+      backgroundColor: theme.colors.surface,
+    },
+    statusBadgeText: {
+      fontSize: 8,
+      fontWeight: '600',
+      color: theme.colors.text.inverse,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    parametersRow: {
+      flexDirection: 'row',
+      gap: 16,
+      marginBottom: 12,
+    },
+    parameter: {
+      minWidth: 60,
+    },
+    parameterLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 2,
+    },
+    parameterValue: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    descriptionSection: {
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      marginBottom: 12,
+    },
+    description: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      lineHeight: 16,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginTop: 12,
+    },
+    actionButton: {
+      flex: 1,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 4,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    primaryActionButton: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    secondaryActionButton: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.border,
+    },
+    primaryActionText: {
+      fontSize: 11,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    secondaryActionText: {
+      fontSize: 11,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+  });
+
   const handleBrewprintPress = (brewprint: Brewprint) => {
     if (Haptics.impactAsync) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -88,28 +338,16 @@ export default function BrewprintsTab() {
     ];
 
     return (
-      <View style={{
-        flexDirection: 'row',
-        gap: theme.spacing[2],
-        marginBottom: theme.spacing[6],
-      }}>
-        {filters.map((filter) => (
+      <View style={styles.filterTabs}>
+        {filters.map((filter, index) => (
           <TouchableOpacity
             key={filter.key}
-            style={{
-              flex: 1,
-              paddingVertical: theme.spacing[2],
-              paddingHorizontal: theme.spacing[3],
-              borderRadius: theme.layout.card.radius.md,
-              backgroundColor: activeFilter === filter.key 
-                ? theme.colors.interactive.default 
-                : theme.colors.surface,
-              borderWidth: 1,
-              borderColor: activeFilter === filter.key 
-                ? theme.colors.interactive.default 
-                : theme.colors.border,
-              alignItems: 'center',
-            }}
+            style={[
+              styles.filterTab,
+              activeFilter === filter.key && styles.activeFilterTab,
+              index === 0 && styles.firstTab,
+              index === filters.length - 1 && styles.lastTab,
+            ]}
             onPress={() => {
               if (Haptics.impactAsync) {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -120,22 +358,18 @@ export default function BrewprintsTab() {
             accessibilityRole="button"
             accessibilityLabel={`Filter by ${filter.label}, ${filter.count} recipes`}
           >
-            <DataText
-              variant="small"
-              color={activeFilter === filter.key ? 'inverse' : 'secondary'}
-              weight="medium"
-              style={{ textAlign: 'center' }}
-            >
+            <Text style={[
+              styles.filterTabText,
+              activeFilter === filter.key && styles.activeFilterTabText
+            ]}>
               {filter.label}
-            </DataText>
-            <DataText
-              variant="tiny"
-              color={activeFilter === filter.key ? 'inverse' : 'tertiary'}
-              weight="medium"
-              style={{ textAlign: 'center' }}
-            >
+            </Text>
+            <Text style={[
+              styles.filterTabCount,
+              activeFilter === filter.key && styles.activeFilterTabCount
+            ]}>
               {filter.count}
-            </DataText>
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -144,212 +378,220 @@ export default function BrewprintsTab() {
 
   if (isLoading) {
     return (
-      <DataLayout title="Recipes" subtitle="Loading your brewing recipes...">
-        <DataCard>
-          <DataText variant="body" color="secondary">
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.pageTitle}>
+            Recipes
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Loading your brewing recipes...
+          </Text>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
             Loading recipes...
-          </DataText>
-        </DataCard>
-      </DataLayout>
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Recipes"
-      subtitle={`${filteredBrewprints.length} recipe${filteredBrewprints.length === 1 ? '' : 's'} available`}
-      scrollable
-      refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-    >
-      {/* Quick Action */}
-      <DataSection spacing="lg">
-        <DataButton
-          title="Create New Recipe"
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>
+          Recipes
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          {filteredBrewprints.length} recipe{filteredBrewprints.length === 1 ? '' : 's'} available
+        </Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+      >
+        {/* Create Button */}
+        <TouchableOpacity
+          style={styles.createButton}
           onPress={handleNewBrewprint}
-          variant="primary"
-          size="lg"
-          fullWidth
-          accessibilityHint="Create a new brewing recipe"
-        />
-      </DataSection>
+          activeOpacity={0.7}
+        >
+          <Text style={styles.createButtonText}>
+            Create New Recipe
+          </Text>
+        </TouchableOpacity>
 
-      {/* Filter Tabs */}
-      <DataSection title="Filter Recipes" spacing="lg">
-        {renderFilterTabs()}
-      </DataSection>
+        {/* Filter Tabs */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Filter Recipes
+          </Text>
+          {renderFilterTabs()}
+        </View>
 
-      {/* Recipe List */}
-      {filteredBrewprints.length === 0 ? (
-        <DataSection title="No Recipes Found" spacing="lg">
-          <DataCard variant="bordered">
-            <View style={{ alignItems: 'center', paddingVertical: theme.spacing[8] }}>
-              <DataText variant="h3" color="primary" weight="semibold" style={{ marginBottom: theme.spacing[2] }}>
-                {activeFilter === 'all' ? 'No Recipes Yet' : `No ${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Recipes`}
-              </DataText>
-              <DataText variant="body" color="secondary" style={{ textAlign: 'center', marginBottom: theme.spacing[6] }}>
-                {activeFilter === 'all' 
-                  ? 'Create your first brewing recipe to get started'
-                  : `Create and organize recipes in different categories`
-                }
-              </DataText>
-              <DataButton
-                title="Create First Recipe"
-                onPress={handleNewBrewprint}
-                variant="primary"
-                size="md"
-              />
+        {/* Recipe List */}
+        {filteredBrewprints.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              {activeFilter === 'all' ? 'No Recipes Yet' : `No ${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Recipes`}
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              {activeFilter === 'all' 
+                ? 'Create your first brewing recipe to get started'
+                : `Create and organize recipes in different categories`
+              }
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={handleNewBrewprint}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.emptyButtonText}>
+                Create First Recipe
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {activeFilter === 'all' ? 'All' : activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Recipes
+            </Text>
+            <View>
+              {filteredBrewprints.map((brewprint, index) => (
+                <TouchableOpacity
+                  key={brewprint.id}
+                  style={[
+                    styles.recipeItem,
+                    index === filteredBrewprints.length - 1 && styles.lastRecipeItem
+                  ]}
+                  onPress={() => handleBrewprintPress(brewprint)}
+                  activeOpacity={0.7}
+                  accessibilityLabel={`Recipe: ${brewprint.name}`}
+                  accessibilityHint="Tap to view recipe details"
+                >
+                  {/* Recipe Header */}
+                  <View style={styles.recipeHeader}>
+                    <View style={styles.recipeInfo}>
+                      <Text style={styles.recipeName}>
+                        {brewprint.name}
+                      </Text>
+                      <Text style={styles.recipeMethod}>
+                        {brewprint.method
+                          ? brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')
+                          : 'Unknown Method'}
+                      </Text>
+                    </View>
+                    
+                    {/* Status Badge */}
+                    <View style={[
+                      styles.statusBadge,
+                      brewprint.status === 'final' && styles.finalBadge,
+                      brewprint.status === 'experimenting' && styles.experimentingBadge,
+                      !brewprint.status && styles.draftBadge,
+                    ]}>
+                      <Text style={styles.statusBadgeText}>
+                        {brewprint.status?.toUpperCase() || 'DRAFT'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Key Parameters */}
+                  <View style={styles.parametersRow}>
+                    <View style={styles.parameter}>
+                      <Text style={styles.parameterLabel}>Coffee</Text>
+                      <Text style={styles.parameterValue}>
+                        {brewprint.parameters?.coffee_grams || '?'}g
+                      </Text>
+                    </View>
+                    <View style={styles.parameter}>
+                      <Text style={styles.parameterLabel}>Water</Text>
+                      <Text style={styles.parameterValue}>
+                        {brewprint.parameters?.water_grams || '?'}g
+                      </Text>
+                    </View>
+                    <View style={styles.parameter}>
+                      <Text style={styles.parameterLabel}>Time</Text>
+                      <Text style={styles.parameterValue}>
+                        {Math.floor((brewprint.parameters?.total_time || 0) / 60)}:{String((brewprint.parameters?.total_time || 0) % 60).padStart(2, '0')}
+                      </Text>
+                    </View>
+                    <View style={styles.parameter}>
+                      <Text style={styles.parameterLabel}>Temp</Text>
+                      <Text style={styles.parameterValue}>
+                        {brewprint.parameters?.water_temp || '?'}°C
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Description */}
+                  {brewprint.description && (
+                    <View style={styles.descriptionSection}>
+                      <Text style={styles.description} numberOfLines={2}>
+                        {brewprint.description}
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Action Buttons */}
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.primaryActionButton]}
+                      onPress={() => {
+                        if (Haptics.impactAsync) {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        if (!brewprint.id) {
+                          toast.error('Recipe ID missing - cannot start brewing session');
+                          return;
+                        }
+                        router.push(`/brewing/${brewprint.id}`);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.primaryActionText}>
+                        Start Brewing
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.secondaryActionButton]}
+                      onPress={() => {
+                        if (Haptics.impactAsync) {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }
+                        router.push({
+                          pathname: '/brewprints/new',
+                          params: {
+                            template: JSON.stringify({
+                              name: `${brewprint.name} (Copy)`,
+                              description: brewprint.description,
+                              method: brewprint.method,
+                              difficulty: brewprint.difficulty || 1,
+                              parameters: brewprint.parameters,
+                              steps: brewprint.steps || [],
+                              bean_id: brewprint.bean_id,
+                              grinder_id: brewprint.grinder_id,
+                              brewer_id: brewprint.brewer_id,
+                              water_profile_id: brewprint.water_profile_id,
+                            }),
+                          },
+                        });
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.secondaryActionText}>
+                        Duplicate
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
-          </DataCard>
-        </DataSection>
-      ) : (
-        <DataSection title={`${activeFilter === 'all' ? 'All' : activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Recipes`} spacing="lg">
-          <DataGrid columns={1} gap="md">
-            {filteredBrewprints.map((brewprint) => (
-              <DataCard
-                key={brewprint.id}
-                onPress={() => handleBrewprintPress(brewprint)}
-                variant="default"
-                accessibilityLabel={`Recipe: ${brewprint.name}`}
-                accessibilityHint="Tap to view recipe details"
-              >
-                {/* Recipe Header */}
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: theme.spacing[4],
-                }}>
-                  <View style={{ flex: 1, marginRight: theme.spacing[3] }}>
-                    <DataText variant="h4" color="primary" weight="semibold" style={{ marginBottom: theme.spacing[1] }}>
-                      {brewprint.name}
-                    </DataText>
-                    <DataText variant="small" color="secondary">
-                      {brewprint.method
-                        ? brewprint.method.charAt(0).toUpperCase() + brewprint.method.slice(1).replace('-', ' ')
-                        : 'Unknown Method'}
-                    </DataText>
-                  </View>
-                  
-                  {/* Status Badge */}
-                  <View
-                    style={{
-                      paddingHorizontal: theme.spacing[2],
-                      paddingVertical: theme.spacing[1],
-                      borderRadius: theme.layout.card.radius.sm,
-                      backgroundColor: 
-                        brewprint.status === 'final'
-                          ? theme.colors.success
-                          : brewprint.status === 'experimenting'
-                          ? theme.colors.warning
-                          : theme.colors.data.secondary,
-                    }}
-                  >
-                    <DataText variant="tiny" color="inverse" weight="medium">
-                      {brewprint.status?.toUpperCase() || 'DRAFT'}
-                    </DataText>
-                  </View>
-                </View>
-
-                {/* Key Parameters */}
-                <View style={{
-                  flexDirection: 'row',
-                  gap: theme.spacing[4],
-                  marginBottom: theme.spacing[4],
-                }}>
-                  <DataMetric
-                    label="Coffee"
-                    value={brewprint.parameters?.coffee_grams || '?'}
-                    unit="g"
-                    size="sm"
-                  />
-                  <DataMetric
-                    label="Water"
-                    value={brewprint.parameters?.water_grams || '?'}
-                    unit="g"
-                    size="sm"
-                  />
-                  <TimeMetric
-                    label="Time"
-                    seconds={brewprint.parameters?.total_time || 0}
-                    size="sm"
-                  />
-                  <DataMetric
-                    label="Temp"
-                    value={brewprint.parameters?.water_temp || '?'}
-                    unit="°C"
-                    size="sm"
-                  />
-                </View>
-
-                {/* Description */}
-                {brewprint.description && (
-                  <View style={{ 
-                    paddingTop: theme.spacing[3],
-                    borderTopWidth: 1,
-                    borderTopColor: theme.colors.borderLight,
-                  }}>
-                    <DataText variant="small" color="secondary" numberOfLines={2}>
-                      {brewprint.description}
-                    </DataText>
-                  </View>
-                )}
-
-                {/* Action Buttons */}
-                <View style={{
-                  flexDirection: 'row',
-                  gap: theme.spacing[2],
-                  marginTop: theme.spacing[4],
-                }}>
-                  <DataButton
-                    title="Start Brewing"
-                    variant="primary"
-                    size="sm"
-                    onPress={() => {
-                      if (Haptics.impactAsync) {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      if (!brewprint.id) {
-                        toast.error('Recipe ID missing - cannot start brewing session');
-                        return;
-                      }
-                      router.push(`/brewing/${brewprint.id}`);
-                    }}
-                    style={{ flex: 1 }}
-                  />
-                  <DataButton
-                    title="Duplicate"
-                    variant="secondary"
-                    size="sm"
-                    onPress={() => {
-                      if (Haptics.impactAsync) {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      router.push({
-                        pathname: '/brewprints/new',
-                        params: {
-                          template: JSON.stringify({
-                            name: `${brewprint.name} (Copy)`,
-                            description: brewprint.description,
-                            method: brewprint.method,
-                            difficulty: brewprint.difficulty || 1,
-                            parameters: brewprint.parameters,
-                            steps: brewprint.steps || [],
-                            bean_id: brewprint.bean_id,
-                            grinder_id: brewprint.grinder_id,
-                            brewer_id: brewprint.brewer_id,
-                            water_profile_id: brewprint.water_profile_id,
-                          }),
-                        },
-                      });
-                    }}
-                    style={{ flex: 1 }}
-                  />
-                </View>
-              </DataCard>
-            ))}
-          </DataGrid>
-        </DataSection>
-      )}
-    </DataLayout>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }

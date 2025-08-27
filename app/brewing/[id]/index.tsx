@@ -1,23 +1,24 @@
-import { DataButton } from "@/components/ui/DataButton";
-import { DataCard, InfoCard } from "@/components/ui/DataCard";
-import { DataGrid, DataLayout, DataSection } from "@/components/ui/DataLayout";
-import { DataMetric } from "@/components/ui/DataMetric";
-import { DataText } from "@/components/ui/DataText";
-import { getTheme } from "@/constants/DataFirstDesign";
 import { useBrewprint } from "@/hooks/useBrewprint";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { useTimer } from "@/hooks/useTimer";
 import type { BrewStep } from "@/lib/services/brewprints";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { View } from "react-native";
+import { ScrollView, StyleSheet, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ProgressBar,
+} from "react-native-ui-lib";
 import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function BrewingScreen() {
   const params = useLocalSearchParams();
   const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? "light");
+  const theme = getTheme(colorScheme ?? 'light');
   
   // Extract ID safely before using hooks
   const id = params?.id as string;
@@ -44,24 +45,43 @@ export default function BrewingScreen() {
   // ID is mandatory for this screen
   if (!params || typeof params.id !== "string" || !params.id) {
     return (
-      <DataLayout
-        title="Invalid Brewing Session"
-        subtitle="Recipe ID is required"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.centerContent}>
-          <DataText variant="body" color="secondary">
-            No valid recipe ID provided for brewing session
-          </DataText>
-          <DataButton
-            title="Back to Recipes"
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity 
             onPress={() => router.back()}
-            variant="primary"
-            style={{ marginTop: 16 }}
-          />
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.backButtonText, { color: theme.colors.text.primary }]}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={[styles.pageTitle, { color: theme.colors.text.primary }]}>
+            Invalid Brewing Session
+          </Text>
+          <Text style={[styles.pageSubtitle, { color: theme.colors.text.secondary }]}>
+            Recipe ID is required
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.emptyStateContainer}>
+          <View style={[styles.emptyState, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <Text style={[styles.emptyTitle, { color: theme.colors.text.primary }]}>
+              No Recipe Selected
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: theme.colors.text.secondary }]}>
+              No valid recipe ID provided for brewing session
+            </Text>
+            <TouchableOpacity
+              style={[styles.emptyButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.emptyButtonText, { color: theme.colors.text.primary }]}>
+                Back to Recipes
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -147,43 +167,71 @@ export default function BrewingScreen() {
 
   if (loading) {
     return (
-      <DataLayout
-        title="Brewing Session"
-        subtitle="Loading recipe for brewing..."
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.centerContent}>
-          <DataText variant="body" color="secondary">
-            Loading brewing session...
-          </DataText>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.backButtonText, { color: theme.colors.text.primary }]}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={[styles.pageTitle, { color: theme.colors.text.primary }]}>
+            Brewing Session
+          </Text>
+          <Text style={[styles.pageSubtitle, { color: theme.colors.text.secondary }]}>
+            Loading recipe for brewing...
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: theme.colors.text.secondary }]}>
+            Loading brewing session...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (error || !brewprint) {
     return (
-      <DataLayout
-        title="Recipe Not Available"
-        subtitle="Brewing recipe could not be loaded"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <InfoCard
-          title="Recipe Not Available"
-          message={
-            error ||
-            "This brewing recipe could not be loaded from your library."
-          }
-          variant="error"
-          action={{
-            title: "Back to Recipes",
-            onPress: () => router.back(),
-            variant: "primary",
-          }}
-        />
-      </DataLayout>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.backButtonText, { color: theme.colors.text.primary }]}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={[styles.pageTitle, { color: theme.colors.text.primary }]}>
+            Recipe Not Available
+          </Text>
+          <Text style={[styles.pageSubtitle, { color: theme.colors.text.secondary }]}>
+            Brewing recipe could not be loaded
+          </Text>
+        </View>
+        
+        <View style={styles.emptyStateContainer}>
+          <View style={[styles.emptyState, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <Text style={[styles.emptyTitle, { color: theme.colors.text.primary }]}>
+              Recipe Not Available
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: theme.colors.text.secondary }]}>
+              {error || "This brewing recipe could not be loaded from your library."}
+            </Text>
+            <TouchableOpacity
+              style={[styles.emptyButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.emptyButtonText, { color: theme.colors.text.primary }]}>
+                Back to Recipes
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -195,645 +243,743 @@ export default function BrewingScreen() {
   const currentStep = getCurrentStep();
 
   return (
-    <DataLayout
-      title={`${brewprint.name} - ${getStatusText()}`}
-      subtitle={`${
-        brewprint.method.charAt(0).toUpperCase() +
-        brewprint.method.slice(1).replace("-", " ")
-      } Brewing • ${formatTime(time)}`}
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Current Brewing Status */}
-      <DataSection title="Current Session" spacing="lg">
-        <DataGrid columns={3} gap="md">
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Elapsed Time
-            </DataText>
-            <DataText
-              variant="h2"
-              color="primary"
-              weight="bold"
-              style={{ marginVertical: theme.spacing[1] }}
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Professional Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.backButtonText, { color: theme.colors.text.primary }]}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={[styles.pageTitle, { color: theme.colors.text.primary }]}>
+          {brewprint.name}
+        </Text>
+        <Text style={[styles.pageSubtitle, { color: theme.colors.text.secondary }]}>
+          {brewprint.method.charAt(0).toUpperCase() +
+            brewprint.method.slice(1).replace("-", " ")} Brewing • {getStatusText()} • {formatTime(time)}
+        </Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Current Brewing Status */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            Current Session
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            Active brewing parameters and timing
+          </Text>
+          
+          <View style={styles.statsGrid}>
+            <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>ELAPSED TIME</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                {formatTime(time)}
+              </Text>
+            </View>
+
+            <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>COFFEE DOSE</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                {brewprint.parameters.coffee_grams}g
+              </Text>
+            </View>
+
+            <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>RATIO</Text>
+              <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                1:{ratio}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Recipe Parameters */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            Recipe Specifications
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            Brewing parameters for this recipe
+          </Text>
+          
+          <View style={[styles.detailsContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: theme.colors.text.secondary }]}>
+                Coffee Dose
+              </Text>
+              <Text style={[styles.detailValue, { color: theme.colors.text.primary }]}>
+                {brewprint.parameters.coffeeAmount}g
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: theme.colors.text.secondary }]}>
+                Water Volume
+              </Text>
+              <Text style={[styles.detailValue, { color: theme.colors.text.primary }]}>
+                {brewprint.parameters.waterAmount}ml
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: theme.colors.text.secondary }]}>
+                Water Temperature
+              </Text>
+              <Text style={[styles.detailValue, { color: theme.colors.text.primary }]}>
+                {brewprint.parameters.water_temp}°C
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={[styles.detailLabel, { color: theme.colors.text.secondary }]}>
+                Coffee Ratio
+              </Text>
+              <Text style={[styles.detailValue, { color: theme.colors.text.primary }]}>
+                1:{ratio}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Timer Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            Extraction Timer
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            {isRunning
+              ? `Timer active - ${Math.round(getProgress())}% complete`
+              : "Timer ready"}
+          </Text>
+          
+          <View style={[styles.timerContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+            <Text
+              style={[styles.timerDisplay, { color: theme.colors.text.primary }]}
             >
               {formatTime(time)}
-            </DataText>
-          </DataCard>
-
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Coffee Dose
-            </DataText>
-            <DataText
-              variant="h2"
-              color="primary"
-              weight="bold"
-              style={{ marginVertical: theme.spacing[1] }}
-            >
-              {brewprint.parameters.coffee_grams}g
-            </DataText>
-          </DataCard>
-
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Ratio
-            </DataText>
-            <DataText
-              variant="h2"
-              color="primary"
-              weight="bold"
-              style={{ marginVertical: theme.spacing[1] }}
-            >
-              1:{ratio}
-            </DataText>
-          </DataCard>
-        </DataGrid>
-      </DataSection>
-
-      {/* Recipe Parameters */}
-      <DataSection
-        title="Recipe Specifications"
-        subtitle="Brewing parameters for this recipe"
-        spacing="lg"
-      >
-        <DataCard>
-          <DataGrid columns={2} gap="sm">
-            <DataMetric
-              label="Coffee Dose"
-              value={brewprint.parameters.coffeeAmount}
-              unit="g"
-            />
-            <DataMetric
-              label="Water Volume"
-              value={brewprint.parameters.waterAmount}
-              unit="ml"
-            />
-            <DataMetric
-              label="Water Temperature"
-              value={brewprint.parameters.water_temp}
-              unit="°C"
-            />
-            <DataMetric label="Coffee Ratio" value={`1:${ratio}`} />
-          </DataGrid>
-        </DataCard>
-      </DataSection>
-
-      {/* Timer Section */}
-      <DataSection
-        title="Extraction Timer"
-        subtitle={
-          isRunning
-            ? `Timer active - ${Math.round(getProgress())}% complete`
-            : "Timer ready"
-        }
-        spacing="lg"
-      >
-        <DataCard>
-          <View style={styles.timerContainer}>
-            <DataText
-              variant="display"
-              weight="bold"
-              style={styles.timerDisplay}
-            >
-              {formatTime(time)}
-            </DataText>
+            </Text>
 
             {brewprint.parameters.totalTime && (
-              <DataGrid columns={2} gap="md" style={{ marginTop: 16 }}>
-                <DataMetric
-                  label="Target Time"
-                  value={formatTime(brewprint.parameters.totalTime)}
-                />
-                <DataMetric
-                  label="Remaining"
-                  value={formatTime(
-                    Math.max(0, brewprint.parameters.totalTime - time)
-                  )}
-                />
-              </DataGrid>
+              <View style={styles.timerStats}>
+                <View style={styles.timerStatItem}>
+                  <Text style={[styles.timerStatLabel, { color: theme.colors.text.secondary }]}>Target Time</Text>
+                  <Text style={[styles.timerStatValue, { color: theme.colors.text.primary }]}>
+                    {formatTime(brewprint.parameters.totalTime)}
+                  </Text>
+                </View>
+                <View style={styles.timerStatItem}>
+                  <Text style={[styles.timerStatLabel, { color: theme.colors.text.secondary }]}>Remaining</Text>
+                  <Text style={[styles.timerStatValue, { color: theme.colors.text.primary }]}>
+                    {formatTime(Math.max(0, brewprint.parameters.totalTime - time))}
+                  </Text>
+                </View>
+              </View>
             )}
 
             {brewprint.parameters.totalTime && (
               <View style={styles.progressSection}>
-                <View
-                  style={[
-                    styles.progressTrack,
-                    { backgroundColor: theme.colors.border },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.progressBar,
-                      {
-                        backgroundColor: isRunning
-                          ? theme.colors.warning
-                          : theme.colors.text.primary,
-                        width: `${getProgress()}%`,
-                      },
-                    ]}
-                  />
-                </View>
-                <View style={styles.progressLabels}>
-                  <DataText variant="caption" color="secondary">
+                <ProgressBar
+                  progress={getProgress()}
+                  progressColor={isRunning ? theme.colors.warning : theme.colors.info}
+                  backgroundColor={theme.colors.border}
+                  style={styles.progressBar}
+                />
+                <View style={styles.progressStats}>
+                  <Text style={[styles.progressLabel, { color: theme.colors.text.secondary }]}>
                     Progress: {Math.round(getProgress())}%
-                  </DataText>
-                  <DataText variant="caption" color="secondary">
+                  </Text>
+                  <Text style={[styles.progressLabel, { color: theme.colors.text.secondary }]}>
                     Status: {isRunning ? "Active" : "Paused"}
-                  </DataText>
+                  </Text>
                 </View>
               </View>
             )}
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Current Step - Active Phase */}
-      {isBrewingStarted && !isBrewingComplete && currentStep && (
-        <DataSection
-          title={`Step ${currentStepIndex + 1} of ${brewprint.steps.length}`}
-          subtitle="Active brewing instruction"
-          spacing="lg"
-        >
-          <DataCard>
-            <DataText
-              variant="h3"
-              weight="semibold"
-              style={{ marginBottom: 12 }}
-            >
-              {currentStep.title}
-            </DataText>
+        {/* Current Step - Active Phase */}
+        {isBrewingStarted && !isBrewingComplete && currentStep && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+              Step {currentStepIndex + 1} of {brewprint.steps.length}
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+              Active brewing instruction
+            </Text>
+            
+            <View style={[styles.activeStepCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <Text style={[styles.stepTitle, { color: theme.colors.text.primary }]}>
+                {currentStep.title}
+              </Text>
 
-            <DataText
-              variant="body"
-              color="secondary"
-              style={{ marginBottom: 16, lineHeight: 24 }}
-            >
-              {currentStep.description}
-            </DataText>
+              <Text style={[styles.stepDescription, { color: theme.colors.text.secondary }]}>
+                {currentStep.description}
+              </Text>
 
-            <DataGrid columns={3} gap="sm">
-              <DataMetric
-                label="Duration"
-                value={currentStep.duration}
-                unit="s"
-              />
-              <DataMetric
-                label="Water Amount"
-                value={currentStep.water_amount}
-                unit="g"
-              />
-              <DataMetric
-                label="Progress"
-                value={`${Math.round(getStepProgress())}%`}
-              />
-            </DataGrid>
-
-            <View style={{ marginTop: 12 }}>
-              <DataText
-                variant="caption"
-                color="secondary"
-                style={{ marginBottom: 4 }}
-              >
-                Technique: {currentStep.technique.replace("-", " ")}
-              </DataText>
-            </View>
-          </DataCard>
-        </DataSection>
-      )}
-
-      {/* Steps Overview - Pre-brewing */}
-      {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
-        <DataSection
-          title="Brewing Process Overview"
-          subtitle={`${brewprint.steps.length} precise steps to perfect extraction`}
-          spacing="lg"
-        >
-          <DataCard>
-            <DataText
-              variant="h4"
-              weight="semibold"
-              style={{ marginBottom: 16 }}
-            >
-              Brewing Sequence ({brewprint.steps.length} steps)
-            </DataText>
-
-            {brewprint.steps.map((step, index) => (
-              <View
-                key={step.id}
-                style={[
-                  styles.stepRow,
-                  index === brewprint.steps.length - 1 && styles.lastStep,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.stepNumber,
-                    { backgroundColor: theme.colors.surface },
-                  ]}
-                >
-                  <DataText variant="caption" weight="bold" color="secondary">
-                    {index + 1}
-                  </DataText>
+              <View style={styles.stepStatsGrid}>
+                <View style={styles.stepStatItem}>
+                  <Text style={[styles.stepStatLabel, { color: theme.colors.text.secondary }]}>Duration</Text>
+                  <Text style={[styles.stepStatValue, { color: theme.colors.text.primary }]}>{currentStep.duration}s</Text>
                 </View>
-
-                <View style={styles.stepContent}>
-                  <DataText variant="body" weight="semibold">
-                    {step.title}
-                  </DataText>
-                  <DataText
-                    variant="caption"
-                    color="secondary"
-                    style={styles.stepMeta}
-                  >
-                    {step.duration}s • {step.water_amount}g •{" "}
-                    {step.technique.replace("-", " ")}
-                  </DataText>
-                  {step.description && (
-                    <DataText
-                      variant="caption"
-                      color="secondary"
-                      style={styles.stepNote}
-                      numberOfLines={2}
-                    >
-                      {step.description}
-                    </DataText>
-                  )}
+                <View style={styles.stepStatItem}>
+                  <Text style={[styles.stepStatLabel, { color: theme.colors.text.secondary }]}>Water Amount</Text>
+                  <Text style={[styles.stepStatValue, { color: theme.colors.text.primary }]}>{currentStep.water_amount}g</Text>
                 </View>
-
-                <View style={styles.stepIndicator}>
-                  <DataText variant="caption" color="secondary">
-                    {step.duration}s
-                  </DataText>
+                <View style={styles.stepStatItem}>
+                  <Text style={[styles.stepStatLabel, { color: theme.colors.text.secondary }]}>Progress</Text>
+                  <Text style={[styles.stepStatValue, { color: theme.colors.text.primary }]}>{Math.round(getStepProgress())}%</Text>
                 </View>
               </View>
-            ))}
-          </DataCard>
-        </DataSection>
-      )}
 
-      {/* Brewing Analytics - Post completion */}
-      {isBrewingComplete && (
-        <DataSection
-          title="Brewing Analytics"
-          subtitle="Your extraction performance metrics"
-          spacing="lg"
-        >
-          <DataGrid columns={2} gap="md">
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Total Time
-              </DataText>
-              <DataText
-                variant="h2"
-                color="primary"
-                weight="bold"
-                style={{ marginVertical: theme.spacing[1] }}
-              >
-                {formatTime(time)}
-              </DataText>
-            </DataCard>
-
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Steps Completed
-              </DataText>
-              <DataText
-                variant="h2"
-                color="primary"
-                weight="bold"
-                style={{ marginVertical: theme.spacing[1] }}
-              >
-                {brewprint.steps.length}
-              </DataText>
-            </DataCard>
-
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Target Time
-              </DataText>
-              <DataText
-                variant="h2"
-                color="primary"
-                weight="bold"
-                style={{ marginVertical: theme.spacing[1] }}
-              >
-                {brewprint.parameters.totalTime
-                  ? formatTime(brewprint.parameters.totalTime)
-                  : "N/A"}
-              </DataText>
-            </DataCard>
-
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Precision
-              </DataText>
-              <DataText
-                variant="h2"
-                color="primary"
-                weight="bold"
-                style={{ marginVertical: theme.spacing[1] }}
-              >
-                {brewprint.parameters.totalTime
-                  ? `${Math.max(
-                      0,
-                      100 -
-                        Math.round(
-                          (Math.abs(time - brewprint.parameters.totalTime) /
-                            brewprint.parameters.totalTime) *
-                            100
-                        )
-                    )}%`
-                  : "100%"}
-              </DataText>
-            </DataCard>
-          </DataGrid>
-        </DataSection>
-      )}
-
-      {/* Action Controls */}
-      <DataSection
-        title="Brewing Controls"
-        subtitle={
-          brewingPhase === "preparation"
-            ? "Ready to begin your brewing session"
-            : brewingPhase === "brewing"
-            ? "Control your active brewing session"
-            : "Session complete - review or brew again"
-        }
-        spacing="xl"
-      >
-        {!isBrewingStarted ? (
-          <DataButton
-            title={`Start Brewing ${brewprint.name}`}
-            onPress={handleStartBrewing}
-            variant="primary"
-            size="lg"
-            fullWidth
-          />
-        ) : isBrewingComplete ? (
-          <DataGrid columns={1} gap="md">
-            <DataButton
-              title="View Full Results"
-              onPress={() => router.push(`/brewing/${id}/results`)}
-              variant="primary"
-              size="lg"
-              fullWidth
-            />
-            <DataButton
-              title="Brew This Recipe Again"
-              onPress={resetBrewing}
-              variant="secondary"
-              size="lg"
-              fullWidth
-            />
-          </DataGrid>
-        ) : (
-          <DataGrid columns={1} gap="md">
-            <DataButton
-              title={
-                currentStepIndex < (brewprint.steps?.length || 0) - 1
-                  ? "Continue to Next Step"
-                  : "Complete Brewing Session"
-              }
-              onPress={handleNextStep}
-              variant="primary"
-              size="lg"
-              fullWidth
-            />
-            <DataGrid columns={2} gap="sm">
-              <DataButton
-                title={isRunning ? "Pause Timer" : "Resume Timer"}
-                onPress={isRunning ? pauseTimer : startTimer}
-                variant="secondary"
-              />
-              <DataButton
-                title="Reset Session"
-                onPress={resetBrewing}
-                variant="outline"
-              />
-            </DataGrid>
-          </DataGrid>
+              <View style={styles.stepTechnique}>
+                <Text style={[styles.stepTechniqueText, { color: theme.colors.text.secondary }]}>
+                  Technique: {currentStep.technique.replace("-", " ")}
+                </Text>
+              </View>
+            </View>
+          </View>
         )}
-      </DataSection>
-    </DataLayout>
+
+        {/* Steps Overview - Pre-brewing */}
+        {!isBrewingStarted && brewprint.steps && brewprint.steps.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+              Brewing Process Overview
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+              {brewprint.steps.length} precise steps to perfect extraction
+            </Text>
+            
+            <View style={[styles.stepsOverviewContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <Text style={[styles.stepsOverviewTitle, { color: theme.colors.text.primary }]}>
+                Brewing Sequence ({brewprint.steps.length} steps)
+              </Text>
+
+              {brewprint.steps.map((step, index) => (
+                <View
+                  key={step.id}
+                  style={[
+                    styles.stepRow,
+                    { borderBottomColor: theme.colors.border },
+                    index === brewprint.steps.length - 1 && styles.lastStep,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.stepNumber,
+                      { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                    ]}
+                  >
+                    <Text style={[styles.stepNumberText, { color: theme.colors.text.primary }]}>
+                      {index + 1}
+                    </Text>
+                  </View>
+
+                  <View style={styles.stepContent}>
+                    <Text style={[styles.stepRowTitle, { color: theme.colors.text.primary }]}>
+                      {step.title}
+                    </Text>
+                    <Text style={[styles.stepMeta, { color: theme.colors.text.secondary }]}>
+                      {step.duration}s • {step.water_amount}g • {step.technique.replace("-", " ")}
+                    </Text>
+                    {step.description && (
+                      <Text
+                        style={[styles.stepNote, { color: theme.colors.text.secondary }]}
+                        numberOfLines={2}
+                      >
+                        {step.description}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View style={styles.stepIndicator}>
+                    <Text style={[styles.stepDuration, { color: theme.colors.text.secondary }]}>
+                      {step.duration}s
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Brewing Analytics - Post completion */}
+        {isBrewingComplete && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+              Brewing Analytics
+            </Text>
+            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+              Your extraction performance metrics
+            </Text>
+            
+            <View style={styles.analyticsGrid}>
+              <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>TOTAL TIME</Text>
+                <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                  {formatTime(time)}
+                </Text>
+              </View>
+
+              <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>STEPS</Text>
+                <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                  {brewprint.steps.length}
+                </Text>
+              </View>
+
+              <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>TARGET TIME</Text>
+                <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                  {brewprint.parameters.totalTime
+                    ? formatTime(brewprint.parameters.totalTime)
+                    : "N/A"}
+                </Text>
+              </View>
+
+              <View style={[styles.statItem, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text style={[styles.statLabel, { color: theme.colors.text.tertiary }]}>PRECISION</Text>
+                <Text style={[styles.statValue, { color: theme.colors.text.primary }]}>
+                  {brewprint.parameters.totalTime
+                    ? `${Math.max(
+                        0,
+                        100 -
+                          Math.round(
+                            (Math.abs(time - brewprint.parameters.totalTime) /
+                              brewprint.parameters.totalTime) *
+                              100
+                          )
+                      )}%`
+                    : "100%"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Action Controls */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            Brewing Controls
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            {brewingPhase === "preparation"
+              ? "Ready to begin your brewing session"
+              : brewingPhase === "brewing"
+              ? "Control your active brewing session"
+              : "Session complete - review or brew again"}
+          </Text>
+          
+          {!isBrewingStarted ? (
+            <TouchableOpacity
+              style={[styles.primaryButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+              onPress={handleStartBrewing}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.primaryButtonText, { color: theme.colors.text.primary }]}>
+                Start Brewing {brewprint.name}
+              </Text>
+            </TouchableOpacity>
+          ) : isBrewingComplete ? (
+            <View style={styles.actionButtonGroup}>
+              <TouchableOpacity
+                style={[styles.primaryButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+                onPress={() => router.push(`/brewing/${id}/results`)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.primaryButtonText, { color: theme.colors.text.primary }]}>
+                  View Full Results
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.secondaryButton, { borderColor: theme.colors.border }]}
+                onPress={resetBrewing}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.secondaryButtonText, { color: theme.colors.text.secondary }]}>
+                  Brew This Recipe Again
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.actionButtonGroup}>
+              <TouchableOpacity
+                style={[styles.primaryButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+                onPress={handleNextStep}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.primaryButtonText, { color: theme.colors.text.primary }]}>
+                  {currentStepIndex < (brewprint.steps?.length || 0) - 1
+                    ? "Continue to Next Step"
+                    : "Complete Brewing Session"}
+                </Text>
+              </TouchableOpacity>
+              
+              <View style={styles.controlButtonRow}>
+                <TouchableOpacity
+                  style={[styles.controlButton, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
+                  onPress={isRunning ? pauseTimer : startTimer}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.controlButtonText, { color: theme.colors.text.primary }]}>
+                    {isRunning ? "Pause Timer" : "Resume Timer"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.controlButton, { borderColor: theme.colors.border }]}
+                  onPress={resetBrewing}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.controlButtonText, { color: theme.colors.text.secondary }]}>
+                    Reset Session
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = {
-  centerContent: {
+const styles = StyleSheet.create({
+  // Layout
+  container: {
     flex: 1,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    padding: 32,
   },
-
-  heroSection: {
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    overflow: "hidden" as const,
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 64,
+    paddingBottom: 24,
   },
-
-  heroContent: {
-    padding: 24,
-    paddingTop: 32,
-    paddingBottom: 28,
-  },
-
-  heroHeader: {
-    flexDirection: "row" as const,
-    alignItems: "flex-start" as const,
-    marginBottom: 24,
-  },
-
-  modernStatusBadge: {
-    paddingHorizontal: 12,
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
     paddingVertical: 8,
-    borderRadius: 16,
-    alignItems: "center" as const,
-    minWidth: 80,
   },
-
-  heroStats: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
+  backButtonText: {
+    fontSize: 14,
   },
-
-  heroStat: {
-    alignItems: "center" as const,
+  pageTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  pageSubtitle: {
+    fontSize: 11,
+  },
+  scrollView: {
     flex: 1,
   },
-
-  errorCard: {
-    alignItems: "center" as const,
-    padding: 32,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    gap: 32,
   },
-
-  errorTitle: {
-    textAlign: "center" as const,
+  
+  // Sections
+  section: {
+    gap: 16,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '500',
     marginBottom: 8,
   },
-
-  errorMessage: {
-    textAlign: "center" as const,
-    marginBottom: 24,
-    lineHeight: 22,
+  sectionSubtitle: {
+    fontSize: 11,
+    marginBottom: 16,
   },
-
-  headerActions: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 12,
+  
+  // Stats Grid
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 16,
   },
-
-  statusIndicator: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+  analyticsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderRadius: 6,
+    borderWidth: 1,
     minWidth: 80,
-    alignItems: "center" as const,
   },
-
-  timerContainer: {
-    alignItems: "center" as const,
-    paddingVertical: 16,
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
   },
-
-  timerMain: {
-    alignItems: "center" as const,
-    marginBottom: 32,
+  statLabel: {
+    fontSize: 9,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-
-  timerDisplay: {
-    fontSize: 96,
-    lineHeight: 96,
-    marginBottom: 12,
-    fontVariant: ["tabular-nums"] as any,
-  },
-
-  timerMeta: {
-    flexDirection: "row" as const,
-    gap: 24,
-  },
-
-  progressSection: {
-    width: "100%" as const,
+  
+  // Details Container
+  detailsContainer: {
+    borderRadius: 6,
+    borderWidth: 1,
+    padding: 16,
     gap: 12,
   },
-
-  progressTrack: {
-    height: 8,
-    borderRadius: 4,
-    overflow: "hidden" as const,
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-
-  progressBar: {
-    height: "100%" as const,
-    borderRadius: 4,
-    minWidth: 4,
+  detailLabel: {
+    fontSize: 12,
   },
-
-  progressLabels: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
+  detailValue: {
+    fontSize: 12,
+    fontWeight: '500',
   },
-
-  activeStepCard: {
-    borderLeftWidth: 6,
+  
+  // Timer
+  timerContainer: {
+    borderRadius: 6,
+    borderWidth: 1,
     padding: 24,
+    alignItems: 'center',
   },
-
-  stepHeader: {
-    marginBottom: 20,
+  timerDisplay: {
+    fontSize: 48,
+    fontWeight: '700',
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
   },
-
-  stepProgress: {
-    gap: 8,
+  timerStats: {
+    flexDirection: 'row',
+    gap: 32,
+    marginTop: 16,
   },
-
-  stepProgressTrack: {
-    height: 4,
-    borderRadius: 2,
-    overflow: "hidden" as const,
+  timerStatItem: {
+    alignItems: 'center',
   },
-
-  stepProgressBar: {
-    height: "100%" as const,
-    borderRadius: 2,
-    minWidth: 2,
+  timerStatLabel: {
+    fontSize: 10,
+    textAlign: 'center',
   },
-
+  timerStatValue: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  progressSection: {
+    width: '100%',
+    marginTop: 20,
+  },
+  progressBar: {
+    height: 6,
+    borderRadius: 3,
+  },
+  progressStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  progressLabel: {
+    fontSize: 10,
+  },
+  
+  // Active Step Card
+  activeStepCard: {
+    borderRadius: 6,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+    padding: 16,
+  },
   stepTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  stepDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+    marginBottom: 16,
+  },
+  stepStatsGrid: {
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 12,
   },
-
-  stepDescription: {
-    marginBottom: 20,
-    lineHeight: 24,
+  stepStatItem: {
+    flex: 1,
+    alignItems: 'center',
   },
-
-  stepsHeader: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-    marginBottom: 24,
+  stepStatLabel: {
+    fontSize: 9,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-
-  stepsBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+  stepStatValue: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
   },
-
+  stepTechnique: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.1)',
+  },
+  stepTechniqueText: {
+    fontSize: 10,
+  },
+  
+  // Steps Overview
+  stepsOverviewContainer: {
+    borderRadius: 6,
+    borderWidth: 1,
+    padding: 16,
+  },
+  stepsOverviewTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 16,
+  },
   stepRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0, 0, 0, 0.05)",
   },
-
   lastStep: {
     borderBottomWidth: 0,
   },
-
   stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    marginRight: 16,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    borderWidth: 1,
   },
-
+  stepNumberText: {
+    fontSize: 10,
+    fontWeight: '500',
+  },
   stepContent: {
     flex: 1,
     gap: 4,
   },
-
-  stepMeta: {
-    fontSize: 11,
+  stepRowTitle: {
+    fontSize: 12,
+    fontWeight: '500',
   },
-
-  stepNote: {
+  stepMeta: {
     fontSize: 10,
+  },
+  stepNote: {
+    fontSize: 9,
+    lineHeight: 14,
     marginTop: 2,
   },
-
   stepIndicator: {
-    alignItems: "center" as const,
-    minWidth: 40,
+    alignItems: 'center',
+    minWidth: 32,
   },
-
-  actionGroup: {
-    gap: 16,
+  stepDuration: {
+    fontSize: 10,
   },
-
-  timerControls: {
-    flexDirection: "row" as const,
-    gap: 0,
+  
+  // Buttons
+  primaryButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
   },
-};
+  primaryButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  secondaryButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  actionButtonGroup: {
+    gap: 12,
+  },
+  controlButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  controlButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  controlButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  
+  // Loading & Empty States
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 12,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 24,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 18,
+  },
+  emptyButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  emptyButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});

@@ -1,15 +1,22 @@
-import { DataLayout } from "@/components/ui/DataLayout";
-import { DataText } from "@/components/ui/DataText";
 import { BeanForm } from "@/forms/BeanForm";
 import { BeansService } from "@/lib/services/beans";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { toast } from "sonner-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function EditBeanScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,61 +73,110 @@ export default function EditBeanScreen() {
     router.back();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    content: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <DataLayout
-        title="Loading Bean Details..."
-        subtitle="Retrieving coffee information for editing"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading bean details...
-          </DataText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Loading Bean...
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Retrieving coffee information
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading bean details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Edit Bean"
-      subtitle={`Update ${initialData?.name || "coffee"} inventory details`}
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {initialData && (
-        <BeanForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-          initialData={initialData}
-          isEditing={true}
-        />
-      )}
-    </DataLayout>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Edit Bean
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Update {initialData?.name || "coffee"} details
+        </Text>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {initialData && (
+          <BeanForm
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+            initialData={initialData}
+            isEditing={true}
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-
-  heroSection: {
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    overflow: "hidden",
-  },
-
-  heroContent: {
-    padding: 24,
-    paddingTop: 32,
-    paddingBottom: 28,
-  },
-});

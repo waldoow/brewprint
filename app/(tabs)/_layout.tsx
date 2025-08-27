@@ -5,13 +5,10 @@ import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { getTheme } from "@/constants/DataFirstDesign";
+import { Colors } from "react-native-ui-lib";
 import { useAuth } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? "light");
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -19,7 +16,7 @@ export default function TabLayout() {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator
           size="large"
-          color={theme.colors.interactive.default}
+          color={Colors.blue30}
         />
       </View>
     );
@@ -32,12 +29,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme.colors.interactive.default,
-        tabBarInactiveTintColor: theme.colors.text.secondary,
+        tabBarActiveTintColor: Colors.blue30,
+        tabBarInactiveTintColor: Colors.grey40,
         tabBarStyle: {
-          backgroundColor:
-            colorScheme === "dark" ? theme.colors.surface : theme.colors.card,
-          borderTopColor: theme.colors.border,
+          backgroundColor: Colors.white,
+          borderTopColor: Colors.grey60,
           borderTopWidth: 1,
           paddingTop: 8,
           paddingBottom: Platform.OS === "ios" ? 34 : 16,
@@ -47,7 +43,6 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           elevation: 8,
-          ...theme.shadows.lg,
         },
         tabBarLabelStyle: {
           fontSize: 11,
@@ -60,7 +55,7 @@ export default function TabLayout() {
         tabBarBackground: () => (
           <BlurView
             intensity={80}
-            tint={colorScheme === "dark" ? "dark" : "light"}
+            tint="light"
             style={StyleSheet.absoluteFill}
           />
         ),

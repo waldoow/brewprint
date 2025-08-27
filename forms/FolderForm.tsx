@@ -1,30 +1,27 @@
 import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { View } from "react-native";
+import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
-
-// Data-First UI Components
-import { DataText } from "@/components/ui/DataText";
-import { DataButton } from "@/components/ui/DataButton";
-import { Input } from "@/components/ui/Input";
-import { ThemedSelect } from "@/components/ui/ThemedSelect";
+import {
+  View,
+  Text,
+  TextField,
+  Button,
+  Picker,
+  Colors,
+} from "react-native-ui-lib";
 
 // Services and Context
 import { useAuth } from "@/context/AuthContext";
 import { FoldersService, type FolderInput } from "@/lib/services/folders";
 
-// Folder form validation schema
-const folderFormSchema = z.object({
-  name: z.string().min(1, "Folder name is required"),
-  description: z.string().optional(),
-  color: z.string().optional(),
-  icon: z.string().optional(),
-  is_default: z.boolean().optional(),
-});
-
-type FolderFormData = z.infer<typeof folderFormSchema>;
+// Form data interface
+interface FolderFormData {
+  name: string;
+  description: string;
+  color: string;
+  icon: string;
+  is_default: boolean;
+}
 
 interface FolderFormProps {
   onSuccess?: (folder: any) => void;
@@ -55,26 +52,36 @@ const iconOptions = [
 export function FolderForm({ onSuccess, onCancel, initialData }: FolderFormProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-    reset,
-  } = useForm<FolderFormData>({
-    resolver: zodResolver(folderFormSchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      description: initialData?.description || "",
-      color: initialData?.color || "#6d28d9",
-      icon: initialData?.icon || "folder",
-      is_default: initialData?.is_default || false,
-    },
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  
+  // Form state
+  const [formData, setFormData] = React.useState<FolderFormData>({
+    name: initialData?.name || "",
+    description: initialData?.description || "",
+    color: initialData?.color || "#6d28d9",
+    icon: initialData?.icon || "folder",
+    is_default: initialData?.is_default || false,
   });
 
-  const onSubmit = async (data: FolderFormData) => {
+  const updateField = (field: keyof FolderFormData, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) newErrors.name = "Folder name is required";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onSubmit = async () => {
+    if (!validateForm()) return;
     if (!user?.id) {
       toast.error("User not authenticated");
       return;
@@ -85,11 +92,11 @@ export function FolderForm({ onSuccess, onCancel, initialData }: FolderFormProps
     try {
       // Convert form data to database format
       const folderData: FolderInput = {
-        name: data.name,
-        description: data.description || undefined,
-        color: data.color || undefined,
-        icon: data.icon || undefined,
-        is_default: data.is_default || false,
+        name: formData.name,
+        description: formData.description || undefined,
+        color: formData.color || undefined,
+        icon: formData.icon || undefined,
+        is_default: formData.is_default || false,
       };
 
       const {
@@ -105,7 +112,6 @@ export function FolderForm({ onSuccess, onCancel, initialData }: FolderFormProps
       }
 
       toast.success("Folder created successfully!");
-      reset();
       onSuccess?.(newFolder);
     } catch (error) {
       console.error("Error creating folder:", error);
@@ -116,118 +122,127 @@ export function FolderForm({ onSuccess, onCancel, initialData }: FolderFormProps
   };
 
   const handleCancel = () => {
-    reset();
     onCancel?.();
   };
 
   return (
-    <View style={{ flex: 1, padding: 16, gap: 24 }}>
+    <View style={styles.container}>
       {/* Basic Information */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Basic Information
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Folder details and organization
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <Input
-              label="Folder Name"
-              placeholder="My Espresso Recipes"
-              value={watch("name")}
-              onChangeText={(value) => setValue("name", value)}
-              error={errors.name?.message}
-              required
-            />
+          <TextField
+            label="Folder Name *"
+            placeholder="My Espresso Recipes"
+            value={formData.name}
+            onChangeText={(value) => updateField("name", value)}
+            enableErrors={!!errors.name}
+            errorMessage={errors.name}
+            fieldStyle={styles.textField}
+          />
 
-            <Input
-              label="Description"
-              placeholder="Collection of my favorite espresso brewing methods..."
-              multiline
-              numberOfLines={2}
-              value={watch("description")}
-              onChangeText={(value) => setValue("description", value)}
-              error={errors.description?.message}
-            />
+          <TextField
+            label="Description"
+            placeholder="Collection of my favorite espresso brewing methods..."
+            multiline
+            numberOfLines={3}
+            value={formData.description}
+            onChangeText={(value) => updateField("description", value)}
+            fieldStyle={styles.textField}
+          />
         </View>
       </View>
 
       {/* Customization */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Customization
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Personalize your folder appearance
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <ThemedSelect
-              label="Color"
-              options={colorOptions}
-              value={watch("color")}
-              onValueChange={(value) => setValue("color", value)}
-              placeholder="Select folder color"
-              error={errors.color?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Color</Text>
+            <Picker
+              value={formData.color}
+              onChange={(value) => updateField("color", value as string)}
+              topBarProps={{ title: "Select Folder Color" }}
+              style={styles.picker}
+            >
+              {colorOptions.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
 
-            <ThemedSelect
-              label="Icon"
-              options={iconOptions}
-              value={watch("icon")}
-              onValueChange={(value) => setValue("icon", value)}
-              placeholder="Select folder icon"
-              error={errors.icon?.message}
-            />
+          <View>
+            <Text body textColor marginB-sm>Icon</Text>
+            <Picker
+              value={formData.icon}
+              onChange={(value) => updateField("icon", value as string)}
+              topBarProps={{ title: "Select Folder Icon" }}
+              style={styles.picker}
+            >
+              {iconOptions.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
         </View>
       </View>
 
       {/* Settings */}
       <View style={styles.section}>
-        <DataText variant="h3" weight="semibold">
+        <Text h3 textColor marginB-sm>
           Settings
-        </DataText>
-        <DataText variant="small" color="secondary">
+        </Text>
+        <Text caption textSecondary marginB-md>
           Folder behavior and preferences
-        </DataText>
+        </Text>
 
         <View style={styles.fieldGroup}>
-            <View style={styles.checkboxField}>
-              <DataText variant="body" weight="medium">
-                Set as Default Folder
-              </DataText>
-              <DataText variant="small" color="secondary" style={{ marginBottom: 8 }}>
-                New recipes will automatically be saved to this folder
-              </DataText>
-              <DataButton
-                title={watch("is_default") ? "✓ Default Folder" : "Set as Default"}
-                variant={watch("is_default") ? "primary" : "secondary"}
-                size="sm"
-                onPress={() => setValue("is_default", !watch("is_default"))}
-              />
-            </View>
+          <View style={styles.checkboxField}>
+            <Text body textColor weight="medium">
+              Set as Default Folder
+            </Text>
+            <Text caption textSecondary marginB-sm>
+              New recipes will automatically be saved to this folder
+            </Text>
+            <Button
+              label={formData.is_default ? "✓ Default Folder" : "Set as Default"}
+              backgroundColor={formData.is_default ? Colors.blue30 : Colors.grey40}
+              size="medium"
+              onPress={() => updateField("is_default", !formData.is_default)}
+            />
+          </View>
         </View>
       </View>
 
       {/* Actions */}
       <View style={styles.section}>
         <View style={styles.actions}>
-          <DataButton
-            title="Create Folder"
-            onPress={handleSubmit(onSubmit)}
-            variant="primary"
-            size="lg"
+          <Button
+            label="Create Folder"
+            onPress={onSubmit}
+            backgroundColor={Colors.blue30}
+            size="large"
             fullWidth
-            loading={isLoading}
             disabled={isLoading}
           />
-          <DataButton
-            title="Cancel"
-            variant="secondary"
-            size="lg"
-            fullWidth
+          <Button
+            label="Cancel"
             onPress={handleCancel}
+            backgroundColor={Colors.grey40}
+            size="large"
+            fullWidth
             disabled={isLoading}
           />
         </View>
@@ -236,17 +251,37 @@ export function FolderForm({ onSuccess, onCancel, initialData }: FolderFormProps
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    gap: 24,
+  },
   section: {
     gap: 16,
   },
   fieldGroup: {
     gap: 16,
   },
+  textField: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    backgroundColor: Colors.white,
+    height: 44,
+  },
   checkboxField: {
-    gap: 4,
+    gap: 8,
   },
   actions: {
     gap: 12,
   },
-};
+});

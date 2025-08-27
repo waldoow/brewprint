@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  TouchableOpacity,
   Switch,
+  StyleSheet,
+  ScrollView,
 } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
 import { router } from 'expo-router';
-import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
-import { DataCard } from '@/components/ui/DataCard';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { toast } from 'sonner-native';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface UserPreferences {
   temperatureUnit: 'celsius' | 'fahrenheit';
@@ -113,37 +114,209 @@ export default function PreferencesScreen() {
     savePreferences(newPreferences);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    unitGroup: {
+      marginBottom: 20,
+      gap: 12,
+    },
+    unitLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+    },
+    unitRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    unitOption: {
+      flex: 1,
+      padding: 12,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'center',
+    },
+    unitOptionSelected: {
+      borderColor: theme.colors.info,
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+    },
+    unitOptionText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    unitOptionTextSelected: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: theme.colors.info,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    settingInfo: {
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    settingDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    methodOption: {
+      padding: 16,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    methodOptionSelected: {
+      borderColor: theme.colors.info,
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+    },
+    methodText: {
+      fontSize: 14,
+      color: theme.colors.text.secondary,
+    },
+    methodTextSelected: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.info,
+    },
+    methodList: {
+      gap: 8,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <DataLayout
-        title="Preferences"
-        subtitle="Customize your brewing experience"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading preferences...
-          </DataText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Preferences
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Customize your brewing experience
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading preferences...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Preferences"
-      subtitle="Customize your brewing experience"
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Units Section */}
-      <DataSection title="Units of Measurement" subtitle="Choose your preferred units for brewing" spacing="lg">
-        <DataCard>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Preferences
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Customize your brewing experience
+        </Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Units Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Units of Measurement
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Choose your preferred units for brewing
+          </Text>
+          
           <View style={styles.unitGroup}>
-            <DataText variant="body" weight="semibold">Temperature</DataText>
-            <DataGrid columns={2} gap="sm">
+            <Text style={styles.unitLabel}>Temperature</Text>
+            <View style={styles.unitRow}>
               {TEMPERATURE_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
@@ -152,22 +325,24 @@ export default function PreferencesScreen() {
                     preferences.temperatureUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('temperatureUnit', unit.value as 'celsius' | 'fahrenheit')}
+                  activeOpacity={0.7}
                 >
-                  <DataText 
-                    variant="body" 
-                    color={preferences.temperatureUnit === unit.value ? 'primary' : 'secondary'}
-                    weight={preferences.temperatureUnit === unit.value ? 'semibold' : 'normal'}
+                  <Text 
+                    style={[
+                      styles.unitOptionText,
+                      preferences.temperatureUnit === unit.value && styles.unitOptionTextSelected
+                    ]}
                   >
                     {unit.label}
-                  </DataText>
+                  </Text>
                 </TouchableOpacity>
               ))}
-            </DataGrid>
+            </View>
           </View>
 
           <View style={styles.unitGroup}>
-            <DataText variant="body" weight="semibold">Weight</DataText>
-            <DataGrid columns={2} gap="sm">
+            <Text style={styles.unitLabel}>Weight</Text>
+            <View style={styles.unitRow}>
               {WEIGHT_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
@@ -176,22 +351,24 @@ export default function PreferencesScreen() {
                     preferences.weightUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('weightUnit', unit.value as 'grams' | 'ounces')}
+                  activeOpacity={0.7}
                 >
-                  <DataText 
-                    variant="body" 
-                    color={preferences.weightUnit === unit.value ? 'primary' : 'secondary'}
-                    weight={preferences.weightUnit === unit.value ? 'semibold' : 'normal'}
+                  <Text 
+                    style={[
+                      styles.unitOptionText,
+                      preferences.weightUnit === unit.value && styles.unitOptionTextSelected
+                    ]}
                   >
                     {unit.label}
-                  </DataText>
+                  </Text>
                 </TouchableOpacity>
               ))}
-            </DataGrid>
+            </View>
           </View>
 
           <View style={styles.unitGroup}>
-            <DataText variant="body" weight="semibold">Volume</DataText>
-            <DataGrid columns={2} gap="sm">
+            <Text style={styles.unitLabel}>Volume</Text>
+            <View style={styles.unitRow}>
               {VOLUME_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
@@ -200,95 +377,116 @@ export default function PreferencesScreen() {
                     preferences.volumeUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('volumeUnit', unit.value as 'ml' | 'fl_oz')}
+                  activeOpacity={0.7}
                 >
-                  <DataText 
-                    variant="body" 
-                    color={preferences.volumeUnit === unit.value ? 'primary' : 'secondary'}
-                    weight={preferences.volumeUnit === unit.value ? 'semibold' : 'normal'}
+                  <Text 
+                    style={[
+                      styles.unitOptionText,
+                      preferences.volumeUnit === unit.value && styles.unitOptionTextSelected
+                    ]}
                   >
                     {unit.label}
-                  </DataText>
+                  </Text>
                 </TouchableOpacity>
               ))}
-            </DataGrid>
-          </View>
-        </DataCard>
-      </DataSection>
-
-      {/* Brewing Preferences */}
-      <DataSection title="Brewing Preferences" subtitle="Customize your brewing workflow" spacing="lg">
-        <DataCard>
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">Timer Auto-Start</DataText>
-              <DataText variant="caption" color="secondary">
-                Automatically start timer when brewing begins
-              </DataText>
             </View>
-            <Switch
-              value={preferences.timerAutoStart}
-              onValueChange={(value) => updatePreference('timerAutoStart', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-            />
           </View>
+        </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">Auto-Save Brews</DataText>
-              <DataText variant="caption" color="secondary">
-                Automatically save brewing sessions when completed
-              </DataText>
+        {/* Brewing Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Brewing Preferences
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Customize your brewing workflow
+          </Text>
+          
+          <View>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Timer Auto-Start</Text>
+                <Text style={styles.settingDescription}>
+                  Automatically start timer when brewing begins
+                </Text>
+              </View>
+              <Switch
+                value={preferences.timerAutoStart}
+                onValueChange={(value) => updatePreference('timerAutoStart', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
             </View>
-            <Switch
-              value={preferences.autoSaveBrews}
-              onValueChange={(value) => updatePreference('autoSaveBrews', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-            />
-          </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">Detailed Metrics</DataText>
-              <DataText variant="caption" color="secondary">
-                Show advanced brewing metrics and analytics
-              </DataText>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Auto-Save Brews</Text>
+                <Text style={styles.settingDescription}>
+                  Automatically save brewing sessions when completed
+                </Text>
+              </View>
+              <Switch
+                value={preferences.autoSaveBrews}
+                onValueChange={(value) => updatePreference('autoSaveBrews', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
             </View>
-            <Switch
-              value={preferences.showDetailedMetrics}
-              onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-            />
-          </View>
-        </DataCard>
-      </DataSection>
 
-      {/* App Experience */}
-      <DataSection title="App Experience" subtitle="Customize interface and feedback" spacing="lg">
-        <DataCard>
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <DataText variant="body" weight="semibold">Haptic Feedback</DataText>
-              <DataText variant="caption" color="secondary">
-                Enable vibration feedback for interactions
-              </DataText>
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Detailed Metrics</Text>
+                <Text style={styles.settingDescription}>
+                  Show advanced brewing metrics and analytics
+                </Text>
+              </View>
+              <Switch
+                value={preferences.showDetailedMetrics}
+                onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
             </View>
-            <Switch
-              value={preferences.hapticFeedback}
-              onValueChange={(value) => updatePreference('hapticFeedback', value)}
-              trackColor={{ false: theme.colors.gray[200], true: theme.colors.interactive.default }}
-              thumbColor={theme.colors.white}
-            />
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Default Brew Method */}
-      <DataSection title="Default Brew Method" subtitle="Select your preferred brewing method" spacing="lg">
-        <DataCard>
-          <DataGrid columns={1} gap="sm">
+        {/* App Experience */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            App Experience
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Customize interface and feedback
+          </Text>
+          
+          <View>
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Haptic Feedback</Text>
+                <Text style={styles.settingDescription}>
+                  Enable vibration feedback for interactions
+                </Text>
+              </View>
+              <Switch
+                value={preferences.hapticFeedback}
+                onValueChange={(value) => updatePreference('hapticFeedback', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Default Brew Method */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Default Brew Method
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Select your preferred brewing method
+          </Text>
+          
+          <View style={styles.methodList}>
             {BREW_METHODS.map((method) => (
               <TouchableOpacity
                 key={method.value}
@@ -297,66 +495,21 @@ export default function PreferencesScreen() {
                   preferences.defaultBrewMethod === method.value && styles.methodOptionSelected
                 ]}
                 onPress={() => updatePreference('defaultBrewMethod', method.value)}
+                activeOpacity={0.7}
               >
-                <DataText 
-                  variant="body" 
-                  color={preferences.defaultBrewMethod === method.value ? 'primary' : 'default'}
-                  weight={preferences.defaultBrewMethod === method.value ? 'semibold' : 'normal'}
+                <Text 
+                  style={[
+                    styles.methodText,
+                    preferences.defaultBrewMethod === method.value && styles.methodTextSelected
+                  ]}
                 >
                   {method.label}
-                </DataText>
+                </Text>
               </TouchableOpacity>
             ))}
-          </DataGrid>
-        </DataCard>
-      </DataSection>
-    </DataLayout>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    padding: 32,
-  },
-  unitGroup: {
-    marginBottom: 20,
-    gap: 12,
-  },
-  unitOption: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    alignItems: 'center' as const,
-  },
-  unitOptionSelected: {
-    borderColor: '#2563EB',
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-  },
-  methodOption: {
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  methodOptionSelected: {
-    borderColor: '#2563EB',
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-  },
-  settingRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: 16,
-    gap: 4,
-  },
-};

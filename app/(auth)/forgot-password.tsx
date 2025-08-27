@@ -1,6 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,19 +7,12 @@ import {
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
-import { Input } from "@/components/ui/Input";
-import { DataCard, InfoCard } from '@/components/ui/DataCard';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { getTheme } from "@/constants/DataFirstDesign";
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 // Zod schema for forgot password validation
@@ -45,21 +36,37 @@ export default function ForgotPassword({
 }: ForgotPasswordProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
+  const validateEmail = (email: string): string | null => {
+    try {
+      forgotPasswordSchema.parse({ email });
+      return null;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return error.errors[0]?.message || "Invalid email";
+      }
+      return "Invalid email";
+    }
+  };
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
+  const onSubmit = async () => {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    
+    setError("");
+    
     try {
       setIsLoading(true);
 
       if (onResetPassword) {
-        await onResetPassword(data);
+        await onResetPassword({ email });
         setEmailSent(true);
       } else {
         // Mock reset password for demo
@@ -78,151 +85,131 @@ export default function ForgotPassword({
   };
 
   const handleResendEmail = async () => {
-    const email = form.getValues("email");
     if (email) {
-      await onSubmit({ email });
+      await onSubmit();
     }
   };
-
-  const theme = getTheme(colorScheme ?? "light");
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <View style={[styles.content, { backgroundColor: theme.colors.background }]}>
-        {/* Clean Header */}
-        <View style={styles.header}>
-          <DataText 
-            variant="display" 
-            weight="bold" 
-            color="primary"
-            style={{
-              textAlign: 'center',
-              marginBottom: theme.spacing[2]
-            }}
-          >
+      <Container>
+        {/* App Header */}
+        <View style={{
+          alignItems: 'center',
+          marginBottom: theme.spacing['5xl'],
+          marginTop: theme.spacing['2xl'],
+        }}>
+          <Text variant="4xl" weight="extrabold" style={{ marginBottom: theme.spacing.sm }}>
             Brewprint
-          </DataText>
-          <DataText 
-            variant="body" 
-            color="secondary"
-            style={{
-              textAlign: 'center',
-            }}
-          >
+          </Text>
+          <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
             Professional Coffee Recipe Management
-          </DataText>
+          </Text>
         </View>
 
-        {/* Clean Form Card */}
-        <DataCard style={styles.formCard}>
-          <View style={{ gap: 16 }}>
-            <View style={styles.formHeader}>
-              <DataText 
-                variant="h1" 
-                weight="semibold" 
-                color="primary"
-                style={{ marginBottom: theme.spacing[2] }}
-              >
-                {emailSent ? "Check Your Email" : "Reset Password"}
-              </DataText>
-              <DataText 
-                variant="body" 
-                color="secondary"
-                style={{ textAlign: 'center' }}
-              >
-                {emailSent
-                  ? "Password reset instructions sent to your email"
-                  : "Enter your email to reset your password"
-                }
-              </DataText>
-            </View>
-
-            <Form {...form}>
-              <View style={styles.form}>
-                {!emailSent ? (
-                  <>
-                    {/* Email Input */}
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            <DataText variant="small" weight="medium" color="primary">
-                              Email Address
-                            </DataText>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="Enter your email"
-                              value={field.value}
-                              onChangeText={field.onChange}
-                              onBlur={field.onBlur}
-                              editable={!isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Reset Password Button */}
-                    <DataButton
-                      title="Send Reset Instructions"
-                      variant="primary"
-                      size="lg"
-                      fullWidth
-                      onPress={form.handleSubmit(onSubmit)}
-                      disabled={isLoading}
-                      loading={isLoading}
-                      style={{
-                        marginTop: theme.spacing[6]
-                      }}
-                    />
-                  </>
-                ) : (
-                  <View style={styles.emailSentContainer}>
-                    <InfoCard
-                      title="Email Sent"
-                      message="If an account with that email exists, you'll receive password reset instructions shortly."
-                      variant="success"
-                      action={{
-                        title: "Resend Email",
-                        onPress: handleResendEmail,
-                        variant: "secondary",
-                        disabled: isLoading,
-                        loading: isLoading
-                      }}
-                    />
-                  </View>
-                )}
-              </View>
-            </Form>
+        {/* Form Card */}
+        <Card variant="default" style={{ marginBottom: theme.spacing.xl }}>
+          <View style={{ alignItems: 'center', marginBottom: theme.spacing.xl }}>
+            <Text variant="2xl" weight="bold" style={{ marginBottom: theme.spacing.sm }}>
+              {emailSent ? "Check Your Email" : "Reset Password"}
+            </Text>
+            <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+              {emailSent
+                ? "Password reset instructions sent to your email"
+                : "Enter your email to reset your password"
+              }
+            </Text>
           </View>
-        </DataCard>
+
+          <View>
+            {!emailSent ? (
+              <>
+                {/* Email Input */}
+                <View style={{ marginBottom: theme.spacing.lg }}>
+                  <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                    Email Address
+                  </Text>
+                  <Input
+                    placeholder="Enter your email"
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      setError("");
+                    }}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    disabled={isLoading}
+                    error={error}
+                  />
+                </View>
+
+                {/* Reset Password Button */}
+                <Button
+                  title="Send Reset Instructions"
+                  onPress={onSubmit}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={isLoading}
+                  style={{ marginTop: theme.spacing.lg }}
+                />
+              </>
+            ) : (
+              <View style={{ alignItems: 'center' }}>
+                {/* Success Card */}
+                <Card 
+                  variant="success"
+                  style={{ 
+                    marginBottom: theme.spacing.lg,
+                    width: '100%',
+                  }}
+                >
+                  <Text variant="lg" weight="semibold" style={{ 
+                    textAlign: 'center',
+                    marginBottom: theme.spacing.sm,
+                    color: theme.colors.success,
+                  }}>
+                    Email Sent
+                  </Text>
+                  <Text variant="body" color="secondary" style={{ 
+                    textAlign: 'center',
+                    marginBottom: theme.spacing.lg,
+                  }}>
+                    If an account with that email exists, you'll receive password reset instructions shortly.
+                  </Text>
+                  <Button
+                    title="Resend Email"
+                    onPress={handleResendEmail}
+                    variant="outline"
+                    loading={isLoading}
+                  />
+                </Card>
+              </View>
+            )}
+          </View>
+        </Card>
 
         {/* Back to Sign In */}
-        <View style={styles.backSection}>
-          <DataText 
-            variant="body" 
-            color="secondary"
-            style={{ textAlign: 'center', marginBottom: theme.spacing[4] }}
-          >
+        <View style={{ alignItems: 'center' }}>
+          <Text variant="body" color="secondary" style={{
+            textAlign: 'center',
+            marginBottom: theme.spacing.lg,
+          }}>
             Remember your password?
-          </DataText>
-          <DataButton
-            variant="secondary"
-            size="lg"
-            fullWidth
+          </Text>
+          <Button
             title="Back to Sign In"
             onPress={onNavigateToSignIn}
+            variant="outline"
+            fullWidth
+            disabled={isLoading}
           />
         </View>
-      </View>
+      </Container>
     </KeyboardAvoidingView>
   );
 }
@@ -230,32 +217,5 @@ export default function ForgotPassword({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  formCard: {
-    marginBottom: 32,
-  },
-  formHeader: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  form: {
-    width: "100%",
-    gap: 16,
-  },
-  emailSentContainer: {
-    alignItems: "center",
-  },
-  backSection: {
-    alignItems: "center",
   },
 });

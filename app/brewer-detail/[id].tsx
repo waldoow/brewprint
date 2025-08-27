@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
-import { DataCard, InfoCard } from '@/components/ui/DataCard';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
 import { BrewersService, type Brewer } from '@/lib/services/brewers';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { toast } from 'sonner-native';
 
 export default function BrewerDetailScreen() {
   const { id } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
   
   const [brewer, setBrewer] = useState<Brewer | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const loadBrewer = React.useCallback(async () => {
     try {
@@ -53,432 +55,613 @@ export default function BrewerDetailScreen() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    editButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    editButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    detailsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    detailLabel: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    detailValue: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    notesContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+    },
+    notesText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      lineHeight: 18,
+    },
+    tipsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    tipRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    tipBullet: {
+      fontSize: 12,
+      color: theme.colors.text.tertiary,
+      marginRight: 8,
+      marginTop: 2,
+    },
+    tipText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      flex: 1,
+      lineHeight: 18,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    primaryActionButton: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    secondaryActionButton: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.border,
+    },
+    primaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    secondaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 18,
+    },
+    emptyButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+    },
+    emptyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+  });
+
   if (loading) {
     return (
-      <DataLayout
-        title="Brewer Details"
-        subtitle="Loading equipment information..."
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading brewer details...
-          </DataText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Brewer Details
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Loading equipment information...
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading brewer details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (!brewer) {
     return (
-      <DataLayout
-        title="Brewer Not Found"
-        subtitle="Equipment could not be found"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <InfoCard
-          title="Brewer Not Found"
-          message="The requested brewing equipment could not be found in your library."
-          variant="error"
-          action={{
-            title: "Back to Library",
-            onPress: () => router.back(),
-            variant: "primary"
-          }}
-        />
-      </DataLayout>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Brewer Not Found
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Equipment could not be found
+          </Text>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              Brewer Not Found
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              The requested brewing equipment could not be found in your library.
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.emptyButtonText}>
+                Back to Library
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title={brewer.name}
-      subtitle={`${brewer.brand || 'Brewing Equipment'} • ${brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}`}
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Equipment Status Overview */}
-      <DataSection title="Equipment Status" spacing="lg">
-        <DataGrid columns={3} gap="md">
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Condition
-            </DataText>
-            <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-              {getConditionLabel(brewer.condition)}
-            </DataText>
-          </DataCard>
-          
-          {brewer.capacity_ml && (
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Capacity
-              </DataText>
-              <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                {brewer.capacity_ml}ml
-              </DataText>
-            </DataCard>
-          )}
-          
-          {brewer.location && (
-            <DataCard>
-              <DataText variant="small" color="secondary" weight="medium">
-                Location
-              </DataText>
-              <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-                {brewer.location}
-              </DataText>
-            </DataCard>
-          )}
-        </DataGrid>
-      </DataSection>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          {brewer.name}
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          {brewer.brand || 'Brewing Equipment'} • {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
+        </Text>
+      </View>
 
-      {/* Quick Actions */}
-      <DataSection spacing="lg">
-        <Link href={`/(tabs)/brewers/edit/${brewer.id}`}>
-          <DataButton
-            title="Edit Equipment Details"
-            variant="primary"
-            size="lg"
-            fullWidth
-          />
-        </Link>
-      </DataSection>
-
-      {/* Physical Specifications */}
-      <DataSection 
-        title="Physical Specifications" 
-        subtitle="Type, material, and construction details"
-        spacing="lg"
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
-        <DataCard>
-          <View style={styles.detailsGrid}>
+        {/* Equipment Status Overview */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Equipment Status
+          </Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Condition</Text>
+              <Text style={styles.statValue}>
+                {getConditionLabel(brewer.condition)}
+              </Text>
+            </View>
+            
+            {brewer.capacity_ml && (
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Capacity</Text>
+                <Text style={styles.statValue}>
+                  {brewer.capacity_ml}ml
+                </Text>
+              </View>
+            )}
+            
+            {brewer.location && (
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Location</Text>
+                <Text style={styles.statValue}>
+                  {brewer.location}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Link href={`/(tabs)/brewers/edit/${brewer.id}`} asChild>
+            <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <Text style={styles.editButtonText}>
+                Edit Equipment Details
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {/* Physical Specifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Physical Specifications
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Type, material, and construction details
+          </Text>
+          <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <DataText variant="caption" color="secondary">
+              <Text style={styles.detailLabel}>
                 Type
-              </DataText>
-              <DataText variant="caption" weight="medium">
+              </Text>
+              <Text style={styles.detailValue}>
                 {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
-              </DataText>
+              </Text>
             </View>
             
             {brewer.material && (
               <View style={styles.detailRow}>
-                <DataText variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Material
-                </DataText>
-                <DataText variant="caption" weight="medium">
+                </Text>
+                <Text style={styles.detailValue}>
                   {brewer.material.charAt(0).toUpperCase() + brewer.material.slice(1)}
-                </DataText>
+                </Text>
               </View>
             )}
             
             {brewer.filter_type && (
               <View style={styles.detailRow}>
-                <DataText variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Filter Type
-                </DataText>
-                <DataText variant="caption" weight="medium">
+                </Text>
+                <Text style={styles.detailValue}>
                   {brewer.filter_type}
-                </DataText>
+                </Text>
               </View>
             )}
             
             {brewer.size && (
               <View style={styles.detailRow}>
-                <DataText variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Size
-                </DataText>
-                <DataText variant="caption" weight="medium">
+                </Text>
+                <Text style={styles.detailValue}>
                   {brewer.size}
-                </DataText>
+                </Text>
               </View>
             )}
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Optimal Brewing Parameters */}
-      {(brewer.optimal_dose_range || brewer.optimal_ratio_range || 
-        brewer.optimal_temp_range || brewer.optimal_grind_range) && (
-        <DataSection
-          title="Optimal Brewing Parameters"
-          subtitle="Recommended settings for best results"
-          spacing="lg"
-        >
-          <DataCard>
-            <View style={styles.detailsGrid}>
+        {/* Optimal Brewing Parameters */}
+        {(brewer.optimal_dose_range || brewer.optimal_ratio_range || 
+          brewer.optimal_temp_range || brewer.optimal_grind_range) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Optimal Brewing Parameters
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Recommended settings for best results
+            </Text>
+            <View style={styles.detailsContainer}>
               {brewer.optimal_dose_range && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Coffee Dose
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_dose_range[0]}g - {brewer.optimal_dose_range[1]}g
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.optimal_ratio_range && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Brew Ratio
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     1:{brewer.optimal_ratio_range[0]} - 1:{brewer.optimal_ratio_range[1]}
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.optimal_temp_range && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Water Temperature
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_temp_range[0]}°C - {brewer.optimal_temp_range[1]}°C
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.optimal_grind_range && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Grind Setting
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_grind_range[0]} - {brewer.optimal_grind_range[1]}
-                  </DataText>
+                  </Text>
                 </View>
               )}
             </View>
-          </DataCard>
-        </DataSection>
-      )}
+          </View>
+        )}
 
-      {/* Purchase & Maintenance */}
-      {(brewer.purchase_date || brewer.purchase_price || brewer.maintenance_schedule || 
-        brewer.last_maintenance) && (
-        <DataSection
-          title="Purchase & Maintenance"
-          subtitle="Purchase information and maintenance schedule"
-          spacing="lg"
-        >
-          <DataCard>
-            <View style={styles.detailsGrid}>
+        {/* Purchase & Maintenance */}
+        {(brewer.purchase_date || brewer.purchase_price || brewer.maintenance_schedule || 
+          brewer.last_maintenance) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Purchase & Maintenance
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Purchase information and maintenance schedule
+            </Text>
+            <View style={styles.detailsContainer}>
               {brewer.purchase_date && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Purchase Date
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {formatDate(brewer.purchase_date)}
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.purchase_price && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Purchase Price
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     ${brewer.purchase_price.toFixed(2)}
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.maintenance_schedule && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Maintenance Schedule
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.maintenance_schedule.charAt(0).toUpperCase() + brewer.maintenance_schedule.slice(1)}
-                  </DataText>
+                  </Text>
                 </View>
               )}
 
               {brewer.last_maintenance && (
                 <View style={styles.detailRow}>
-                  <DataText variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Last Maintenance
-                  </DataText>
-                  <DataText variant="caption" weight="medium">
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {formatDate(brewer.last_maintenance)}
-                  </DataText>
+                  </Text>
                 </View>
               )}
             </View>
-          </DataCard>
-          
-          {brewer.maintenance_notes && (
-            <DataCard style={{ marginTop: 16 }}>
-              <DataText variant="body" weight="medium" style={{ marginBottom: 8 }}>
-                Maintenance Notes
-              </DataText>
-              <DataText variant="body" color="secondary" style={{ lineHeight: 20 }}>
-                {brewer.maintenance_notes}
-              </DataText>
-            </DataCard>
-          )}
-        </DataSection>
-      )}
+            
+            {brewer.maintenance_notes && (
+              <View style={[styles.notesContainer, { marginTop: 16 }]}>
+                <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>
+                  Maintenance Notes
+                </Text>
+                <Text style={styles.notesText}>
+                  {brewer.maintenance_notes}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
-      {/* Brewing Tips */}
-      {brewer.brewing_tips && brewer.brewing_tips.length > 0 && (
-        <DataSection
-          title="Brewing Tips"
-          subtitle="Expert techniques for optimal results"
-          spacing="lg"
-        >
-          <DataCard>
-            <View style={styles.tipsGrid}>
+        {/* Brewing Tips */}
+        {brewer.brewing_tips && brewer.brewing_tips.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Brewing Tips
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Expert techniques for optimal results
+            </Text>
+            <View style={styles.tipsContainer}>
               {brewer.brewing_tips.map((tip, index) => (
                 <View key={index} style={styles.tipRow}>
-                  <DataText variant="body" weight="medium" style={{ color: theme.colors.text.tertiary, marginRight: 8 }}>
-                    •
-                  </DataText>
-                  <DataText variant="body" style={{ flex: 1, lineHeight: 20 }}>
+                  <Text style={styles.tipBullet}>•</Text>
+                  <Text style={styles.tipText}>
                     {tip}
-                  </DataText>
+                  </Text>
                 </View>
               ))}
             </View>
-          </DataCard>
-        </DataSection>
-      )}
+          </View>
+        )}
 
-      {/* Personal Notes */}
-      {brewer.notes && (
-        <DataSection
-          title="Notes"
-          subtitle="Personal observations and preferences"
-          spacing="lg"
-        >
-          <DataCard>
-            <DataText variant="body" style={{ lineHeight: 20 }}>
-              {brewer.notes}
-            </DataText>
-          </DataCard>
-        </DataSection>
-      )}
+        {/* Personal Notes */}
+        {brewer.notes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Notes
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Personal observations and preferences
+            </Text>
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesText}>
+                {brewer.notes}
+              </Text>
+            </View>
+          </View>
+        )}
 
-      {/* Actions */}
-      <DataSection
-        title="Actions"
-        subtitle="Manage equipment or start brewing"
-        spacing="xl"
-      >
-        <DataGrid columns={2} gap="md">
-          <Link href={`/(tabs)/brewers/edit/${brewer.id}`}>
-            <DataButton
-              title="Edit Equipment"
-              variant="secondary"
-            />
-          </Link>
-          <Link href={`/brewprints/new?brewer_id=${brewer.id}`}>
-            <DataButton
-              title="Create Recipe"
-              variant="primary"
-            />
-          </Link>
-        </DataGrid>
-      </DataSection>
-    </DataLayout>
+        {/* Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Actions
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Manage equipment or start brewing
+          </Text>
+          <View style={styles.actionRow}>
+            <Link href={`/(tabs)/brewers/edit/${brewer.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.secondaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.secondaryActionText}>
+                  Edit Equipment
+                </Text>
+              </TouchableOpacity>
+            </Link>
+            <Link href={`/brewprints/new?brewer_id=${brewer.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.primaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.primaryActionText}>
+                  Create Recipe
+                </Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    padding: 32,
-  },
-  
-  heroSection: {
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    overflow: 'hidden' as const,
-  },
-  
-  heroContent: {
-    padding: 24,
-    paddingTop: 32,
-    paddingBottom: 28,
-  },
-  
-  statusRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-  },
-  
-  heroStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignItems: 'center' as const,
-  },
-  
-  modernStatusGrid: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'flex-start' as const,
-    gap: 16,
-  },
-  
-  modernStatusItem: {
-    flex: 1,
-    alignItems: 'center' as const,
-    gap: 8,
-  },
-  
-  modernStatusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    alignItems: 'center' as const,
-    minWidth: 80,
-  },
-  
-  statusItem: {
-    alignItems: 'center' as const,
-    gap: 8,
-  },
-  
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignItems: 'center' as const,
-  },
-  
-  detailsGrid: {
-    gap: 12,
-  },
-  
-  detailRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-  },
-  
-  tipsGrid: {
-    gap: 12,
-  },
-  
-  tipRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'flex-start' as const,
-  },
-  
-  actionsRow: {
-    flexDirection: 'row' as const,
-    gap: 12,
-  },
-};

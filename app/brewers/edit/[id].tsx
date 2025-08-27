@@ -1,15 +1,22 @@
-import { DataLayout } from "@/components/ui/DataLayout";
-import { DataText } from "@/components/ui/DataText";
 import { BrewerForm } from "@/forms/BrewerForm";
 import { BrewersService } from "@/lib/services/brewers";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { toast } from "sonner-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function EditBrewerScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
   
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,48 +86,87 @@ export default function EditBrewerScreen() {
     router.back();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: theme.spacing.md,
+      paddingTop: theme.spacing['3xl'],
+      paddingBottom: theme.spacing.sm,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+      paddingVertical: theme.spacing.xs,
+    },
+    content: {
+      paddingHorizontal: theme.spacing.md,
+      paddingBottom: theme.spacing.xl,
+    },
+  });
+
   if (loading) {
     return (
-      <DataLayout
-        title="Loading Equipment Details..."
-        subtitle="Retrieving brewing equipment information for editing"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading brewer details...
-          </DataText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text body style={{ color: theme.colors.text.primary }}>← Back</Text>
+          </TouchableOpacity>
+          <Text h2 style={{ color: theme.colors.text.primary, marginBottom: 2, fontWeight: '600' }}>
+            Loading Brewer...
+          </Text>
+          <Text tiny style={{ color: theme.colors.text.secondary, fontSize: 11 }}>
+            Retrieving equipment information
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text body style={{ color: theme.colors.text.secondary }}>
+            Loading brewer details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <DataLayout
-      title="Edit Equipment"
-      subtitle="Update brewing equipment specifications"
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {initialData && (
-        <BrewerForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-          initialData={initialData}
-          isEditing={true}
-        />
-      )}
-    </DataLayout>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text body style={{ color: theme.colors.text.primary }}>← Back</Text>
+        </TouchableOpacity>
+        <Text h2 style={{ color: theme.colors.text.primary, marginBottom: 2, fontWeight: '600' }}>
+          Edit Brewer
+        </Text>
+        <Text tiny style={{ color: theme.colors.text.secondary, fontSize: 11 }}>
+          Update equipment specifications
+        </Text>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {initialData && (
+          <BrewerForm
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+            initialData={initialData}
+            isEditing={true}
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-});

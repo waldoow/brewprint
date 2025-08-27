@@ -1,21 +1,22 @@
-import { DataLayout, DataGrid, DataSection } from "@/components/ui/DataLayout";
-import { DataCard, InfoCard } from "@/components/ui/DataCard";
-import { DataText } from "@/components/ui/DataText";
-import { DataButton } from "@/components/ui/DataButton";
-import { getTheme } from "@/constants/DataFirstDesign";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { ExportService } from "@/lib/services/export";
 import * as FileSystem from "expo-file-system";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
-import { Alert, Share, View } from "react-native";
+import { Alert, Share, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
 import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function DataPrivacyScreen() {
   const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? "light");
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [backupStats, setBackupStats] = useState<{
     total_items: number;
@@ -198,233 +199,413 @@ export default function DataPrivacyScreen() {
     }
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    dataCard: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      padding: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 16,
+    },
+    statItem: {
+      alignItems: 'center',
+      padding: 16,
+      minWidth: '45%',
+    },
+    statLabel: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    statValue: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+    },
+    statValueSmall: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+    },
+    exportButtons: {
+      gap: 12,
+    },
+    primaryButton: {
+      backgroundColor: theme.colors.info,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    primaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.inverse,
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    secondaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    dangerButton: {
+      backgroundColor: theme.colors.error,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    dangerButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.inverse,
+    },
+    infoBox: {
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.info,
+      padding: 12,
+      borderRadius: 6,
+      marginTop: 16,
+    },
+    infoText: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      lineHeight: 18,
+    },
+    privacyList: {
+      gap: 20,
+    },
+    privacyItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 12,
+    },
+    privacyIcon: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: theme.colors.success,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    privacyIconText: {
+      color: theme.colors.text.inverse,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    privacyContent: {
+      flex: 1,
+    },
+    privacyTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 4,
+    },
+    privacyDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      lineHeight: 18,
+    },
+    dangerZone: {
+      backgroundColor: 'rgba(220, 38, 38, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      borderRadius: 6,
+      padding: 16,
+    },
+    warningBox: {
+      backgroundColor: 'rgba(220, 38, 38, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      padding: 12,
+      borderRadius: 6,
+      marginTop: 16,
+    },
+    warningText: {
+      fontSize: 10,
+      color: theme.colors.error,
+      lineHeight: 18,
+    },
+    loadingContainer: {
+      alignItems: 'center',
+      paddingVertical: 32,
+    },
+    loadingText: {
+      fontSize: 14,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   return (
-    <DataLayout
-      title="Data & Privacy"
-      subtitle="Export and manage your coffee data"
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Data Overview */}
-      <DataSection title="Your Data" subtitle="Overview of your coffee information" spacing="lg">
-        <DataCard>
-          {backupStats ? (
-            <DataGrid columns={2} gap="md">
-              <View style={styles.statItem}>
-                <DataText variant="caption" color="secondary" style={styles.statLabel}>
-                  Total Items
-                </DataText>
-                <DataText variant="h3" weight="bold" style={styles.statValue}>
-                  {backupStats.total_items}
-                </DataText>
-              </View>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Data & Privacy
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Export and manage your coffee data
+        </Text>
+      </View>
 
-              {Object.entries(backupStats.tables).map(([table, count]) => (
-                <View key={table} style={styles.statItem}>
-                  <DataText variant="caption" color="secondary" style={styles.statLabel}>
-                    {table
-                      .replace("_", " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </DataText>
-                  <DataText variant="h4" weight="semibold" style={styles.statValue}>
-                    {count}
-                  </DataText>
-                </View>
-              ))}
-            </DataGrid>
-          ) : (
-            <View style={styles.loadingContainer}>
-              <DataText variant="body" color="secondary">
-                Loading data overview...
-              </DataText>
-            </View>
-          )}
-        </DataCard>
-      </DataSection>
-
-      {/* Export Section */}
-      <DataSection 
-        title="Export Data" 
-        subtitle="Download your coffee data for backup or to use in other applications" 
-        spacing="lg"
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
-        <DataCard>
-          <DataGrid columns={1} gap="md">
-            <DataButton
-              title="Complete Backup (JSON)"
-              onPress={handleExportAllData}
-              variant="primary"
-              loading={exporting}
-              fullWidth
-            />
+        {/* Data Overview */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Your Data
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Overview of your coffee information
+          </Text>
+          
+          <View style={styles.dataCard}>
+            {backupStats ? (
+              <View style={styles.statsGrid}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>
+                    Total Items
+                  </Text>
+                  <Text style={styles.statValue}>
+                    {backupStats.total_items}
+                  </Text>
+                </View>
 
-            <DataButton
-              title="Recipes (CSV)"
-              onPress={handleExportBrewprintsCSV}
-              variant="secondary"
-              loading={exporting}
-              fullWidth
-            />
-
-            <DataButton
-              title="Bean Inventory (CSV)"
-              onPress={handleExportBeansCSV}
-              variant="secondary"
-              loading={exporting}
-              fullWidth
-            />
-          </DataGrid>
-
-          <View style={styles.infoBox}>
-            <DataText variant="caption" color="secondary" style={styles.infoText}>
-              • Complete backup includes all data in JSON format for maximum compatibility{"\n"}
-              • CSV exports are ideal for spreadsheet applications like Excel or Google Sheets{"\n"}
-              • All exports respect your privacy - no data is sent to external servers
-            </DataText>
+                {Object.entries(backupStats.tables).map(([table, count]) => (
+                  <View key={table} style={styles.statItem}>
+                    <Text style={styles.statLabel}>
+                      {table
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </Text>
+                    <Text style={styles.statValueSmall}>
+                      {count}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>
+                  Loading data overview...
+                </Text>
+              </View>
+            )}
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Privacy Section */}
-      <DataSection title="Privacy & Security" spacing="lg">
-        <DataCard>
+        {/* Export Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Export Data
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Download your coffee data for backup or to use in other applications
+          </Text>
+          
+          <View style={styles.exportButtons}>
+            <TouchableOpacity
+              style={[styles.primaryButton, exporting && { opacity: 0.5 }]}
+              onPress={handleExportAllData}
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.primaryButtonText}>
+                Complete Backup (JSON)
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryButton, exporting && { opacity: 0.5 }]}
+              onPress={handleExportBrewprintsCSV}
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Recipes (CSV)
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryButton, exporting && { opacity: 0.5 }]}
+              onPress={handleExportBeansCSV}
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Bean Inventory (CSV)
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>
+                • Complete backup includes all data in JSON format for maximum compatibility{"\n"}
+                • CSV exports are ideal for spreadsheet applications like Excel or Google Sheets{"\n"}
+                • All exports respect your privacy - no data is sent to external servers
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Privacy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Privacy & Security
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Your data protection and privacy assurance
+          </Text>
+          
           <View style={styles.privacyList}>
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
-                <DataText style={styles.privacyIconText}>✓</DataText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
+                <Text style={styles.privacyTitle}>
                   Local Data Storage
-                </DataText>
-                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
+                </Text>
+                <Text style={styles.privacyDescription}>
                   All your coffee data is stored securely on your device and in your personal cloud account
-                </DataText>
+                </Text>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
-                <DataText style={styles.privacyIconText}>✓</DataText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
+                <Text style={styles.privacyTitle}>
                   No Analytics Tracking
-                </DataText>
-                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
-                  We don&apos;t track your usage or collect personal data for analytics purposes
-                </DataText>
+                </Text>
+                <Text style={styles.privacyDescription}>
+                  We don't track your usage or collect personal data for analytics purposes
+                </Text>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: theme.colors.success }]}>
-                <DataText style={styles.privacyIconText}>✓</DataText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <DataText variant="body" weight="semibold" style={styles.privacyTitle}>
+                <Text style={styles.privacyTitle}>
                   Data Ownership
-                </DataText>
-                <DataText variant="caption" color="secondary" style={styles.privacyDescription}>
+                </Text>
+                <Text style={styles.privacyDescription}>
                   Your coffee data belongs to you. Export it anytime, no restrictions
-                </DataText>
+                </Text>
               </View>
             </View>
           </View>
-        </DataCard>
-      </DataSection>
+        </View>
 
-      {/* Danger Zone */}
-      <DataSection 
-        title="Danger Zone" 
-        subtitle="These actions cannot be undone. Please be careful." 
-        spacing="lg"
-      >
-        <DataCard variant="error">
-          <DataButton
-            title="Clear All Data"
-            onPress={handleClearAllData}
-            variant="destructive"
-            loading={clearing}
-          />
+        {/* Danger Zone */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Danger Zone
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            These actions cannot be undone. Please be careful.
+          </Text>
+          
+          <View style={styles.dangerZone}>
+            <TouchableOpacity
+              style={[styles.dangerButton, clearing && { opacity: 0.5 }]}
+              onPress={handleClearAllData}
+              disabled={clearing}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.dangerButtonText}>
+                Clear All Data
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.warningBox}>
-            <DataText variant="caption" color="error" style={styles.warningText}>
-              ⚠️ This will permanently delete all your coffee data including recipes, brewing history, beans, equipment, and preferences. Make sure to export your data first!
-            </DataText>
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                ⚠️ This will permanently delete all your coffee data including recipes, brewing history, beans, equipment, and preferences. Make sure to export your data first!
+              </Text>
+            </View>
           </View>
-        </DataCard>
-      </DataSection>
-    </DataLayout>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    padding: 20,
-    alignItems: "center" as const,
-  },
-  statItem: {
-    alignItems: "center" as const,
-    padding: 16,
-  },
-  statLabel: {
-    textAlign: "center" as const,
-    marginBottom: 4,
-  },
-  statValue: {
-    textAlign: "center" as const,
-  },
-  infoBox: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(59, 130, 246, 0.2)",
-    marginTop: 16,
-  },
-  infoText: {
-    lineHeight: 18,
-  },
-  privacyList: {
-    gap: 20,
-  },
-  privacyItem: {
-    flexDirection: "row" as const,
-    alignItems: "flex-start" as const,
-    gap: 12,
-  },
-  privacyIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  privacyIconText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold" as const,
-  },
-  privacyContent: {
-    flex: 1,
-  },
-  privacyTitle: {
-    marginBottom: 4,
-  },
-  privacyDescription: {
-    lineHeight: 18,
-  },
-  warningBox: {
-    backgroundColor: "rgba(220, 38, 38, 0.1)",
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(220, 38, 38, 0.2)",
-    marginTop: 16,
-  },
-  warningText: {
-    lineHeight: 18,
-  },
-};

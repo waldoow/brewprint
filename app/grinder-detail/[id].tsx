@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import { Container } from '@/components/ui/Container';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Card } from '@/components/ui/Card';
-import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
-import { Section } from '@/components/ui/Section';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
 import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { GrindersService, type Grinder } from '@/lib/services/grinders';
@@ -19,6 +18,221 @@ export default function GrinderDetailScreen() {
   
   const [grinder, setGrinder] = useState<Grinder | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    conditionBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+      marginTop: 4,
+    },
+    conditionText: {
+      fontSize: 8,
+      fontWeight: '600',
+      color: theme.colors.text.inverse,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    editButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    editButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    detailsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    detailLabel: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    detailValue: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    notesContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+    },
+    notesText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      lineHeight: 18,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    primaryActionButton: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    secondaryActionButton: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.border,
+    },
+    primaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    secondaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 18,
+    },
+    emptyButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+    },
+    emptyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+  });
 
   const loadGrinder = React.useCallback(async () => {
     try {
@@ -50,150 +264,189 @@ export default function GrinderDetailScreen() {
       case 'good': return theme.colors.success;
       case 'fair': return theme.colors.warning;
       case 'needs-replacement': return theme.colors.error;
-      default: return theme.colors.gray[400];
+      default: return theme.colors.surface;
+    }
+  };
+
+  const getConditionLabel = (condition: Grinder['condition']) => {
+    switch (condition) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Good';
+      case 'fair': return 'Fair';
+      case 'needs-replacement': return 'Needs Replacement';
+      default: return 'Unknown';
     }
   };
 
   if (loading) {
     return (
-      <Container>
-        <PageHeader 
-          title="Grinder Details"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Grinder Details
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Loading equipment information...
+          </Text>
+        </View>
+        
         <View style={styles.loadingContainer}>
-          <Text variant="body" color="secondary">
+          <Text style={styles.loadingText}>
             Loading grinder details...
           </Text>
         </View>
-      </Container>
+      </View>
     );
   }
 
   if (!grinder) {
     return (
-      <Container>
-        <PageHeader 
-          title="Grinder Not Found"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <Card variant="outlined" style={{ flex: 1, justifyContent: 'center' }}>
-          <Text 
-            variant="h4" 
-            weight="semibold" 
-            style={{ textAlign: 'center', marginBottom: 8 }}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
           >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
             Grinder Not Found
           </Text>
-          <Text 
-            variant="body" 
-            color="secondary" 
-            style={{ textAlign: 'center', marginBottom: 24 }}
-          >
-            The requested grinder could not be found.
+          <Text style={styles.pageSubtitle}>
+            Equipment could not be found
           </Text>
-          <Button
-            title="Back to Library"
-            onPress={() => router.back()}
-            variant="primary"
-            fullWidth
-          />
-        </Card>
-      </Container>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              Grinder Not Found
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              The requested grinder could not be found in your library.
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.emptyButtonText}>
+                Back to Library
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
   return (
-    <Container scrollable>
-      <PageHeader 
-        title={grinder.name}
-        subtitle="Grinder Details"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          {grinder.name}
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()} • {grinder.burr_material || 'Steel'} Burrs
+        </Text>
+      </View>
 
-      <Section 
-        title="Status & Overview"
-        subtitle={`${grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()} • ${grinder.burr_material || 'Steel'} Burrs`}
-        spacing="lg"
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
-        <Link href={`/(tabs)/grinders/edit/${grinder.id}`}>
-          <Button
-            title="Edit Grinder Details"
-            variant="secondary"
-            size="lg"
-            fullWidth
-          />
-        </Link>
-      </Section>
-
-      <Section 
-        title="Status & Condition"
-        subtitle="Current condition and burr information"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.statusRow}>
-            <View style={styles.statusItem}>
-              <Text variant="caption" color="secondary">
-                Condition
+        {/* Edit Action */}
+        <View style={styles.section}>
+          <Link href={`/(tabs)/grinders/edit/${grinder.id}`} asChild>
+            <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <Text style={styles.editButtonText}>
+                Edit Grinder Details
               </Text>
-              <View style={[styles.statusBadge, { backgroundColor: getConditionColor(grinder.condition) }]}>
-                <Text variant="caption" color="inverse">
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {/* Status & Condition */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Status & Condition
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Current condition and burr information
+          </Text>
+          
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Condition</Text>
+              <Text style={styles.statValue}>
+                {getConditionLabel(grinder.condition)}
+              </Text>
+              <View style={[styles.conditionBadge, { backgroundColor: getConditionColor(grinder.condition) }]}>
+                <Text style={styles.conditionText}>
                   {grinder.condition?.toUpperCase() || 'UNKNOWN'}
                 </Text>
               </View>
             </View>
             
             {grinder.burr_size && (
-              <View style={styles.statusItem}>
-                <Text variant="caption" color="secondary">
-                  Burr Size
-                </Text>
-                <Text variant="body" weight="medium">
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Burr Size</Text>
+                <Text style={styles.statValue}>
                   {grinder.burr_size}mm
                 </Text>
               </View>
             )}
             
             {grinder.motor_power_watts && (
-              <View style={styles.statusItem}>
-                <Text variant="caption" color="secondary">
-                  Motor Power
-                </Text>
-                <Text variant="body" weight="medium">
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Motor Power</Text>
+                <Text style={styles.statValue}>
                   {grinder.motor_power_watts}W
                 </Text>
               </View>
             )}
           </View>
-        </Card>
-      </Section>
+        </View>
 
-      <Section
-        title="Physical Specifications"
-        subtitle="Type, construction, and technical details"
-        spacing="lg"
-      >
-        <Card variant="default">
-          <View style={styles.detailsGrid}>
+        {/* Physical Specifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Physical Specifications
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Type, construction, and technical details
+          </Text>
+          <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
-              <Text variant="caption" color="secondary">
+              <Text style={styles.detailLabel}>
                 Type
               </Text>
-              <Text variant="caption" weight="medium">
+              <Text style={styles.detailValue}>
                 {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')}
               </Text>
             </View>
             
             {grinder.burr_material && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Burr Material
                 </Text>
-                <Text variant="caption" weight="medium">
+                <Text style={styles.detailValue}>
                   {grinder.burr_material.charAt(0).toUpperCase() + grinder.burr_material.slice(1)}
                 </Text>
               </View>
@@ -201,10 +454,10 @@ export default function GrinderDetailScreen() {
             
             {grinder.weight_grams && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Weight
                 </Text>
-                <Text variant="caption" weight="medium">
+                <Text style={styles.detailValue}>
                   {grinder.weight_grams}g
                 </Text>
               </View>
@@ -212,32 +465,33 @@ export default function GrinderDetailScreen() {
             
             {grinder.hopper_capacity_grams && (
               <View style={styles.detailRow}>
-                <Text variant="caption" color="secondary">
+                <Text style={styles.detailLabel}>
                   Hopper Capacity
                 </Text>
-                <Text variant="caption" weight="medium">
+                <Text style={styles.detailValue}>
                   {grinder.hopper_capacity_grams}g
                 </Text>
               </View>
             )}
           </View>
-        </Card>
-      </Section>
+        </View>
 
-      {(grinder.optimal_dose_range || grinder.optimal_grind_settings) && (
-        <Section
-          title="Optimal Settings"
-          subtitle="Recommended grind settings and parameters"
-          spacing="lg"
-        >
-          <Card variant="default">
-            <View style={styles.detailsGrid}>
+        {/* Optimal Settings */}
+        {(grinder.optimal_dose_range || grinder.optimal_grind_settings) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Optimal Settings
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Recommended grind settings and parameters
+            </Text>
+            <View style={styles.detailsContainer}>
               {grinder.optimal_dose_range && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Dose Range
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     {grinder.optimal_dose_range[0]}g - {grinder.optimal_dose_range[1]}g
                   </Text>
                 </View>
@@ -245,10 +499,10 @@ export default function GrinderDetailScreen() {
 
               {grinder.optimal_grind_settings && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Grind Settings
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     {Array.isArray(grinder.optimal_grind_settings) 
                       ? grinder.optimal_grind_settings.join(', ')
                       : grinder.optimal_grind_settings}
@@ -256,25 +510,26 @@ export default function GrinderDetailScreen() {
                 </View>
               )}
             </View>
-          </Card>
-        </Section>
-      )}
+          </View>
+        )}
 
-      {(grinder.purchase_date || grinder.purchase_price || grinder.last_burr_replacement || 
-        grinder.burr_life_shots) && (
-        <Section
-          title="Purchase & Maintenance"
-          subtitle="Purchase information and burr maintenance"
-          spacing="lg"
-        >
-          <Card variant="default">
-            <View style={styles.detailsGrid}>
+        {/* Purchase & Maintenance */}
+        {(grinder.purchase_date || grinder.purchase_price || grinder.last_burr_replacement || 
+          grinder.burr_life_shots) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Purchase & Maintenance
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Purchase information and burr maintenance
+            </Text>
+            <View style={styles.detailsContainer}>
               {grinder.purchase_date && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Purchase Date
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     {formatDate(grinder.purchase_date)}
                   </Text>
                 </View>
@@ -282,10 +537,10 @@ export default function GrinderDetailScreen() {
 
               {grinder.purchase_price && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Purchase Price
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     ${grinder.purchase_price.toFixed(2)}
                   </Text>
                 </View>
@@ -293,10 +548,10 @@ export default function GrinderDetailScreen() {
 
               {grinder.last_burr_replacement && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Last Burr Replacement
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     {formatDate(grinder.last_burr_replacement)}
                   </Text>
                 </View>
@@ -304,94 +559,63 @@ export default function GrinderDetailScreen() {
 
               {grinder.burr_life_shots && (
                 <View style={styles.detailRow}>
-                  <Text variant="caption" color="secondary">
+                  <Text style={styles.detailLabel}>
                     Burr Life Shots
                   </Text>
-                  <Text variant="caption" weight="medium">
+                  <Text style={styles.detailValue}>
                     {grinder.burr_life_shots.toLocaleString()}
                   </Text>
                 </View>
               )}
             </View>
-          </Card>
-        </Section>
-      )}
+          </View>
+        )}
 
-      {grinder.notes && (
-        <Section
-          title="Notes"
-          subtitle="Personal observations and settings"
-          spacing="lg"
-        >
-          <Card variant="default">
-            <Text variant="body" style={{ lineHeight: 20 }}>
-              {grinder.notes}
+        {/* Notes */}
+        {grinder.notes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Notes
             </Text>
-          </Card>
-        </Section>
-      )}
+            <Text style={styles.sectionSubtitle}>
+              Personal observations and settings
+            </Text>
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesText}>
+                {grinder.notes}
+              </Text>
+            </View>
+          </View>
+        )}
 
-      <Section
-        title="Quick Actions"
-        subtitle="Edit details or manage this grinder"
-        spacing="xl"
-      >
-        <View style={styles.actionsRow}>
-          <Link href={`/(tabs)/grinders/edit/${grinder.id}`} style={{ flex: 1, marginRight: 8 }}>
-            <Button
-              title="Edit Grinder"
-              variant="secondary"
-            />
-          </Link>
-          <Button
-            title="New Recipe"
-            variant="primary"
-            onPress={() => router.push(`/brewprints/new?grinder_id=${grinder.id}`)}
-            style={{ flex: 1, marginLeft: 8 }}
-          />
+        {/* Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Actions
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Edit details or manage this grinder
+          </Text>
+          <View style={styles.actionRow}>
+            <Link href={`/(tabs)/grinders/edit/${grinder.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.secondaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.secondaryActionText}>
+                  Edit Grinder
+                </Text>
+              </TouchableOpacity>
+            </Link>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.primaryActionButton]}
+              onPress={() => router.push(`/brewprints/new?grinder_id=${grinder.id}`)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.primaryActionText}>
+                New Recipe
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </Section>
-    </Container>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    padding: 32,
-  },
-  
-  statusRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'flex-start' as const,
-  },
-  
-  statusItem: {
-    alignItems: 'center' as const,
-    gap: 8,
-  },
-  
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignItems: 'center' as const,
-  },
-  
-  detailsGrid: {
-    gap: 12,
-  },
-  
-  detailRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-  },
-  
-  actionsRow: {
-    flexDirection: 'row' as const,
-  },
-};

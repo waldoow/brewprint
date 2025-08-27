@@ -1,8 +1,15 @@
-import { DataLayout, DataGrid, DataSection } from '@/components/ui/DataLayout';
-import { DataCard, InfoCard } from '@/components/ui/DataCard';
-import { DataText } from '@/components/ui/DataText';
-import { DataButton } from '@/components/ui/DataButton';
-import { DataMetric } from '@/components/ui/DataMetric';
+import {
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import {
+  View,
+  Text,
+  Card,
+  Button,
+  TouchableOpacity,
+  Colors,
+} from "react-native-ui-lib";
 import { BrewprintsService, type Brewprint } from "@/lib/services";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -11,20 +18,15 @@ import {
   Alert,
   Platform,
   Share,
-  View,
   type AlertButton,
 } from "react-native";
 import { toast } from "sonner-native";
-import { getTheme } from '@/constants/DataFirstDesign';
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function BrewprintDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [brewprint, setBrewprint] = useState<Brewprint | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const colorScheme = useColorScheme();
-  const theme = getTheme(colorScheme ?? 'light');
 
   const loadBrewprint = useCallback(async () => {
     if (!id) return;
@@ -196,40 +198,64 @@ export default function BrewprintDetailScreen() {
 
   if (isLoading) {
     return (
-      <DataLayout
-        title="Loading Recipe"
-        subtitle="Retrieving brewing details..."
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <View style={styles.loadingContainer}>
-          <DataText variant="body" color="secondary">
-            Loading recipe details...
-          </DataText>
+      <View flex bg-screenBG>
+        <View padding-page paddingT-xxxl>
+          <TouchableOpacity onPress={() => router.back()} marginB-md>
+            <Text body textColor>← Back</Text>
+          </TouchableOpacity>
+          <Text h1 textColor marginB-xs>
+            Loading Recipe
+          </Text>
+          <Text body textSecondary>
+            Retrieving brewing details...
+          </Text>
         </View>
-      </DataLayout>
+        
+        <View flex center>
+          <Text body textSecondary>
+            Loading recipe details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (!brewprint) {
     return (
-      <DataLayout
-        title="Recipe Not Found"
-        subtitle="Unable to load brewing recipe"
-        showBackButton={true}
-        onBackPress={() => router.back()}
-      >
-        <InfoCard
-          title="Recipe Not Available"
-          message="This brewing recipe could not be found or may have been deleted."
-          variant="error"
-          action={{
-            title: "Go Back",
-            onPress: () => router.back(),
-            variant: "primary"
-          }}
-        />
-      </DataLayout>
+      <View flex bg-screenBG>
+        <View padding-page paddingT-xxxl>
+          <TouchableOpacity onPress={() => router.back()} marginB-md>
+            <Text body textColor>← Back</Text>
+          </TouchableOpacity>
+          <Text h1 textColor marginB-xs>
+            Recipe Not Found
+          </Text>
+          <Text body textSecondary>
+            Unable to load brewing recipe
+          </Text>
+        </View>
+
+        <ScrollView
+          style={StyleSheet.create({ scrollView: { flex: 1 } }).scrollView}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 24 }}
+        >
+          <Card padding-md backgroundColor={Colors.red10}>
+            <Text h3 textColor marginB-xs>
+              Recipe Not Available
+            </Text>
+            <Text body textSecondary marginB-md>
+              This brewing recipe could not be found or may have been deleted.
+            </Text>
+            <Button
+              label="Go Back"
+              onPress={() => router.back()}
+              backgroundColor={Colors.blue30}
+              size="large"
+              fullWidth
+            />
+          </Card>
+        </ScrollView>
+      </View>
     );
   }
 
@@ -239,162 +265,219 @@ export default function BrewprintDetailScreen() {
 
 
   return (
-    <DataLayout
-      title={brewprint.name}
-      subtitle={`${brewprint.method.replace('-', ' ')} Recipe • ${brewprint.status}`}
-      showBackButton={true}
-      onBackPress={() => router.back()}
-      scrollable
-    >
-      {/* Recipe Overview */}
-      <DataSection title="Recipe Overview" spacing="lg">
-        <DataGrid columns={3} gap="md">
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Coffee
-            </DataText>
-            <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-              {brewprint.parameters?.coffee_grams || 0}g
-            </DataText>
-          </DataCard>
-          
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Water
-            </DataText>
-            <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-              {brewprint.parameters?.water_grams || 0}ml
-            </DataText>
-          </DataCard>
-          
-          <DataCard>
-            <DataText variant="small" color="secondary" weight="medium">
-              Ratio
-            </DataText>
-            <DataText variant="h2" color="primary" weight="bold" style={{ marginVertical: theme.spacing[1] }}>
-              {ratio ? `1:${ratio}` : 'N/A'}
-            </DataText>
-          </DataCard>
-        </DataGrid>
-      </DataSection>
+    <View flex bg-screenBG>
+      <View padding-page paddingT-xxxl>
+        <TouchableOpacity onPress={() => router.back()} marginB-md>
+          <Text body textColor>← Back</Text>
+        </TouchableOpacity>
+        <Text h1 textColor marginB-xs>
+          {brewprint.name}
+        </Text>
+        <Text body textSecondary>
+          {brewprint.method.replace('-', ' ')} Recipe • {brewprint.status}
+        </Text>
+      </View>
 
-      {/* Brewing Parameters */}
-      <DataSection title="Brewing Parameters" spacing="lg">
-        <DataCard>
-          <DataGrid columns={2} gap="sm">
-            <DataMetric
-              label="Water Temperature"
-              value={brewprint.parameters?.water_temp || 0}
-              unit="°C"
-            />
-            <DataMetric
-              label="Grind Size"
-              value={brewprint.parameters?.grind_size || 'Medium'}
-            />
-            <DataMetric
-              label="Total Time"
-              value={brewprint.parameters?.total_time || 0}
-              unit="s"
-            />
-            <DataMetric
-              label="Status"
-              value={brewprint.status.charAt(0).toUpperCase() + brewprint.status.slice(1)}
-            />
-          </DataGrid>
-        </DataCard>
-      </DataSection>
-
-      {/* Brewing Steps */}
-      {brewprint.steps && brewprint.steps.length > 0 && (
-        <DataSection title="Brewing Steps" subtitle={`${brewprint.steps.length} step process`} spacing="lg">
-          <DataCard>
-            {brewprint.steps.map((step, index) => (
-              <View key={step.id} style={[styles.stepRow, index === brewprint.steps!.length - 1 && styles.lastStep]}>
-                <View style={[styles.stepNumber, { backgroundColor: theme.colors.gray[100] }]}>
-                  <DataText variant="caption" weight="bold" color="secondary">
-                    {index + 1}
-                  </DataText>
-                </View>
-                
-                <View style={styles.stepContent}>
-                  <DataText variant="body" weight="semibold">
-                    {step.title}
-                  </DataText>
-                  <DataText variant="caption" color="secondary" style={styles.stepMeta}>
-                    {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
-                  </DataText>
-                  {step.description && (
-                    <DataText variant="caption" color="secondary" style={styles.stepDescription}>
-                      {step.description}
-                    </DataText>
-                  )}
-                </View>
-              </View>
-            ))}
-          </DataCard>
-        </DataSection>
-      )}
-
-      {/* Notes */}
-      {brewprint.notes && (
-        <DataSection title="Recipe Notes" spacing="lg">
-          <DataCard>
-            <DataText variant="body" style={{ lineHeight: 20 }}>
-              {brewprint.notes}
-            </DataText>
-          </DataCard>
-        </DataSection>
-      )}
-
-      {/* Recipe Actions */}
-      <DataSection title="Recipe Actions" spacing="xl">
-        <DataGrid columns={1} gap="md">
-          <DataButton
-            title="Start Brewing Session"
-            onPress={() => {
-              if (!id) {
-                toast.error('Recipe ID missing - cannot start brewing session');
-                return;
-              }
-              router.push(`/brewing/${id}`);
-            }}
-            variant="primary"
-            size="lg"
-            fullWidth
-          />
-          
-          <DataGrid columns={2} gap="sm">
-            <DataButton
-              title="Edit Recipe"
-              onPress={() => router.push(`/brewprints/edit/${id}`)}
-              variant="secondary"
-            />
+      <ScrollView
+        style={StyleSheet.create({ scrollView: { flex: 1 } }).scrollView}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 24 }}
+      >
+        {/* Recipe Overview */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Recipe Overview
+          </Text>
+          <Text body textSecondary marginB-md>
+            Essential brewing parameters
+          </Text>
+          <View row gap-md>
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Coffee
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {brewprint.parameters?.coffee_grams || 0}g
+              </Text>
+            </Card>
             
-            <DataButton
-              title="More Options"
-              onPress={showActionSheet}
-              variant="outline"
-            />
-          </DataGrid>
-        </DataGrid>
-      </DataSection>
-    </DataLayout>
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Water
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {brewprint.parameters?.water_grams || 0}ml
+              </Text>
+            </Card>
+            
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Ratio
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {ratio ? `1:${ratio}` : 'N/A'}
+              </Text>
+            </Card>
+          </View>
+        </View>
+
+        {/* Brewing Parameters */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Brewing Parameters
+          </Text>
+          <Text body textSecondary marginB-md>
+            Detailed brewing specifications
+          </Text>
+          <Card padding-md>
+            <View style={styles.parametersGrid}>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Water Temperature</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.water_temp || 0}°C
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Grind Size</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.grind_size || 'Medium'}
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Total Time</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.total_time || 0}s
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Status</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.status.charAt(0).toUpperCase() + brewprint.status.slice(1)}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </View>
+
+        {/* Brewing Steps */}
+        {brewprint.steps && brewprint.steps.length > 0 && (
+          <View>
+            <Text h3 textColor marginB-xs>
+              Brewing Steps
+            </Text>
+            <Text body textSecondary marginB-md>
+              {brewprint.steps.length} step process
+            </Text>
+            <Card padding-md>
+              {brewprint.steps.map((step, index) => (
+                <View key={step.id} style={[styles.stepRow, index === brewprint.steps!.length - 1 && styles.lastStep]}>
+                  <View style={[styles.stepNumber, { backgroundColor: Colors.grey40 }]}>
+                    <Text caption textColor weight="bold">
+                      {index + 1}
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.stepContent}>
+                    <Text body textColor weight="semibold">
+                      {step.title}
+                    </Text>
+                    <Text caption textSecondary style={styles.stepMeta}>
+                      {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
+                    </Text>
+                    {step.description && (
+                      <Text caption textSecondary style={styles.stepDescription}>
+                        {step.description}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </Card>
+          </View>
+        )}
+
+        {/* Notes */}
+        {brewprint.notes && (
+          <View>
+            <Text h3 textColor marginB-xs>
+              Recipe Notes
+            </Text>
+            <Text body textSecondary marginB-md>
+              Additional brewing notes and observations
+            </Text>
+            <Card padding-md>
+              <Text body textColor style={{ lineHeight: 20 }}>
+                {brewprint.notes}
+              </Text>
+            </Card>
+          </View>
+        )}
+
+        {/* Recipe Actions */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Recipe Actions
+          </Text>
+          <Text body textSecondary marginB-md>
+            Start brewing or manage this recipe
+          </Text>
+          <Card padding-md>
+            <View style={{ gap: 12 }}>
+              <Button
+                label="Start Brewing Session"
+                onPress={() => {
+                  if (!id) {
+                    toast.error('Recipe ID missing - cannot start brewing session');
+                    return;
+                  }
+                  router.push(`/brewing/${id}`);
+                }}
+                backgroundColor={Colors.blue30}
+                size="large"
+                fullWidth
+              />
+              
+              <View row gap-sm>
+                <Button
+                  label="Edit Recipe"
+                  onPress={() => router.push(`/brewprints/edit/${id}`)}
+                  backgroundColor={Colors.grey40}
+                  size="large"
+                  flex
+                />
+                
+                <Button
+                  label="More Options"
+                  onPress={showActionSheet}
+                  backgroundColor={Colors.grey40}
+                  size="large"
+                  flex
+                />
+              </View>
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = {
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center' as const,
+const styles = StyleSheet.create({
+  parametersGrid: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 16,
+  },
+  parameterItem: {
+    minWidth: '45%',
     alignItems: 'center' as const,
-    padding: 32,
+    padding: 16,
   },
   stepRow: {
     flexDirection: 'row' as const,
     alignItems: 'flex-start' as const,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomColor: Colors.grey30,
   },
   lastStep: {
     borderBottomWidth: 0,
@@ -419,4 +502,4 @@ const styles = {
     fontSize: 12,
     lineHeight: 16,
   },
-};
+});
