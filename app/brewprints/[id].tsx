@@ -1,26 +1,23 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { BrewprintsService, type Brewprint } from "@/lib/services";
-import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  Coffee,
-  Droplets,
-  SlidersHorizontal,
-  Thermometer,
-  Timer as TimerIcon,
-} from "lucide-react-native";
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import {
+  View,
+  Text,
+  Card,
+  Button,
+  TouchableOpacity,
+  Colors,
+} from "react-native-ui-lib";
+import { BrewprintsService, type Brewprint } from "@/lib/services";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActionSheetIOS,
   Alert,
   Platform,
   Share,
-  StyleSheet,
   type AlertButton,
 } from "react-native";
 import { toast } from "sonner-native";
@@ -39,11 +36,11 @@ export default function BrewprintDetailScreen() {
       if (result.success && result.data) {
         setBrewprint(result.data);
       } else {
-        Alert.alert("Erreur", "Impossible de charger la recette");
+        Alert.alert("Error", "Unable to load recipe");
         router.back();
       }
     } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
+      Alert.alert("Error", "An error occurred");
       router.back();
     } finally {
       setIsLoading(false);
@@ -63,12 +60,12 @@ export default function BrewprintDetailScreen() {
       const result = await BrewprintsService.markAsFinal(brewprint.id);
       if (result.success && result.data) {
         setBrewprint(result.data);
-        toast.success("Recette marquée comme finale!");
+        toast.success("Recipe marked as final!");
       } else {
-        Alert.alert("Erreur", "Impossible de marquer comme finale");
+        Alert.alert("Error", "Unable to mark as final");
       }
     } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
+      Alert.alert("Error", "An error occurred");
     }
   };
 
@@ -76,12 +73,12 @@ export default function BrewprintDetailScreen() {
     if (!brewprint) return;
 
     Alert.alert(
-      "Archiver la recette",
-      "Cette recette sera déplacée vers les archives. Continuer?",
+      "Archive Recipe",
+      "This recipe will be moved to archives. Continue?",
       [
-        { text: "Annuler", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Archiver",
+          text: "Archive",
           style: "destructive",
           onPress: async () => {
             try {
@@ -89,13 +86,13 @@ export default function BrewprintDetailScreen() {
                 brewprint.id
               );
               if (result.success) {
-                toast.success("Recette archivée");
+                toast.success("Recipe archived");
                 router.back();
               } else {
-                Alert.alert("Erreur", "Impossible d'archiver la recette");
+                Alert.alert("Error", "Unable to archive recipe");
               }
             } catch {
-              Alert.alert("Erreur", "Une erreur s'est produite");
+              Alert.alert("Error", "An error occurred");
             }
           },
         },
@@ -107,26 +104,24 @@ export default function BrewprintDetailScreen() {
     if (!brewprint) return;
 
     Alert.alert(
-      "Supprimer la recette",
-      "Cette action est irréversible. Êtes-vous sûr?",
+      "Delete Recipe",
+      "This will permanently delete this recipe. This action cannot be undone.",
       [
-        { text: "Annuler", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Supprimer",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
-              const result = await BrewprintsService.deleteBrewprint(
-                brewprint.id
-              );
+              const result = await BrewprintsService.deleteBrewprint(brewprint.id);
               if (result.success) {
-                toast.success("Recette supprimée");
+                toast.success("Recipe deleted");
                 router.back();
               } else {
-                Alert.alert("Erreur", "Impossible de supprimer la recette");
+                Alert.alert("Error", "Unable to delete recipe");
               }
             } catch {
-              Alert.alert("Erreur", "Une erreur s'est produite");
+              Alert.alert("Error", "An error occurred");
             }
           },
         },
@@ -134,679 +129,377 @@ export default function BrewprintDetailScreen() {
     );
   };
 
-  const handleCreateIteration = async () => {
-    if (!brewprint) return;
-
-    try {
-      const result = await BrewprintsService.createExperimentIteration(
-        brewprint.id,
-        {
-          version_notes: "Nouvelle itération basée sur " + brewprint.version,
-        }
-      );
-
-      if (result.success && result.data) {
-        toast.success("Nouvelle itération créée!");
-        router.push(`/brewprints/${result.data.id}`);
-      } else {
-        Alert.alert("Erreur", "Impossible de créer l'itération");
-      }
-    } catch {
-      Alert.alert("Erreur", "Une erreur s'est produite");
-    }
-  };
-
   const handleDuplicate = async () => {
     if (!brewprint) return;
 
     try {
-      // Navigate to the new brewprint form with this brewprint as a template
-      router.push({
-        pathname: "/brewprints/new",
-        params: {
-          template: JSON.stringify({
-            name: `${brewprint.name} (Copy)`,
-            description: brewprint.description,
-            method: brewprint.method,
-            difficulty: brewprint.difficulty,
-            parameters: brewprint.parameters,
-            steps: brewprint.steps,
-            bean_id: brewprint.bean_id,
-            grinder_id: brewprint.grinder_id,
-            brewer_id: brewprint.brewer_id,
-            water_profile_id: brewprint.water_profile_id,
-          }),
-        },
-      });
+      const result = await BrewprintsService.duplicateBrewprint(brewprint.id);
+      if (result.success) {
+        toast.success("Recipe duplicated");
+        router.back();
+      } else {
+        Alert.alert("Error", "Unable to duplicate recipe");
+      }
     } catch {
-      Alert.alert("Erreur", "Impossible de dupliquer la recette");
-    }
-  };
-
-  const handleStartBrewing = () => {
-    if (!brewprint) return;
-    router.push(`/brewing/${brewprint.id}`);
-  };
-
-  const showActionSheet = () => {
-    if (!brewprint) return;
-
-    // Build dynamic options and handlers to avoid brittle index mapping
-    const options: string[] = [];
-    const handlers: (() => void)[] = [];
-
-    const addOption = (label: string, handler: () => void) => {
-      options.push(label);
-      handlers.push(handler);
-    };
-
-    addOption("Share Recipe", () => {
-      void handleShare();
-    });
-    addOption("Duplicate Recipe", () => {
-      void handleDuplicate();
-    });
-    addOption("Create New Iteration", () => {
-      void handleCreateIteration();
-    });
-
-    if (brewprint.status === "experimenting") {
-      addOption("Mark as Final", () => {
-        void handleMarkAsFinal();
-      });
-    }
-    if (brewprint.status !== "archived") {
-      addOption("Archive Recipe", () => {
-        void handleArchive();
-      });
-    }
-
-    const deleteIndex = options.length;
-    addOption("Delete Recipe", () => {
-      void handleDelete();
-    });
-
-    const cancelIndex = options.length;
-    options.push("Cancel");
-
-    if (Platform.OS === "ios") {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options,
-          destructiveButtonIndex: deleteIndex,
-          cancelButtonIndex: cancelIndex,
-          title: "Recipe Actions",
-        },
-        (buttonIndex) => {
-          if (buttonIndex !== cancelIndex) {
-            const fn = handlers[buttonIndex];
-            if (fn) fn();
-          }
-        }
-      );
-    } else {
-      // For Android, use Alert with typed action buttons
-      const alertActions: AlertButton[] = [];
-      alertActions.push({
-        text: "Share Recipe",
-        onPress: () => {
-          void handleShare();
-        },
-      });
-      alertActions.push({
-        text: "Duplicate Recipe",
-        onPress: () => {
-          void handleDuplicate();
-        },
-      });
-      alertActions.push({
-        text: "Create New Iteration",
-        onPress: () => {
-          void handleCreateIteration();
-        },
-      });
-      if (brewprint.status === "experimenting") {
-        alertActions.push({
-          text: "Mark as Final",
-          onPress: () => {
-            void handleMarkAsFinal();
-          },
-        });
-      }
-      if (brewprint.status !== "archived") {
-        alertActions.push({
-          text: "Archive Recipe",
-          onPress: () => {
-            void handleArchive();
-          },
-        });
-      }
-      alertActions.push({
-        text: "Delete Recipe",
-        onPress: () => {
-          void handleDelete();
-        },
-        style: "destructive",
-      });
-      alertActions.push({ text: "Cancel", style: "cancel" });
-
-      Alert.alert("Recipe Actions", "Choose an action", alertActions);
+      Alert.alert("Error", "An error occurred");
     }
   };
 
   const handleShare = async () => {
     if (!brewprint) return;
 
-    const calculateRatio = () => {
-      const ratio =
-        brewprint.parameters.water_grams / brewprint.parameters.coffee_grams;
-      return `1:${ratio.toFixed(1)}`;
+    const shareContent = {
+      title: `${brewprint.name} - Coffee Recipe`,
+      message: `Check out this coffee recipe: ${brewprint.name}\n\nMethod: ${brewprint.method}\nCoffee: ${brewprint.parameters?.coffee_grams}g\nWater: ${brewprint.parameters?.water_grams}ml\nTemperature: ${brewprint.parameters?.water_temp}°C`,
     };
 
-    const shareContent = `
-📖 ${brewprint.name}
-${brewprint.description ? `\n${brewprint.description}\n` : ""}
-🔧 Méthode: ${brewprint.method.toUpperCase()}
-📏 Paramètres:
-• ${brewprint.parameters.coffee_grams}g café / ${
-      brewprint.parameters.water_grams
-    }g eau (${calculateRatio()})
-• Température: ${brewprint.parameters.water_temp}°C
-${brewprint.rating ? `\n⭐ Note: ${brewprint.rating}/5` : ""}
-
-Créé avec Brewprint ☕
-`.trim();
-
     try {
-      await Share.share({
-        message: shareContent,
-        title: `Recette: ${brewprint.name}`,
-      });
+      await Share.share(shareContent);
     } catch {
-      // ignored
+      Alert.alert("Error", "Unable to share recipe");
+    }
+  };
+
+  const showActionSheet = () => {
+    const options: AlertButton[] = [
+      { text: "Edit Recipe", onPress: () => router.push(`/brewprints/edit/${id}`) },
+      { text: "Duplicate", onPress: handleDuplicate },
+      { text: "Share Recipe", onPress: handleShare },
+    ];
+
+    if (brewprint?.status !== 'final') {
+      options.push({ text: "Mark as Final", onPress: handleMarkAsFinal });
+    }
+
+    options.push(
+      { text: "Archive", style: "destructive", onPress: handleArchive },
+      { text: "Delete", style: "destructive", onPress: handleDelete },
+      { text: "Cancel", style: "cancel" }
+    );
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: options.map(o => o.text),
+          destructiveButtonIndex: options.findIndex(o => o.style === 'destructive'),
+          cancelButtonIndex: options.length - 1,
+        },
+        (buttonIndex) => {
+          if (buttonIndex < options.length - 1) {
+            options[buttonIndex].onPress?.();
+          }
+        }
+      );
+    } else {
+      // For Android, show a series of alerts
+      Alert.alert("Recipe Actions", "Choose an action", options);
     }
   };
 
   if (isLoading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Chargement..."
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Chargement de la recette...</ThemedText>
-        </ThemedView>
-      </ThemedView>
+      <View flex bg-screenBG>
+        <View padding-page paddingT-xxxl>
+          <TouchableOpacity onPress={() => router.back()} marginB-md>
+            <Text body textColor>← Back</Text>
+          </TouchableOpacity>
+          <Text h1 textColor marginB-xs>
+            Loading Recipe
+          </Text>
+          <Text body textSecondary>
+            Retrieving brewing details...
+          </Text>
+        </View>
+        
+        <View flex center>
+          <Text body textSecondary>
+            Loading recipe details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (!brewprint) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Erreur"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <ThemedView style={styles.errorContainer}>
-          <ThemedText>Recette introuvable</ThemedText>
-        </ThemedView>
-      </ThemedView>
+      <View flex bg-screenBG>
+        <View padding-page paddingT-xxxl>
+          <TouchableOpacity onPress={() => router.back()} marginB-md>
+            <Text body textColor>← Back</Text>
+          </TouchableOpacity>
+          <Text h1 textColor marginB-xs>
+            Recipe Not Found
+          </Text>
+          <Text body textSecondary>
+            Unable to load brewing recipe
+          </Text>
+        </View>
+
+        <ScrollView
+          style={StyleSheet.create({ scrollView: { flex: 1 } }).scrollView}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 24 }}
+        >
+          <Card padding-md backgroundColor={Colors.red10}>
+            <Text h3 textColor marginB-xs>
+              Recipe Not Available
+            </Text>
+            <Text body textSecondary marginB-md>
+              This brewing recipe could not be found or may have been deleted.
+            </Text>
+            <Button
+              label="Go Back"
+              onPress={() => router.back()}
+              backgroundColor={Colors.blue30}
+              size="large"
+              fullWidth
+            />
+          </Card>
+        </ScrollView>
+      </View>
     );
   }
 
+  const ratio = brewprint.parameters?.coffee_grams && brewprint.parameters?.water_grams 
+    ? Math.round((brewprint.parameters.water_grams / brewprint.parameters.coffee_grams) * 10) / 10
+    : 0;
+
+
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
-        title={brewprint.name}
-        subtitle={`${brewprint.method.toUpperCase()} • ${brewprint.version}`}
-        showBackButton={true}
-        onBackPress={() => router.back()}
-        backButtonTitle="Recipes"
-        customContent={
-          <ThemedButton
-            title="⋮"
-            size="sm"
-            variant="ghost"
-            onPress={showActionSheet}
-          />
-        }
-      />
+    <View flex bg-screenBG>
+      <View padding-page paddingT-xxxl>
+        <TouchableOpacity onPress={() => router.back()} marginB-md>
+          <Text body textColor>← Back</Text>
+        </TouchableOpacity>
+        <Text h1 textColor marginB-xs>
+          {brewprint.name}
+        </Text>
+        <Text body textSecondary>
+          {brewprint.method.replace('-', ' ')} Recipe • {brewprint.status}
+        </Text>
+      </View>
 
-      <ThemedScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-        contentInsetAdjustmentBehavior="automatic"
+      <ScrollView
+        style={StyleSheet.create({ scrollView: { flex: 1 } }).scrollView}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 24 }}
       >
-        <ThemedView noBackground style={styles.content}>
-          {/* Hero Section */}
-          <LinearGradient
-            colors={["#1f1b2e", "#0f0c16"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.heroCard}
-          >
-            <ThemedView noBackground style={styles.heroHeaderRow}>
-              <ThemedBadge
-                variant={
-                  brewprint.status === "final"
-                    ? "success"
-                    : brewprint.status === "archived"
-                    ? "secondary"
-                    : "warning"
-                }
-                size="sm"
-              >
-                {brewprint.status === "final"
-                  ? "Final"
-                  : brewprint.status === "archived"
-                  ? "Archived"
-                  : "Experiment"}
-              </ThemedBadge>
-              {typeof brewprint.rating === "number" && (
-                <ThemedText type="defaultSemiBold" style={styles.ratingText}>
-                  {brewprint.rating}/5
-                </ThemedText>
-              )}
-            </ThemedView>
-            <ThemedText type="title" style={styles.heroTitle}>
-              {brewprint.name}
-            </ThemedText>
-            <ThemedText type="caption" style={styles.heroSubtitle}>
-              {brewprint.method.toUpperCase()} • {brewprint.version}
-            </ThemedText>
+        {/* Recipe Overview */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Recipe Overview
+          </Text>
+          <Text body textSecondary marginB-md>
+            Essential brewing parameters
+          </Text>
+          <View row gap-md>
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Coffee
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {brewprint.parameters?.coffee_grams || 0}g
+              </Text>
+            </Card>
+            
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Water
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {brewprint.parameters?.water_grams || 0}ml
+              </Text>
+            </Card>
+            
+            <Card flex padding-md>
+              <Text caption textSecondary weight="medium">
+                Ratio
+              </Text>
+              <Text h2 textColor weight="bold" marginV-xs>
+                {ratio ? `1:${ratio}` : 'N/A'}
+              </Text>
+            </Card>
+          </View>
+        </View>
 
-            <ThemedView noBackground style={styles.heroActions}>
-              <ThemedButton
-                title="Start Brewing"
-                size="lg"
-                onPress={handleStartBrewing}
-                style={styles.heroBrewButton}
-              />
-              <ThemedButton
-                title="Share"
-                variant="outline"
-                size="lg"
-                onPress={handleShare}
-              />
-            </ThemedView>
-          </LinearGradient>
+        {/* Brewing Parameters */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Brewing Parameters
+          </Text>
+          <Text body textSecondary marginB-md>
+            Detailed brewing specifications
+          </Text>
+          <Card padding-md>
+            <View style={styles.parametersGrid}>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Water Temperature</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.water_temp || 0}°C
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Grind Size</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.grind_size || 'Medium'}
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Total Time</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.parameters?.total_time || 0}s
+                </Text>
+              </View>
+              <View style={styles.parameterItem}>
+                <Text caption textSecondary>Status</Text>
+                <Text body textColor weight="semibold">
+                  {brewprint.status.charAt(0).toUpperCase() + brewprint.status.slice(1)}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </View>
 
-          {/* Stats Card */}
-          <ThemedView noBackground style={styles.card}>
-            <ThemedText type="subtitle" style={styles.cardHeader}>
-              Parameters
-            </ThemedText>
-            <ThemedView noBackground style={styles.statsGrid}>
-              <ThemedView noBackground style={styles.statItem}>
-                <Coffee size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Coffee
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.coffee_grams}g
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Droplets size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Water
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.water_grams}g
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Droplets size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Ratio
-                </ThemedText>
-                <ThemedText
-                  type="defaultSemiBold"
-                  style={[styles.statValue, styles.accentDataValue]}
-                >
-                  1:
-                  {(
-                    brewprint.parameters.water_grams /
-                    brewprint.parameters.coffee_grams
-                  ).toFixed(1)}
-                </ThemedText>
-              </ThemedView>
-
-              <ThemedView noBackground style={styles.statItem}>
-                <Thermometer size={18} color="#8b5cf6" />
-                <ThemedText type="caption" style={styles.statLabel}>
-                  Temperature
-                </ThemedText>
-                <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                  {brewprint.parameters.water_temp}°C
-                </ThemedText>
-              </ThemedView>
-
-              {brewprint.parameters.grind_setting && (
-                <ThemedView noBackground style={styles.statItem}>
-                  <SlidersHorizontal size={18} color="#8b5cf6" />
-                  <ThemedText type="caption" style={styles.statLabel}>
-                    Grind
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                    {brewprint.parameters.grind_setting}
-                  </ThemedText>
-                </ThemedView>
-              )}
-
-              {brewprint.parameters.total_time && (
-                <ThemedView noBackground style={styles.statItem}>
-                  <TimerIcon size={18} color="#8b5cf6" />
-                  <ThemedText type="caption" style={styles.statLabel}>
-                    Time
-                  </ThemedText>
-                  <ThemedText type="defaultSemiBold" style={styles.statValue}>
-                    {Math.floor(brewprint.parameters.total_time / 60)}:
-                    {String(brewprint.parameters.total_time % 60).padStart(
-                      2,
-                      "0"
-                    )}
-                  </ThemedText>
-                </ThemedView>
-              )}
-            </ThemedView>
-          </ThemedView>
-
-          {/* Steps Card */}
-          {brewprint.steps && brewprint.steps.length > 0 && (
-            <ThemedView noBackground style={styles.card}>
-              <ThemedText type="subtitle" style={styles.cardHeader}>
-                Steps
-              </ThemedText>
-              <ThemedView noBackground style={styles.timeline}>
-                {brewprint.steps.map((step, index) => (
-                  <ThemedView
-                    key={index}
-                    noBackground
-                    style={styles.timelineRow}
-                  >
-                    <ThemedView noBackground style={styles.timelineLeft}>
-                      <ThemedView noBackground style={styles.timelineBullet}>
-                        <ThemedText
-                          type="caption"
-                          style={styles.timelineNumber}
-                        >
-                          {index + 1}
-                        </ThemedText>
-                      </ThemedView>
-                      {index < brewprint.steps.length - 1 && (
-                        <ThemedView
-                          noBackground
-                          style={styles.timelineConnector}
-                        />
-                      )}
-                    </ThemedView>
-
-                    <ThemedView noBackground style={styles.timelineContent}>
-                      <ThemedText type="body" style={styles.stepDescription}>
+        {/* Brewing Steps */}
+        {brewprint.steps && brewprint.steps.length > 0 && (
+          <View>
+            <Text h3 textColor marginB-xs>
+              Brewing Steps
+            </Text>
+            <Text body textSecondary marginB-md>
+              {brewprint.steps.length} step process
+            </Text>
+            <Card padding-md>
+              {brewprint.steps.map((step, index) => (
+                <View key={step.id} style={[styles.stepRow, index === brewprint.steps!.length - 1 && styles.lastStep]}>
+                  <View style={[styles.stepNumber, { backgroundColor: Colors.grey40 }]}>
+                    <Text caption textColor weight="bold">
+                      {index + 1}
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.stepContent}>
+                    <Text body textColor weight="semibold">
+                      {step.title}
+                    </Text>
+                    <Text caption textSecondary style={styles.stepMeta}>
+                      {step.duration}s • {step.water_amount}g • {step.technique.replace('-', ' ')}
+                    </Text>
+                    {step.description && (
+                      <Text caption textSecondary style={styles.stepDescription}>
                         {step.description}
-                      </ThemedText>
-                      {(step.duration || step.water_amount) && (
-                        <ThemedView noBackground style={styles.stepMeta}>
-                          {step.duration && (
-                            <ThemedText
-                              type="caption"
-                              style={styles.stepMetaText}
-                            >
-                              {step.duration}s
-                            </ThemedText>
-                          )}
-                          {step.water_amount && (
-                            <ThemedText
-                              type="caption"
-                              style={styles.stepMetaText}
-                            >
-                              {step.water_amount}g
-                            </ThemedText>
-                          )}
-                        </ThemedView>
-                      )}
-                    </ThemedView>
-                  </ThemedView>
-                ))}
-              </ThemedView>
-            </ThemedView>
-          )}
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </Card>
+          </View>
+        )}
+
+        {/* Notes */}
+        {brewprint.notes && (
+          <View>
+            <Text h3 textColor marginB-xs>
+              Recipe Notes
+            </Text>
+            <Text body textSecondary marginB-md>
+              Additional brewing notes and observations
+            </Text>
+            <Card padding-md>
+              <Text body textColor style={{ lineHeight: 20 }}>
+                {brewprint.notes}
+              </Text>
+            </Card>
+          </View>
+        )}
+
+        {/* Recipe Actions */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Recipe Actions
+          </Text>
+          <Text body textSecondary marginB-md>
+            Start brewing or manage this recipe
+          </Text>
+          <Card padding-md>
+            <View style={{ gap: 12 }}>
+              <Button
+                label="Start Brewing Session"
+                onPress={() => {
+                  if (!id) {
+                    toast.error('Recipe ID missing - cannot start brewing session');
+                    return;
+                  }
+                  router.push(`/brewing/${id}`);
+                }}
+                backgroundColor={Colors.blue30}
+                size="large"
+                fullWidth
+              />
+              
+              <View row gap-sm>
+                <Button
+                  label="Edit Recipe"
+                  onPress={() => router.push(`/brewprints/edit/${id}`)}
+                  backgroundColor={Colors.grey40}
+                  size="large"
+                  flex
+                />
+                
+                <Button
+                  label="More Options"
+                  onPress={showActionSheet}
+                  backgroundColor={Colors.grey40}
+                  size="large"
+                  flex
+                />
+              </View>
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  parametersGrid: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 16,
   },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: 4,
-    paddingVertical: 16,
-    gap: 32,
-  },
-  heroCard: {
-    borderRadius: 16,
+  parameterItem: {
+    minWidth: '45%',
+    alignItems: 'center' as const,
     padding: 16,
-    marginHorizontal: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
   },
-  heroHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
+  stepRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'flex-start' as const,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.grey30,
   },
-  heroTitle: {
-    marginBottom: 4,
+  lastStep: {
+    borderBottomWidth: 0,
   },
-  heroSubtitle: {
-    opacity: 0.8,
-  },
-  heroActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 16,
-  },
-  heroBrewButton: {
-    backgroundColor: "#8b5cf6",
-  },
-  ratingText: {
-    opacity: 0.9,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  // Primary Action
-  primaryAction: {
-    paddingTop: 8,
-  },
-
-  // Section Divider
-  sectionDivider: {
-    height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    marginHorizontal: 16,
-  },
-  brewButton: {
-    backgroundColor: "#8b5cf6",
-    shadowColor: "#8b5cf6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-
-  // Data Section - Clean and minimal
-  dataSection: {
-    gap: 8,
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    borderRadius: 12,
-    padding: 12,
-    marginHorizontal: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    gap: 8,
-  },
-  cardHeader: {
-    marginBottom: 8,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  statItem: {
-    width: "48%",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-    borderRadius: 10,
-    padding: 10,
-    gap: 4,
-  },
-  statLabel: {
-    opacity: 0.7,
-  },
-  statValue: {
-    marginTop: 2,
-  },
-  dataRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
-  },
-  primaryDataRow: {
-    // Remove special styling for now
-  },
-  accentDataRow: {
-    // Keep just a subtle highlight for ratio
-    backgroundColor: "rgba(139, 92, 246, 0.03)",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    marginHorizontal: -8,
-  },
-  dataLabel: {
-    opacity: 0.7,
-    minWidth: 80,
-  },
-  primaryDataValue: {
-    // Remove color
-  },
-  accentDataValue: {
-    color: "#8b5cf6",
-  },
-  methodValue: {
-    // Remove color
-  },
-  ratingValue: {
-    // Remove color
-  },
-
-  // Steps Section
-  stepsSection: {
-    gap: 12,
-  },
-  timeline: {
-    gap: 12,
-  },
-  timelineRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  timelineLeft: {
-    alignItems: "center",
-  },
-  timelineBullet: {
+  stepNumber: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "rgba(139, 92, 246, 0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timelineNumber: {
-    fontSize: 12,
-  },
-  timelineConnector: {
-    width: 2,
-    flex: 1,
-    backgroundColor: "rgba(139, 92, 246, 0.15)",
-    marginTop: 2,
-    marginBottom: 8,
-  },
-  timelineContent: {
-    flex: 1,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.06)",
-  },
-  sectionHeader: {
-    marginBottom: 8,
-  },
-  stepRow: {
-    flexDirection: "row",
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
-  stepNumber: {
-    minWidth: 24,
-    opacity: 0.6,
-    textAlign: "center",
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginRight: 12,
     marginTop: 2,
   },
   stepContent: {
     flex: 1,
-  },
-  stepHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  stepDescription: {
-    flex: 1,
+    gap: 4,
   },
   stepMeta: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
+    fontSize: 11,
   },
-  stepMetaText: {
-    opacity: 0.7,
+  stepDescription: {
     fontSize: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    lineHeight: 16,
   },
 });

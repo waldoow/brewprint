@@ -1,3 +1,7 @@
+// Initialize RNUI configuration first (must be before any RNUI imports)
+import "@/config/rnui-config";
+
+import { initializeRNUITheme } from "@/constants/RNUITheme";
 import { AuthProvider } from "@/context/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
@@ -7,7 +11,7 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -19,6 +23,11 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+
+  // Initialize RNUI theme on mount and when color scheme changes
+  useEffect(() => {
+    initializeRNUITheme();
+  }, [colorScheme]);
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -48,28 +57,23 @@ export default function RootLayout() {
               initialRouteName="index"
             >
               <Stack.Screen name="index" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="beans" />
-              <Stack.Screen name="brewers" />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="brewprints" />
-              <Stack.Screen name="bean-detail/[id]" />
-              <Stack.Screen name="brewer-detail/[id]" />
               <Stack.Screen name="brewing/[id]" />
-              <Stack.Screen name="brewing/[id]/results" />
               <Stack.Screen name="settings/about" />
               <Stack.Screen name="settings/data" />
               <Stack.Screen name="settings/notifications" />
               <Stack.Screen name="settings/preferences" />
               <Stack.Screen name="settings/profile" />
+              <Stack.Screen name="folders/new" />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <StatusBar style="auto" />
             <Toaster
-              position="bottom-center"
+              position="top-center"
               duration={3000}
               swipeToDismissDirection="up"
-              visibleToasts={4}
+              visibleToasts={2}
             />
           </ThemeProvider>
         </AuthProvider>

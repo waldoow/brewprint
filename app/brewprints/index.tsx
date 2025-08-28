@@ -25,7 +25,7 @@ export default function BrewprintsScreen() {
       } else {
         Alert.alert("Error", "Failed to load brewing recipes");
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "An error occurred while loading recipes");
     } finally {
       setIsLoading(false);

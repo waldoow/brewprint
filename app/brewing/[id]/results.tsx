@@ -1,82 +1,85 @@
-// app/brewing/[id]/results.tsx
-import { Header } from "@/components/ui/Header";
-import { RatingInput } from "@/components/ui/RatingInput";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
-import { Colors } from "@/constants/Colors";
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import {
+  View,
+  Text,
+  Card,
+  TextField,
+  Button,
+  TouchableOpacity,
+  Colors,
+} from "react-native-ui-lib";
 import { useAuth } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { supabase } from "@/lib/supabase";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
 import { toast } from "sonner-native";
 
 interface ResultsForm {
-  rating: number;
+  rating: string;
   notes: string;
-  tds?: number;
-  extraction?: number;
+  tds: string;
+  extraction: string;
 }
 
 export default function ResultsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const form = useForm<ResultsForm>({
-    defaultValues: {
-      rating: 0,
-      notes: "",
-    },
+  const [formData, setFormData] = useState<ResultsForm>({
+    rating: "",
+    notes: "",
+    tds: "",
+    extraction: "",
   });
 
-  const rating = form.watch("rating");
+  const updateField = (field: keyof ResultsForm, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
 
-  const onSubmit = async (data: ResultsForm) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    const ratingNum = parseInt(formData.rating);
+    if (!formData.rating || isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+      newErrors.rating = "Please rate your brew between 1 and 5";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const rating = parseInt(formData.rating) || 0;
+
+  const onSubmit = async () => {
+    if (!validateForm()) return;
     if (!user) return;
 
-    // Validate rating before submission
-    if (!data.rating || data.rating < 1 || data.rating > 5) {
-      toast.error("Please provide a rating between 1 and 5");
-      return;
-    }
 
     setSaving(true);
     try {
       // Prepare the update data according to the actual schema
       const updateData: any = {
-        rating: data.rating,
-        brewing_notes: data.notes || "", // Ensure it's never null
+        rating: parseInt(formData.rating),
+        brewing_notes: formData.notes || "",
         brew_date: new Date().toISOString(),
         status: "final",
       };
 
       // Add actual_metrics if TDS or extraction data is provided
-      if (data.tds || data.extraction) {
+      const tdsNum = parseFloat(formData.tds);
+      const extractionNum = parseFloat(formData.extraction);
+      if ((!isNaN(tdsNum) && tdsNum > 0) || (!isNaN(extractionNum) && extractionNum > 0)) {
         updateData.actual_metrics = {};
-        if (data.tds && data.tds > 0) updateData.actual_metrics.tds = data.tds;
-        if (data.extraction && data.extraction > 0) updateData.actual_metrics.extraction_yield = data.extraction;
+        if (!isNaN(tdsNum) && tdsNum > 0) updateData.actual_metrics.tds = tdsNum;
+        if (!isNaN(extractionNum) && extractionNum > 0) updateData.actual_metrics.extraction_yield = extractionNum;
       }
 
       const { error } = await supabase
@@ -98,214 +101,163 @@ export default function ResultsScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ThemedView style={styles.container}>
-        <Header title="How was it?" onBackPress={() => router.back()} />
+    <View flex bg-screenBG>
+      <View padding-page paddingT-xxxl>
+        <TouchableOpacity onPress={() => router.back()} marginB-md>
+          <Text body textColor>← Back</Text>
+        </TouchableOpacity>
+        <Text h1 textColor marginB-xs>
+          How was it?
+        </Text>
+        <Text body textSecondary>
+          Rate and review your brewing session
+        </Text>
+      </View>
 
-        <Form {...form}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* Rating Section */}
-            <View style={[styles.section, { backgroundColor: colors.surface }]}>
-              <ThemedText type="subtitle" style={styles.sectionTitle}>
-                Rate your brew
-              </ThemedText>
+      <ScrollView
+        style={StyleSheet.create({ scrollView: { flex: 1 } }).scrollView}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 24 }}
+      >
+        {/* Rating Section */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Rate Your Brew
+          </Text>
+          <Text body textSecondary marginB-md>
+            How did this brewing session turn out?
+          </Text>
+          <Card padding-md>
+            <TextField
+              label="Rating (1-5) *"
+              placeholder="Rating 1-5"
+              keyboardType="numeric"
+              value={formData.rating}
+              onChangeText={(value) => updateField("rating", value)}
+              enableErrors={!!errors.rating}
+              errorMessage={errors.rating}
+              fieldStyle={styles.textField}
+            />
 
-              <FormField
-                control={form.control}
-                name="rating"
-                rules={{ 
-                  required: "Please rate your brew",
-                  min: { value: 1, message: "Rating must be at least 1" },
-                  max: { value: 5, message: "Rating cannot exceed 5" }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <RatingInput value={field.value} onChange={field.onChange} size="large" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-            <ThemedText type="caption" style={styles.ratingText}>
+            <Text caption textSecondary style={styles.ratingText}>
               {rating === 0 && "Tap to rate"}
               {rating === 1 && "Poor - Major issues"}
               {rating === 2 && "Below average"}
               {rating === 3 && "Good - Room for improvement"}
               {rating === 4 && "Very good - Minor tweaks needed"}
               {rating === 5 && "Excellent - Perfect brew!"}
-            </ThemedText>
-          </View>
+            </Text>
+          </Card>
+        </View>
 
-          {/* Notes Section */}
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Tasting notes
-            </ThemedText>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ThemedTextArea
-                      value={field.value}
-                      onChangeText={field.onChange}
-                      onBlur={field.onBlur}
-                      placeholder="Describe the taste, aroma, body, and any adjustments for next time..."
-                      numberOfLines={6}
-                      style={styles.textArea}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        {/* Notes Section */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Tasting Notes
+          </Text>
+          <Text body textSecondary marginB-md>
+            Describe the taste, aroma, and overall experience
+          </Text>
+          <Card padding-md>
+            <TextField
+              label="Brewing Notes"
+              placeholder="Describe the taste, aroma, body, and any adjustments for next time..."
+              multiline
+              numberOfLines={6}
+              value={formData.notes}
+              onChangeText={(value) => updateField("notes", value)}
+              fieldStyle={[styles.textField, styles.textArea]}
             />
-          </View>
+          </Card>
+        </View>
 
-          {/* Measurements Section (Optional) */}
-          <View style={[styles.section, { backgroundColor: colors.surface }]}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>
-              Measurements (Optional)
-            </ThemedText>
-
-            <View style={styles.measurementsRow}>
-              <View style={styles.measurementItem}>
-                <ThemedText type="default" style={styles.measurementLabel}>
-                  TDS %
-                </ThemedText>
-                <FormField
-                  control={form.control}
-                  name="tds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ThemedInput
-                          value={field.value?.toString()}
-                          onChangeText={(text) =>
-                            field.onChange(parseFloat(text) || undefined)
-                          }
-                          onBlur={field.onBlur}
-                          keyboardType="decimal-pad"
-                          placeholder="1.35"
-                          style={styles.measurementInput}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+        {/* Measurements Section (Optional) */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Measurements (Optional)
+          </Text>
+          <Text body textSecondary marginB-md>
+            Record TDS and extraction measurements if available
+          </Text>
+          <Card padding-md>
+            <View row gap-md>
+              <View flex>
+                <TextField
+                  label="TDS %"
+                  placeholder="1.35"
+                  keyboardType="decimal-pad"
+                  value={formData.tds}
+                  onChangeText={(value) => updateField("tds", value)}
+                  fieldStyle={[styles.textField, styles.measurementInput]}
                 />
               </View>
-
-              <View style={styles.measurementItem}>
-                <ThemedText type="default" style={styles.measurementLabel}>
-                  Extraction %
-                </ThemedText>
-                <FormField
-                  control={form.control}
-                  name="extraction"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ThemedInput
-                          value={field.value?.toString()}
-                          onChangeText={(text) =>
-                            field.onChange(parseFloat(text) || undefined)
-                          }
-                          onBlur={field.onBlur}
-                          keyboardType="decimal-pad"
-                          placeholder="20.5"
-                          style={styles.measurementInput}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <View flex>
+                <TextField
+                  label="Extraction %"
+                  placeholder="20.5"
+                  keyboardType="decimal-pad"
+                  value={formData.extraction}
+                  onChangeText={(value) => updateField("extraction", value)}
+                  fieldStyle={[styles.textField, styles.measurementInput]}
                 />
               </View>
             </View>
-          </View>
+          </Card>
+        </View>
 
-          {/* Actions */}
-          <View style={styles.actions}>
-            <ThemedButton
-              title="Save & Finish"
-              onPress={form.handleSubmit(onSubmit)}
-              loading={saving}
-              disabled={rating === 0}
-              variant="default"
-            />
+        {/* Actions */}
+        <View>
+          <Text h3 textColor marginB-xs>
+            Save Results
+          </Text>
+          <Text body textSecondary marginB-md>
+            Complete your brewing session
+          </Text>
+          <Card padding-md>
+            <View style={{ gap: 12 }}>
+              <Button
+                label="Save & Finish"
+                onPress={onSubmit}
+                backgroundColor={Colors.blue30}
+                size="large"
+                fullWidth
+                disabled={saving || rating === 0}
+              />
 
-            <ThemedButton
-              title="Save & Brew Again"
-              onPress={form.handleSubmit(async (data) => {
-                await onSubmit(data);
-                router.push(`/brewing/${id}`);
-              })}
-              loading={saving}
-              disabled={rating === 0}
-              variant="secondary"
-            />
-          </View>
-        </ScrollView>
-        </Form>
-      </ThemedView>
-    </KeyboardAvoidingView>
+              <Button
+                label="Save & Brew Again"
+                onPress={async () => {
+                  await onSubmit();
+                  router.push(`/brewing/${id}`);
+                }}
+                backgroundColor={Colors.grey40}
+                size="large"
+                fullWidth
+                disabled={saving || rating === 0}
+              />
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 50, // Reduced from 100 to 50
-  },
-  section: {
-    margin: 8, // Reduced from 16 to 8
-    padding: 10, // Reduced from 20 to 10
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontWeight: "600",
-    marginBottom: 8, // Reduced from 16 to 8
+  textField: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
   },
   ratingText: {
-    textAlign: "center",
-    marginTop: 6, // Reduced from 12 to 6
-    opacity: 0.6,
+    textAlign: "center" as const,
+    marginTop: 8,
   },
   textArea: {
     minHeight: 120,
   },
-  measurementsRow: {
-    flexDirection: "row",
-    gap: 8, // Reduced from 16 to 8
-  },
-  measurementItem: {
-    flex: 1,
-  },
-  measurementLabel: {
-    opacity: 0.6,
-    marginBottom: 4, // Reduced from 8 to 4
-  },
   measurementInput: {
-    textAlign: "center",
-  },
-  actions: {
-    padding: 8, // Reduced from 16 to 8
-    gap: 6, // Reduced from 12 to 6
+    textAlign: "center" as const,
   },
 });

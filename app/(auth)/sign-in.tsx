@@ -1,28 +1,20 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
+  View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Zod schema for sign-in validation
 const signInSchema = z.object({
@@ -50,29 +42,53 @@ export default function SignIn({
   onForgotPassword,
 }: SignInProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<Partial<SignInFormData>>({});
 
-  const form = useForm<SignInFormData>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const onSubmit = async (data: SignInFormData) => {
+  const validateForm = (): SignInFormData | null => {
+    try {
+      const data = signInSchema.parse({ email, password });
+      setErrors({});
+      return data;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formErrors: Partial<SignInFormData> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            formErrors[err.path[0] as keyof SignInFormData] = err.message;
+          }
+        });
+        setErrors(formErrors);
+      }
+      return null;
+    }
+  };
+
+  const onSubmit = async () => {
+    const validatedData = validateForm();
+    if (!validatedData) return;
+
     try {
       setIsLoading(true);
 
       if (onSignIn) {
-        await onSignIn(data);
-        form.reset();
+        await onSignIn(validatedData);
+        setEmail("");
+        setPassword("");
+        setErrors({});
       } else {
         // Mock sign-in for demo
         await new Promise((resolve) => setTimeout(resolve, 1500));
         toast.success("Welcome back!", {
           description: "You have successfully signed in.",
         });
-        form.reset();
+        setEmail("");
+        setPassword("");
+        setErrors({});
       }
     } catch (error) {
       // Let the parent component handle the error toast
@@ -83,169 +99,116 @@ export default function SignIn({
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedView style={styles.content}>
-              {/* Header */}
-              <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                  Welcome Back
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  Sign in to your account to continue
-                </ThemedText>
-              </ThemedView>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <Container>
+        {/* App Header */}
+        <View style={{
+          alignItems: 'center',
+          marginBottom: theme.spacing['5xl'],
+          marginTop: theme.spacing['2xl'],
+        }}>
+          <Text variant="4xl" weight="extrabold" style={{ marginBottom: theme.spacing.sm }}>
+            Brewprint
+          </Text>
+          <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+            Professional Coffee Recipe Management
+          </Text>
+        </View>
 
-              {/* Form */}
-              <Form {...form}>
-                <ThemedView style={styles.form}>
-                  {/* Email Input */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="email"
-                            placeholder="Enter your email"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        {/* Sign In Card */}
+        <Card variant="default" style={{ marginBottom: theme.spacing.xl }}>
+          <View style={{ alignItems: 'center', marginBottom: theme.spacing.xl }}>
+            <Text variant="2xl" weight="bold" style={{ marginBottom: theme.spacing.sm }}>
+              Sign In
+            </Text>
+            <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+              Access your brewing recipes and data
+            </Text>
+          </View>
 
-                  {/* Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Enter your password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <View>
+            {/* Email Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Email Address
+              </Text>
+              <Input
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                disabled={isLoading}
+                error={errors.email}
+              />
+            </View>
 
-                  {/* Forgot Password */}
-                  <ThemedButton
-                    variant="link"
-                    title="Forgot your password?"
-                    onPress={onForgotPassword}
-                    style={styles.forgotPassword}
-                  />
+            {/* Password Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Password
+              </Text>
+              <Input
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                disabled={isLoading}
+                error={errors.password}
+              />
+            </View>
 
-                  {/* Sign In Button */}
-                  <ThemedButton
-                    title={isLoading ? "Signing In..." : "Sign In"}
-                    onPress={form.handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                    loading={isLoading}
-                    style={styles.signInButton}
-                  />
-                </ThemedView>
-              </Form>
+            {/* Forgot Password Link */}
+            <View style={{ alignItems: 'flex-end', marginBottom: theme.spacing.lg }}>
+              <Button
+                title="Forgot your password?"
+                onPress={onForgotPassword}
+                variant="ghost"
+                size="sm"
+                disabled={isLoading}
+              />
+            </View>
 
-              {/* Sign Up Link */}
-              <ThemedView style={styles.signUpContainer}>
-                <ThemedText style={styles.signUpText}>
-                  Don&apos;t have an account?{" "}
-                </ThemedText>
-                <ThemedButton
-                  variant="link"
-                  title="Sign Up"
-                  onPress={onNavigateToSignUp}
-                />
-              </ThemedView>
-            </ThemedView>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+            {/* Sign In Button */}
+            <Button
+              title="Sign In"
+              onPress={onSubmit}
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={isLoading}
+              style={{ marginTop: theme.spacing.lg }}
+            />
+          </View>
+        </Card>
+
+        {/* Sign Up Section */}
+        <View style={{ alignItems: 'center' }}>
+          <Text variant="body" color="secondary" style={{ 
+            textAlign: 'center',
+            marginBottom: theme.spacing.lg,
+          }}>
+            Don&apos;t have an account?
+          </Text>
+          <Button
+            title="Create Account"
+            onPress={onNavigateToSignUp}
+            variant="outline"
+            fullWidth
+            disabled={isLoading}
+          />
+        </View>
+      </Container>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    minHeight: "100%",
-  },
-  content: {
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  title: {
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: "center",
-    opacity: 0.7,
-  },
-  form: {
-    width: "100%",
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-  },
-  signInButton: {
-    marginBottom: 24,
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signUpText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  signUpLink: {
-    fontSize: 14,
   },
 });

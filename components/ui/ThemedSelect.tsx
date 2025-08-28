@@ -12,7 +12,8 @@ import {
   type ViewStyle,
 } from "react-native";
 
-import { useThemeColor } from "@/hooks/useThemeColor";
+import { getTheme } from "@/constants/DataFirstDesign";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export type SelectOption = {
   label: string;
@@ -65,20 +66,9 @@ export function ThemedSelect({
   const selectRef = useRef<View>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-
-  const textColor = useThemeColor(
-    { light: lightTextColor, dark: darkTextColor },
-    "text"
-  );
-  const backgroundColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
-    "inputBackground"
-  );
-  const iconColor = useThemeColor({}, "icon");
-  const borderColor = useThemeColor(
-    { light: lightBorderColor, dark: darkBorderColor },
-    "border"
-  );
+  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
   const selectedOption = options.find((option) => option.value === value);
 
@@ -130,36 +120,12 @@ export function ThemedSelect({
     const baseStyle = styles.base;
     const sizeStyle = styles[`size_${size}`];
 
-    let variantStyle: ViewStyle = {};
-
-    switch (variant) {
-      case "default":
-        variantStyle = {
-          backgroundColor: backgroundColor,
-          borderWidth: 1,
-          borderColor: borderColor,
-        };
-        break;
-      case "outline":
-        variantStyle = {
-          backgroundColor: backgroundColor,
-          borderWidth: 1,
-          borderColor: borderColor,
-        };
-        break;
-      case "filled":
-        variantStyle = {
-          backgroundColor: backgroundColor,
-          borderWidth: 1,
-          borderColor: borderColor,
-        };
-        break;
-    }
-
     return {
       ...baseStyle,
       ...sizeStyle,
-      ...variantStyle,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: error ? theme.colors.error : theme.colors.border,
       opacity: disabled ? 0.5 : 1,
     };
   };
@@ -171,21 +137,21 @@ export function ThemedSelect({
     return {
       ...baseTextStyle,
       ...sizeTextStyle,
-      color: selectedOption ? textColor : textColor + "70",
+      color: selectedOption ? theme.colors.text.primary : theme.colors.text.tertiary,
     };
   };
 
   const getLabelStyles = (): TextStyle => {
     return {
       ...styles.label,
-      color: textColor,
+      color: theme.colors.text.primary,
     };
   };
 
   const getErrorStyles = (): TextStyle => {
     return {
       ...styles.error,
-      color: "#ef4444",
+      color: theme.colors.error,
     };
   };
 
@@ -210,7 +176,7 @@ export function ThemedSelect({
           index === 0 && styles.firstOption,
           index === options.length - 1 && styles.lastOption,
           isSelected && styles.selectedOption,
-          { backgroundColor: isSelected ? iconColor + "15" : "transparent" },
+          { backgroundColor: isSelected ? theme.colors.interactive.default + "10" : "transparent" },
         ]}
         onPress={() => handleSelect(item.value)}
         activeOpacity={0.7}
@@ -218,13 +184,13 @@ export function ThemedSelect({
         <Text
           style={[
             styles.optionText,
-            { color: textColor },
+            { color: theme.colors.text.primary },
             isSelected && styles.selectedOptionText,
           ]}
         >
           {item.label}
         </Text>
-        {isSelected && <Check size={16} color={iconColor} strokeWidth={2.5} />}
+        {isSelected && <Check size={16} color={theme.colors.interactive.default} strokeWidth={2.5} />}
       </TouchableOpacity>
     );
   };
@@ -254,7 +220,7 @@ export function ThemedSelect({
         <Animated.View
           style={[styles.iconContainer, isOpen && styles.iconRotated]}
         >
-          <ChevronDown size={16} color={iconColor} strokeWidth={2} />
+          <ChevronDown size={16} color={theme.colors.text.secondary} strokeWidth={2} />
         </Animated.View>
       </TouchableOpacity>
 
@@ -275,8 +241,8 @@ export function ThemedSelect({
             style={[
               styles.dropdown,
               {
-                backgroundColor: backgroundColor,
-                borderColor: borderColor,
+                backgroundColor: theme.colors.card,
+                borderColor: theme.colors.border,
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,
                 width: dropdownPosition.width,
@@ -304,7 +270,7 @@ export function ThemedSelect({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
 
   base: {
@@ -313,6 +279,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    fontFamily: 'System',
   },
 
   selectOpen: {
@@ -337,15 +304,16 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontWeight: "400",
+    fontFamily: 'System',
   },
   text_default: {
-    fontSize: 16,
+    fontSize: 15,
   },
   text_sm: {
-    fontSize: 14,
+    fontSize: 13,
   },
   text_lg: {
-    fontSize: 18,
+    fontSize: 16,
   },
 
   iconContainer: {
@@ -359,7 +327,7 @@ const styles = StyleSheet.create({
 
   // Label and error styles
   label: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "500",
     marginBottom: 8,
   },
@@ -367,7 +335,7 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 12,
     fontWeight: "400",
-    marginTop: 6,
+    marginTop: 4,
   },
 
   // Modal styles
@@ -422,9 +390,10 @@ const styles = StyleSheet.create({
   },
 
   optionText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "400",
     flex: 1,
+    fontFamily: 'System',
   },
 
   selectedOptionText: {

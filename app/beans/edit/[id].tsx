@@ -1,21 +1,28 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
 import { BeanForm } from "@/forms/BeanForm";
 import { BeansService } from "@/lib/services/beans";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, ScrollView } from "react-native";
 import { toast } from "sonner-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function EditBeanScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
+
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadBean = useCallback(async () => {
-    if (!id || typeof id !== 'string') {
+    if (!id || typeof id !== "string") {
       router.back();
       return;
     }
@@ -38,7 +45,7 @@ export default function EditBeanScreen() {
           price: bean.price?.toString() || "",
           notes: bean.notes || "",
           rating: bean.rating?.toString() || "",
-          flavor_notes: bean.flavor_notes?.join('\n') || "",
+          flavor_notes: bean.flavor_notes?.join("\n") || "",
         });
       } else {
         toast.error("Failed to load bean");
@@ -66,42 +73,110 @@ export default function EditBeanScreen() {
     router.back();
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    content: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Loading..."
-          showBackButton={true}
-          onBackPress={handleCancel}
-          backButtonTitle="Back"
-        />
-      </ThemedView>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Loading Bean...
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Retrieving coffee information
+          </Text>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading bean details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
-        title="Edit Bean"
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Back"
-      />
-      
-      {initialData && (
-        <BeanForm
-          onSuccess={handleSuccess}
-          onCancel={handleCancel}
-          initialData={initialData}
-          isEditing={true}
-        />
-      )}
-    </ThemedView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Edit Bean
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Update {initialData?.name || "coffee"} details
+        </Text>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {initialData && (
+          <BeanForm
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+            initialData={initialData}
+            isEditing={true}
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

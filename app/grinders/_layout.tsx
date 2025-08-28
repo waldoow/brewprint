@@ -1,20 +1,32 @@
 import { Stack } from 'expo-router';
+import { Platform } from 'react-native';
 
 export default function GrindersLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        ...Platform.select({
+          ios: {
+            animation: "default", // Use iOS default slide animation
+          },
+          android: {
+            animation: "slide_from_right",
+          },
+        }),
+      }}
+    >
       <Stack.Screen 
         name="new" 
         options={{ 
-          presentation: 'modal',
-          title: 'Add New Grinder'
+          headerShown: false,
         }} 
       />
       <Stack.Screen 
         name="edit/[id]" 
         options={{ 
-          presentation: 'modal',
-          title: 'Edit Grinder'
+          headerShown: false,
         }} 
       />
     </Stack>

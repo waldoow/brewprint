@@ -1,28 +1,19 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
+  View,
 } from "react-native";
 import { toast } from "sonner-native";
 import { z } from "zod";
-
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
+import { Container } from '@/components/ui/Container';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Zod schema for sign-up validation
 const signUpSchema = z
@@ -72,33 +63,60 @@ export default function SignUp({
   onNavigateToSignIn,
 }: SignUpProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<Partial<SignUpFormData>>({});
 
-  const form = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const validateForm = (): Omit<SignUpFormData, "confirmPassword"> | null => {
+    try {
+      const data = signUpSchema.parse({ username, email, password, confirmPassword });
+      setErrors({});
+      const { confirmPassword: _, ...submitData } = data;
+      return submitData;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const formErrors: Partial<SignUpFormData> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            formErrors[err.path[0] as keyof SignUpFormData] = err.message;
+          }
+        });
+        setErrors(formErrors);
+      }
+      return null;
+    }
+  };
+
+  const onSubmit = async () => {
+    const validatedData = validateForm();
+    if (!validatedData) return;
+
     try {
       setIsLoading(true);
 
-      const { confirmPassword, ...submitData } = data;
-
       if (onSignUp) {
-        await onSignUp(submitData);
-        form.reset();
+        await onSignUp(validatedData);
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setErrors({});
       } else {
         // Mock sign-up for demo
         await new Promise((resolve) => setTimeout(resolve, 2000));
         toast.success("Account created successfully!", {
           description: "Welcome to our platform. You can now sign in.",
         });
-        form.reset();
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setErrors({});
       }
     } catch (error) {
       // Let the parent component handle the error toast
@@ -109,261 +127,136 @@ export default function SignUp({
   };
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedView style={styles.content}>
-              {/* Header */}
-              <ThemedView style={styles.header}>
-                <ThemedText type="title" style={styles.title}>
-                  Create Account
-                </ThemedText>
-                <ThemedText style={styles.subtitle}>
-                  Sign up to get started with your new account
-                </ThemedText>
-              </ThemedView>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <Container scrollable>
+        {/* App Header */}
+        <View style={{
+          alignItems: 'center',
+          marginBottom: theme.spacing['4xl'],
+          marginTop: theme.spacing.xl,
+        }}>
+          <Text variant="4xl" weight="extrabold" style={{ marginBottom: theme.spacing.sm }}>
+            Brewprint
+          </Text>
+          <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+            Professional Coffee Recipe Management
+          </Text>
+        </View>
 
-              {/* Form */}
-              <Form {...form}>
-                <ThemedView style={styles.form}>
-                  {/* Username Input */}
-                  <FormField
-                    control={form.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            placeholder="Choose a username"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            autoCapitalize="none"
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        {/* Sign Up Card */}
+        <Card variant="default" style={{ marginBottom: theme.spacing.xl }}>
+          <View style={{ alignItems: 'center', marginBottom: theme.spacing.xl }}>
+            <Text variant="2xl" weight="bold" style={{ marginBottom: theme.spacing.sm }}>
+              Create Account
+            </Text>
+            <Text variant="body" color="secondary" style={{ textAlign: 'center' }}>
+              Join the professional coffee community
+            </Text>
+          </View>
 
-                  {/* Email Input */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="email"
-                            placeholder="Enter your email"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+          <View>
+            {/* Username Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Username
+              </Text>
+              <Input
+                placeholder="Choose a unique username"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                autoCorrect={false}
+                disabled={isLoading}
+                error={errors.username}
+              />
+            </View>
 
-                  {/* Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Create a password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            {/* Email Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Email Address
+              </Text>
+              <Input
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                disabled={isLoading}
+                error={errors.email}
+              />
+            </View>
 
-                  {/* Confirm Password Input */}
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <ThemedInput
-                            type="password"
-                            placeholder="Confirm your password"
-                            value={field.value}
-                            onChangeText={field.onChange}
-                            onBlur={field.onBlur}
-                            editable={!isLoading}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            {/* Password Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Password
+              </Text>
+              <Input
+                placeholder="Create a secure password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                disabled={isLoading}
+                error={errors.password}
+              />
+            </View>
 
-                {/* Terms Checkbox */}
-                {/* <ThemedView style={styles.checkboxContainer}>
-                  <Controller
-                    control={control}
-                    name="acceptTerms"
-                    render={({ field: { onChange, value } }) => (
-                      <ThemedView>
-                        <ThemedCheckBox
-                          checked={value}
-                          onCheckedChange={onChange}
-                          disabled={isLoading}
-                          containerStyle={styles.checkbox}
-                        />
-                        <ThemedView style={styles.checkboxText}>
-                          <ThemedText style={styles.termsText}>
-                            I agree to the{" "}
-                            <TouchableOpacity onPress={onTermsPress}>
-                              <ThemedText type="link" style={styles.termsLink}>
-                                Terms of Service
-                              </ThemedText>
-                            </TouchableOpacity>{" "}
-                            and{" "}
-                            <TouchableOpacity onPress={onPrivacyPress}>
-                              <ThemedText type="link" style={styles.termsLink}>
-                                Privacy Policy
-                              </ThemedText>
-                            </TouchableOpacity>
-                          </ThemedText>
-                        </ThemedView>
-                      </ThemedView>
-                    )}
-                  />
-                  {errors.acceptTerms && (
-                    <ThemedText style={[styles.errorText, { marginLeft: 32 }]}>
-                      {errors.acceptTerms.message}
-                    </ThemedText>
-                  )}
-                </ThemedView> */}
+            {/* Confirm Password Input */}
+            <View style={{ marginBottom: theme.spacing.lg }}>
+              <Text variant="label" weight="medium" style={{ marginBottom: theme.spacing.xs }}>
+                Confirm Password
+              </Text>
+              <Input
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                disabled={isLoading}
+                error={errors.confirmPassword}
+              />
+            </View>
 
-                  {/* Sign Up Button */}
-                  <ThemedButton
-                    title={isLoading ? "Creating Account..." : "Create Account"}
-                    onPress={form.handleSubmit(onSubmit)}
-                    disabled={isLoading}
-                    loading={isLoading}
-                    style={styles.signUpButton}
-                  />
-                </ThemedView>
-              </Form>
+            {/* Create Account Button */}
+            <Button
+              title="Create Account"
+              onPress={onSubmit}
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={isLoading}
+              style={{ marginTop: theme.spacing.lg }}
+            />
+          </View>
+        </Card>
 
-              {/* Sign In Link */}
-              <ThemedView style={styles.signInContainer}>
-                <ThemedText style={styles.signInText}>
-                  Already have an account?{" "}
-                </ThemedText>
-                <ThemedButton
-                  variant="link"
-                  title="Sign In"
-                  onPress={onNavigateToSignIn}
-                />
-              </ThemedView>
-            </ThemedView>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+        {/* Sign In Section */}
+        <View style={{ alignItems: 'center' }}>
+          <Text variant="body" color="secondary" style={{
+            textAlign: 'center',
+            marginBottom: theme.spacing.lg,
+          }}>
+            Already have an account?
+          </Text>
+          <Button
+            title="Sign In"
+            onPress={onNavigateToSignIn}
+            variant="outline"
+            fullWidth
+            disabled={isLoading}
+          />
+        </View>
+      </Container>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    minHeight: "100%",
-  },
-  content: {
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  title: {
-    marginBottom: 8,
-  },
-  subtitle: {
-    textAlign: "center",
-    opacity: 0.7,
-  },
-  form: {
-    width: "100%",
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  checkboxContainer: {
-    marginBottom: 24,
-  },
-  checkbox: {
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  checkboxText: {
-    flex: 1,
-    marginLeft: 32,
-    marginTop: -24,
-  },
-  termsText: {
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.7,
-  },
-  termsLink: {
-    fontSize: 14,
-  },
-  signUpButton: {},
-  signInContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  signInText: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  signInLink: {
-    fontSize: 14,
-  },
-  errorText: {
-    fontSize: 14,
-    marginTop: 6,
-    marginLeft: 4,
-    color: "#dc2626",
   },
 });

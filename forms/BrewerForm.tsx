@@ -1,60 +1,38 @@
-import { useAuth } from "@/context/AuthContext";
-import { BrewersService, type BrewerInput } from "@/lib/services/brewers";
-import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
-import { z } from "zod";
+import {
+  View,
+  Text,
+  TextField,
+  Button,
+  Picker,
+  Colors,
+} from "react-native-ui-lib";
 
-// UI Components
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedInput } from "@/components/ui/ThemedInput";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { SelectOption, ThemedSelect } from "@/components/ui/ThemedSelect";
-import { ThemedTextArea } from "@/components/ui/ThemedTextArea";
-import { ThemedView } from "@/components/ui/ThemedView";
+// Services and Context
+import { useAuth } from "@/context/AuthContext";
+import { BrewersService, type BrewerInput } from "@/lib/services/brewers";
 
-// Brewer form validation schema - only fields that exist in database
-const brewerFormSchema = z.object({
-  // Basic Info
-  name: z.string().min(1, "Brewer name is required"),
-  brand: z.string().min(1, "Brand is required"),
-  model: z.string().min(1, "Model is required"),
-  type: z.enum([
-    "pour-over",
-    "immersion", 
-    "espresso",
-    "cold-brew",
-    "siphon",
-    "percolator",
-    "turkish",
-    "moka",
-  ]),
-
-  // General Specifications (optional)
-  capacity_ml: z.string().optional(),
-  material: z.string().optional(),
-  filter_type: z.string().optional(),
-
-  // Espresso-specific fields (only for espresso type)
-  espresso_specs: z.string().optional(),
-
-  // Notes
-  notes: z.string().optional(),
-});
-
-type BrewerFormData = z.infer<typeof brewerFormSchema>;
-
-interface BrewerFormProps {
-  onSuccess: (brewer: any) => void;
-  onCancel: () => void;
-  initialData?: Partial<BrewerFormData> & { id?: string };
-  isEditing?: boolean;
+// Form data interface
+interface BrewerFormData {
+  name: string;
+  brand: string;
+  model: string;
+  type: string;
+  capacity_ml: string;
+  material: string;
+  filter_type: string;
+  notes: string;
 }
 
-// Options for selects
-const brewerTypeOptions: SelectOption[] = [
+interface BrewerFormProps {
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  initialData?: Partial<BrewerFormData>;
+}
+
+const brewerTypeOptions = [
   { label: "Pour Over", value: "pour-over" },
   { label: "Immersion", value: "immersion" },
   { label: "Espresso Machine", value: "espresso" },
@@ -65,275 +43,271 @@ const brewerTypeOptions: SelectOption[] = [
   { label: "Moka Pot", value: "moka" },
 ];
 
-export function BrewerForm({
-  onSuccess,
-  onCancel,
-  initialData,
-  isEditing = false,
-}: BrewerFormProps) {
+export function BrewerForm({ onSuccess, onCancel, initialData }: BrewerFormProps) {
   const { user } = useAuth();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<BrewerFormData>({
-    resolver: zodResolver(brewerFormSchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      brand: initialData?.brand || "",
-      model: initialData?.model || "",
-      type: initialData?.type || "pour-over",
-      capacity_ml: initialData?.capacity_ml?.toString() || "",
-      material: initialData?.material || "",
-      filter_type: initialData?.filter_type || "",
-      espresso_specs: initialData?.espresso_specs ? JSON.stringify(initialData.espresso_specs) : "",
-      notes: initialData?.notes || "",
-    },
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  
+  // Form state
+  const [formData, setFormData] = React.useState<BrewerFormData>({
+    name: initialData?.name || "",
+    brand: initialData?.brand || "",
+    model: initialData?.model || "",
+    type: initialData?.type || "pour-over",
+    capacity_ml: initialData?.capacity_ml || "",
+    material: initialData?.material || "",
+    filter_type: initialData?.filter_type || "",
+    notes: initialData?.notes || "",
   });
 
-  const handleFormSubmit = async (data: BrewerFormData) => {
-    if (!user) {
-      toast.error("You must be logged in to save a brewer");
+  const updateField = (field: keyof BrewerFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) newErrors.name = "Brewer name is required";
+    if (!formData.brand.trim()) newErrors.brand = "Brand is required";
+    if (!formData.model.trim()) newErrors.model = "Model is required";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const onSubmit = async () => {
+    if (!validateForm()) return;
+    
+    if (!user?.id) {
+      toast.error("User not authenticated");
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // Transform form data to match service expectations (only available fields)
+      // Convert form data to database format
       const brewerData: BrewerInput = {
-        name: data.name,
-        brand: data.brand,
-        model: data.model,
-        type: data.type,
-        capacity_ml: data.capacity_ml ? parseInt(data.capacity_ml) : undefined,
-        material: data.material || undefined,
-        filter_type: data.filter_type || undefined,
-        espresso_specs: data.espresso_specs ? JSON.parse(data.espresso_specs) : undefined,
-        notes: data.notes || undefined,
+        name: formData.name,
+        brand: formData.brand,
+        model: formData.model,
+        type: formData.type as any,
+        capacity_ml: formData.capacity_ml ? parseInt(formData.capacity_ml) : undefined,
+        material: formData.material || undefined,
+        filter_type: formData.filter_type || undefined,
+        notes: formData.notes || undefined,
       };
 
-      let result;
-      if (isEditing && initialData?.id) {
-        // For editing, we need to include the ID and use update service
-        result = await BrewersService.updateBrewer({
-          id: initialData.id,
-          ...brewerData,
-        });
-      } else {
-        result = await BrewersService.createBrewer(brewerData);
+      const {
+        data: newBrewer,
+        error,
+        success,
+      } = await BrewersService.createBrewer(brewerData);
+
+      if (!success || error) {
+        console.error("Error creating brewer:", error);
+        toast.error(error || "Failed to add brewer. Please try again.");
+        return;
       }
 
-      if (result.success && result.data) {
-        toast.success(
-          isEditing
-            ? "Brewer updated successfully!"
-            : "Brewer created successfully!"
-        );
-        onSuccess(result.data);
-        reset();
-      } else {
-        toast.error(result.error || "Failed to save brewer");
-      }
+      toast.success("Brewer added successfully!");
+      onSuccess?.();
     } catch (error) {
-      console.error("Error saving brewer:", error);
-      toast.error("An unexpected error occurred");
+      console.error("Error adding brewer:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    reset();
-    onCancel();
+    onCancel?.();
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-      >
-        <ThemedView style={styles.form}>
-          {/* Basic Info */}
-          <ThemedView style={styles.section}>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Brewer Name *"
-                  placeholder="e.g., My V60, Kitchen Chemex"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.name?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+    <View style={styles.container}>
+      {/* Basic Information */}
+      <View style={styles.section}>
+        <Text h3 textColor marginB-sm>
+          Basic Information
+        </Text>
+        <Text caption textSecondary marginB-md>
+          Essential brewing equipment details
+        </Text>
 
-            <Controller
-              control={control}
-              name="brand"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Brand *"
-                  placeholder="e.g., Hario, Chemex, AeroPress"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.brand?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+        <View style={styles.fieldGroup}>
+          <TextField
+            label="Brewer Name *"
+            placeholder="My V60, Kitchen Chemex"
+            value={formData.name}
+            onChangeText={(value) => updateField("name", value)}
+            enableErrors={!!errors.name}
+            errorMessage={errors.name}
+            fieldStyle={styles.textField}
+          />
 
-            <Controller
-              control={control}
-              name="model"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Model *"
-                  placeholder="e.g., V60-02, Classic, Original"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.model?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+          <View row gap-md>
+            <View flex>
+              <TextField
+                label="Brand *"
+                placeholder="Hario, Chemex, AeroPress"
+                value={formData.brand}
+                onChangeText={(value) => updateField("brand", value)}
+                enableErrors={!!errors.brand}
+                errorMessage={errors.brand}
+                fieldStyle={styles.textField}
+              />
+            </View>
+            <View flex>
+              <TextField
+                label="Model *"
+                placeholder="V60-02, Classic, Original"
+                value={formData.model}
+                onChangeText={(value) => updateField("model", value)}
+                enableErrors={!!errors.model}
+                errorMessage={errors.model}
+                fieldStyle={styles.textField}
+              />
+            </View>
+          </View>
+        </View>
+      </View>
 
-            <Controller
-              control={control}
-              name="type"
-              render={({ field: { onChange, value } }) => (
-                <ThemedSelect
-                  label="Brewer Type *"
-                  value={value}
-                  onValueChange={onChange}
-                  options={brewerTypeOptions}
-                  error={errors.type?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+      {/* Brewing Method */}
+      <View style={styles.section}>
+        <Text h3 textColor marginB-sm>
+          Brewing Method
+        </Text>
+        <Text caption textSecondary marginB-md>
+          Type and brewing characteristics
+        </Text>
 
-            <Controller
-              control={control}
-              name="capacity_ml"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Capacity (ml)"
-                  placeholder="e.g., 500, 900"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.capacity_ml?.message}
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-              )}
-            />
+        <View style={styles.fieldGroup}>
+          <View>
+            <Text body textColor marginB-sm>Brewer Type *</Text>
+            <Picker
+              value={formData.type}
+              onChange={(value) => updateField("type", value as string)}
+              topBarProps={{ title: "Select Brewer Type" }}
+              style={styles.picker}
+            >
+              {brewerTypeOptions.map(option => (
+                <Picker.Item key={option.value} value={option.value} label={option.label} />
+              ))}
+            </Picker>
+          </View>
 
-            <Controller
-              control={control}
-              name="material"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Material"
-                  placeholder="e.g., ceramic, glass, plastic"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.material?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+          <View row gap-md>
+            <View flex>
+              <TextField
+                label="Capacity (ml)"
+                placeholder="500"
+                keyboardType="numeric"
+                value={formData.capacity_ml}
+                onChangeText={(value) => updateField("capacity_ml", value)}
+                fieldStyle={styles.textField}
+              />
+            </View>
+            <View flex>
+              <TextField
+                label="Material"
+                placeholder="ceramic, glass, plastic"
+                value={formData.material}
+                onChangeText={(value) => updateField("material", value)}
+                fieldStyle={styles.textField}
+              />
+            </View>
+          </View>
 
-            <Controller
-              control={control}
-              name="filter_type"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedInput
-                  label="Filter Type"
-                  placeholder="e.g., V60 02, Chemex Square, Metal"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.filter_type?.message}
-                  style={styles.input}
-                />
-              )}
-            />
+          <TextField
+            label="Filter Type"
+            placeholder="V60 02, Chemex Square, Metal"
+            value={formData.filter_type}
+            onChangeText={(value) => updateField("filter_type", value)}
+            fieldStyle={styles.textField}
+          />
+        </View>
+      </View>
 
-            <Controller
-              control={control}
-              name="notes"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <ThemedTextArea
-                  label="Notes"
-                  placeholder="Any additional notes about this brewer..."
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.notes?.message}
-                  style={styles.input}
-                  rows={3}
-                />
-              )}
-            />
-          </ThemedView>
+      {/* Additional Details */}
+      <View style={styles.section}>
+        <Text h3 textColor marginB-sm>
+          Additional Details
+        </Text>
+        <Text caption textSecondary marginB-md>
+          Optional notes and specifications
+        </Text>
 
-          {/* Form Actions */}
-          <ThemedView style={styles.buttonContainer}>
-            <ThemedButton
-              title="Cancel"
-              onPress={handleCancel}
-              variant="outline"
-              style={styles.cancelButton}
-            />
-            <ThemedButton
-              title={isEditing ? "Update Brewer" : "Create Brewer"}
-              onPress={handleSubmit(handleFormSubmit)}
-              loading={isSubmitting}
-              style={styles.submitButton}
-            />
-          </ThemedView>
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+        <View style={styles.fieldGroup}>
+          <TextField
+            label="Notes"
+            placeholder="Any additional notes about this brewer..."
+            multiline
+            numberOfLines={3}
+            value={formData.notes}
+            onChangeText={(value) => updateField("notes", value)}
+            fieldStyle={styles.textField}
+          />
+        </View>
+      </View>
+
+      {/* Actions */}
+      <View style={styles.section}>
+        <View style={styles.actions}>
+          <Button
+            label="Add Brewer"
+            onPress={onSubmit}
+            backgroundColor={Colors.blue30}
+            size="large"
+            fullWidth
+            disabled={isLoading}
+          />
+          <Button
+            label="Cancel"
+            onPress={handleCancel}
+            backgroundColor={Colors.grey40}
+            size="large"
+            fullWidth
+            disabled={isLoading}
+          />
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  form: {
     padding: 16,
-    paddingBottom: 32,
+    gap: 24,
   },
   section: {
     gap: 16,
-    marginBottom: 8,
   },
-  input: {
-    marginBottom: 8,
+  fieldGroup: {
+    gap: 16,
   },
-  buttonContainer: {
-    flexDirection: "row",
+  textField: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: Colors.grey40,
+    borderRadius: 8,
+    backgroundColor: Colors.white,
+    height: 44,
+  },
+  actions: {
     gap: 12,
-    marginTop: 24,
-    paddingTop: 16,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 2,
   },
 });

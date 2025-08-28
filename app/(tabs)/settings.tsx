@@ -1,510 +1,321 @@
-import { StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { Header } from '@/components/ui/Header';
-import { useAuth } from '@/context/AuthContext';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
+import { getTheme } from "@/constants/ProfessionalDesign";
+import { useAuth } from "@/context/AuthContext";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import { Alert, ScrollView, StyleSheet } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native-ui-lib";
 
 export default function SettingsScreen() {
-  const { user, signOut } = useAuth();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? "light");
+  const { user, signOut } = useAuth();
 
   const handleSignOut = () => {
+    if (Haptics.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
+      "Sign Out",
+      "Are you sure you want to sign out? You can sign back in anytime.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive',
-          onPress: signOut 
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: signOut,
         },
       ]
     );
   };
 
-  const systemSections = [
-    {
-      title: "BREWING PREFERENCES",
-      description: "Units • Temperature scale • Timer precision • Default parameters",
-      icon: "slider.horizontal.3",
-      route: "/settings/preferences",
-      category: "system",
-      priority: 1,
-    },
-    {
-      title: "DATA MANAGEMENT", 
-      description: "Backup • Export formats • Cloud sync • Import/export operations",
-      icon: "tray.and.arrow.up",
-      route: "/settings/data",
-      category: "system",
-      priority: 2,
-    },
-    {
-      title: "BREWING ALERTS",
-      description: "Timer notifications • Freshness warnings • Extraction alerts", 
-      icon: "bell",
-      route: "/settings/notifications",
-      category: "system",
-      priority: 3,
-    },
-  ];
+  const handleSettingPress = (route: string, label: string) => {
+    if (Haptics.impactAsync) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push(route as any);
+  };
 
-  const advancedSections = [
-    {
-      title: "EQUIPMENT PROFILES",
-      description: "Grinder calibration • Water chemistry • Brewing device settings",
-      icon: "wrench.and.screwdriver",
-      route: "/settings/equipment",
-      category: "advanced",
-      priority: 1,
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
     },
-    {
-      title: "EXTRACTION ANALYTICS",
-      description: "TDS calculation • Yield analysis • Performance metrics",
-      icon: "chart.line.uptrend.xyaxis",
-      route: "/settings/analytics",
-      category: "advanced",
-      priority: 2,
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
     },
-    {
-      title: "SYSTEM DIAGNOSTICS",
-      description: "Performance monitoring • Error logs • Debug information",
-      icon: "stethoscope",
-      route: "/settings/diagnostics",
-      category: "advanced",
-      priority: 3,
+    content: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
     },
-  ];
-
-  const accountSections = [
-    {
-      title: "PROFILE MANAGEMENT",
-      description: "User settings • Authentication • Session management",
-      icon: "person.crop.circle",
-      route: "/settings/profile",
-      category: "account",
-      priority: 1,
+    section: {
+      marginBottom: 32,
     },
-    {
-      title: "PRIVACY & SECURITY",
-      description: "Data protection • Access control • Privacy settings",
-      icon: "lock.shield",
-      route: "/settings/privacy",
-      category: "account",
-      priority: 2,
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 16,
     },
-    {
-      title: "ABOUT & SUPPORT",
-      description: "Version info • Documentation • Technical support",
-      icon: "info.circle",
-      route: "/settings/about",
-      category: "account",
-      priority: 3,
+    profileSection: {
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      marginBottom: 32,
     },
-  ];
+    profileName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    profileEmail: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    settingItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    settingContent: {
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    settingDescription: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: 16,
+      marginBottom: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 12,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+    },
+    signOutButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      marginTop: 16,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+  });
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      {/* Professional Header for System Configuration */}
-      <Header 
-        title="System Configuration"
-        subtitle="Advanced brewing system settings and preferences"
-        showBackButton={false}
-        showMenuButton={true}
-        showProfileAvatar={true}
-        showSearchButton={false}
-        onMenuPress={() => console.log('Menu pressed')}
-        onProfilePress={() => console.log('Profile pressed')}
-        showTopSpacing={true}
-      />
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>
+          Settings
+        </Text>
+        <Text style={{ fontSize: 12, color: theme.colors.text.secondary, marginTop: 2 }}>
+          Account and preferences for {user?.user_metadata?.username || "Coffee Enthusiast"}
+        </Text>
+      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        {/* System Settings Section */}
-        <ThemedView style={styles.configurationSection}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-              SYSTEM SETTINGS
-            </ThemedText>
-            <ThemedText style={[styles.sectionCount, { color: colors.textSecondary }]}>
-              {systemSections.length}
-            </ThemedText>
-          </ThemedView>
-          
-          <ThemedView style={styles.settingsGrid}>
-            {systemSections.map((setting, index) => (
-              <TouchableOpacity 
-                key={`system-${index}`}
-                style={[styles.advancedSettingCard, { 
-                  backgroundColor: colors.cardBackground,
-                  borderLeftColor: colors.primary,
-                }]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  console.log(`${setting.title} - Implementation required`);
-                }}
-              >
-                <ThemedView style={styles.settingHeader}>
-                  <ThemedView style={styles.settingMain}>
-                    <ThemedText style={[styles.settingTitleAdvanced, { color: colors.text }]}>
-                      {setting.title}
-                    </ThemedText>
-                    <ThemedText style={[styles.settingDescriptionAdvanced, { color: colors.textSecondary }]}>
-                      {setting.description}
-                    </ThemedText>
-                  </ThemedView>
-                  <IconSymbol name="chevron.right" size={14} color={colors.textSecondary} />
-                </ThemedView>
-                
-                <ThemedView style={styles.settingAnalytics}>
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      PRIORITY
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.text }]}>
-                      {setting.priority}
-                    </ThemedText>
-                  </ThemedView>
-                  
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      STATUS
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.statusYellow }]}>
-                      CONFIG
-                    </ThemedText>
-                  </ThemedView>
-                </ThemedView>
-              </TouchableOpacity>
-            ))}
-          </ThemedView>
-        </ThemedView>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* User Profile */}
+        <View style={styles.profileSection}>
+          <Text style={styles.profileName}>
+            {user?.user_metadata?.username || "Coffee Enthusiast"}
+          </Text>
+          <Text style={styles.profileEmail}>
+            {user?.email}
+          </Text>
+        </View>
 
-        {/* Advanced Features Section */}
-        <ThemedView style={styles.configurationSection}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-              ADVANCED FEATURES
-            </ThemedText>
-            <ThemedText style={[styles.sectionCount, { color: colors.textSecondary }]}>
-              {advancedSections.length}
-            </ThemedText>
-          </ThemedView>
-          
-          <ThemedView style={styles.settingsGrid}>
-            {advancedSections.map((setting, index) => (
-              <TouchableOpacity 
-                key={`advanced-${index}`}
-                style={[styles.advancedSettingCard, { 
-                  backgroundColor: colors.cardBackground,
-                  borderLeftColor: colors.statusGreen,
-                }]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  console.log(`${setting.title} - Professional feature`);
-                }}
-              >
-                <ThemedView style={styles.settingHeader}>
-                  <ThemedView style={styles.settingMain}>
-                    <ThemedText style={[styles.settingTitleAdvanced, { color: colors.text }]}>
-                      {setting.title}
-                    </ThemedText>
-                    <ThemedText style={[styles.settingDescriptionAdvanced, { color: colors.textSecondary }]}>
-                      {setting.description}
-                    </ThemedText>
-                  </ThemedView>
-                  <IconSymbol name="chevron.right" size={14} color={colors.textSecondary} />
-                </ThemedView>
-                
-                <ThemedView style={styles.settingAnalytics}>
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      COMPLEXITY
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.text }]}>
-                      HIGH
-                    </ThemedText>
-                  </ThemedView>
-                  
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      ACCESS
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.statusGreen }]}>
-                      EXPERT
-                    </ThemedText>
-                  </ThemedView>
-                </ThemedView>
-              </TouchableOpacity>
-            ))}
-          </ThemedView>
-        </ThemedView>
+        {/* Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Account
+          </Text>
 
-        {/* Account Management Section */}
-        <ThemedView style={styles.configurationSection}>
-          <ThemedView style={styles.sectionHeader}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-              ACCOUNT MANAGEMENT
-            </ThemedText>
-            <ThemedText style={[styles.sectionCount, { color: colors.textSecondary }]}>
-              {accountSections.length}
-            </ThemedText>
-          </ThemedView>
-          
-          <ThemedView style={styles.settingsGrid}>
-            {accountSections.map((setting, index) => (
-              <TouchableOpacity 
-                key={`account-${index}`}
-                style={[styles.advancedSettingCard, { 
-                  backgroundColor: colors.cardBackground,
-                  borderLeftColor: colors.statusRed,
-                }]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  console.log(`${setting.title} - Account feature`);
-                }}
-              >
-                <ThemedView style={styles.settingHeader}>
-                  <ThemedView style={styles.settingMain}>
-                    <ThemedText style={[styles.settingTitleAdvanced, { color: colors.text }]}>
-                      {setting.title}
-                    </ThemedText>
-                    <ThemedText style={[styles.settingDescriptionAdvanced, { color: colors.textSecondary }]}>
-                      {setting.description}
-                    </ThemedText>
-                  </ThemedView>
-                  <IconSymbol name="chevron.right" size={14} color={colors.textSecondary} />
-                </ThemedView>
-                
-                <ThemedView style={styles.settingAnalytics}>
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      SECURITY
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.text }]}>
-                      HIGH
-                    </ThemedText>
-                  </ThemedView>
-                  
-                  <ThemedView style={styles.analyticsItem}>
-                    <ThemedText style={[styles.analyticsLabel, { color: colors.textSecondary }]}>
-                      REQUIRED
-                    </ThemedText>
-                    <ThemedText style={[styles.analyticsValue, { color: colors.statusRed }]}>
-                      YES
-                    </ThemedText>
-                  </ThemedView>
-                </ThemedView>
-              </TouchableOpacity>
-            ))}
-          </ThemedView>
-        </ThemedView>
-
-        {/* User Session Information */}
-        <ThemedView style={[styles.sessionCard, { 
-          backgroundColor: colors.cardBackground,
-          borderColor: colors.border,
-        }]}>
-          <ThemedView style={styles.sessionHeader}>
-            <ThemedText style={[styles.sessionTitle, { color: colors.text }]}>
-              ACTIVE SESSION
-            </ThemedText>
-            <ThemedText style={[styles.sessionStatus, { color: colors.statusGreen }]}>
-              AUTHENTICATED
-            </ThemedText>
-          </ThemedView>
-          
-          <ThemedView style={styles.sessionDetails}>
-            <ThemedView style={styles.sessionRow}>
-              <ThemedText style={[styles.sessionLabel, { color: colors.textSecondary }]}>
-                USER
-              </ThemedText>
-              <ThemedText style={[styles.sessionValue, { color: colors.text }]}>
-                {user?.email || 'Unknown'}
-              </ThemedText>
-            </ThemedView>
-            
-            <ThemedView style={styles.sessionRow}>
-              <ThemedText style={[styles.sessionLabel, { color: colors.textSecondary }]}>
-                SESSION
-              </ThemedText>
-              <ThemedText style={[styles.sessionValue, { color: colors.text }]}>
-                {new Date().toLocaleDateString()}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-          
-          <ThemedButton
-            onPress={handleSignOut}
-            variant="outline"
-            style={styles.terminateButton}
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => handleSettingPress("/settings/profile", "Profile")}
+            activeOpacity={0.7}
           >
-            TERMINATE SESSION
-          </ThemedButton>
-        </ThemedView>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>
+                Profile Settings
+              </Text>
+              <Text style={styles.settingDescription}>
+                Update your username and personal info
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.colors.text.tertiary }}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Preferences Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Preferences
+          </Text>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => handleSettingPress("/settings/notifications", "Notifications")}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>
+                Notifications
+              </Text>
+              <Text style={styles.settingDescription}>
+                Push notifications and alerts
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.colors.text.tertiary }}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => handleSettingPress("/settings/preferences", "Units")}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>
+                Default Units
+              </Text>
+              <Text style={styles.settingDescription}>
+                Metric (grams, Celsius)
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.colors.text.tertiary }}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Data & Support Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Data & Support
+          </Text>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => handleSettingPress("/settings/data", "Data Management")}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>
+                Data Management
+              </Text>
+              <Text style={styles.settingDescription}>
+                Export, backup, and sync your brewing data
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.colors.text.tertiary }}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => handleSettingPress("/settings/about", "About")}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={styles.settingTitle}>
+                About
+              </Text>
+              <Text style={styles.settingDescription}>
+                App version, privacy policy, and support
+              </Text>
+            </View>
+            <Text style={{ fontSize: 16, color: theme.colors.text.tertiary }}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Account Statistics */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Account Overview
+          </Text>
+
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>—</Text>
+              <Text style={styles.statLabel}>Recipes Created</Text>
+            </View>
+
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>—</Text>
+              <Text style={styles.statLabel}>Total Brews</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "—"}
+              </Text>
+              <Text style={styles.statLabel}>Member Since</Text>
+            </View>
+
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>1.0.0</Text>
+              <Text style={styles.statLabel}>App Version</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Sign Out */}
+        <TouchableOpacity
+          style={styles.signOutButton}
+          onPress={handleSignOut}
+          activeOpacity={0.7}
+        >
+          <Text style={{ fontSize: 14, fontWeight: '500', color: theme.colors.error }}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  configurationSection: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  
-  // Section headers
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingTop: 16,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  sectionCount: {
-    fontSize: 12,
-    fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
-  
-  // Settings grid
-  settingsGrid: {
-    gap: 12,
-  },
-  
-  // Advanced setting card styles
-  advancedSettingCard: {
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  settingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  settingMain: {
-    flex: 1,
-  },
-  settingTitleAdvanced: {
-    fontSize: 15,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-    marginBottom: 4,
-  },
-  settingDescriptionAdvanced: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  
-  // Setting analytics
-  settingAnalytics: {
-    flexDirection: 'row',
-    gap: 16,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  analyticsItem: {
-    flex: 1,
-  },
-  analyticsLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  analyticsValue: {
-    fontSize: 11,
-    fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
-  
-  // Session card
-  sessionCard: {
-    marginHorizontal: 16,
-    marginBottom: 24,
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  sessionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sessionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  sessionStatus: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  
-  // Session details
-  sessionDetails: {
-    gap: 8,
-    marginBottom: 16,
-  },
-  sessionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sessionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    flex: 1,
-  },
-  sessionValue: {
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'right',
-    flex: 2,
-  },
-  
-  // Terminate button
-  terminateButton: {
-    alignSelf: 'flex-start',
-    minWidth: 160,
-  },
-});

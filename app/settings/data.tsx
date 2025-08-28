@@ -1,29 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { ExportService } from "@/lib/services/export";
+import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import * as Sharing from "expo-sharing";
+import React, { useEffect, useState } from "react";
+import { Alert, Share, StyleSheet, ScrollView } from "react-native";
 import {
-  StyleSheet,
-  ScrollView,
   View,
-  Alert,
-  Share,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
+  Text,
+  TouchableOpacity,
+} from "react-native-ui-lib";
+import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { ExportService } from '@/lib/services/export';
-import { AnalyticsService } from '@/lib/services/analytics';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import * as Haptics from 'expo-haptics';
-import { toast } from 'sonner-native';
 
 export default function DataPrivacyScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [backupStats, setBackupStats] = useState<{
     total_items: number;
@@ -43,7 +36,7 @@ export default function DataPrivacyScreen() {
         setBackupStats(result.data);
       }
     } catch (error) {
-      console.error('Failed to load backup stats:', error);
+      console.error("Failed to load backup stats:", error);
     }
   };
 
@@ -53,37 +46,37 @@ export default function DataPrivacyScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       const result = await ExportService.exportAllData();
-      
+
       if (result.success && result.data) {
-        const filename = ExportService.generateBackupFilename('json');
+        const filename = ExportService.generateBackupFilename("json");
         const fileUri = `${FileSystem.documentDirectory}${filename}`;
-        
+
         await FileSystem.writeAsStringAsync(
-          fileUri, 
+          fileUri,
           JSON.stringify(result.data, null, 2)
         );
 
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(fileUri, {
-            mimeType: 'application/json',
-            dialogTitle: 'Export Brewprint Data',
+            mimeType: "application/json",
+            dialogTitle: "Export Brewprint Data",
           });
         } else {
           // Fallback to Share API
           await Share.share({
-            title: 'Brewprint Data Export',
-            message: 'Your complete Brewprint data backup',
+            title: "Brewprint Data Export",
+            message: "Your complete Brewprint data backup",
             url: fileUri,
           });
         }
 
-        toast.success('Data exported successfully!');
+        toast.success("Data exported successfully!");
       } else {
-        toast.error(result.error || 'Export failed');
+        toast.error(result.error || "Export failed");
       }
     } catch (error) {
-      console.error('Export failed:', error);
-      toast.error('Export failed');
+      console.error("Export failed:", error);
+      toast.error("Export failed");
     } finally {
       setExporting(false);
     }
@@ -95,27 +88,27 @@ export default function DataPrivacyScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       const result = await ExportService.exportBrewprintsCSV();
-      
+
       if (result.success && result.data) {
-        const filename = 'brewprints-export.csv';
+        const filename = "brewprints-export.csv";
         const fileUri = `${FileSystem.documentDirectory}${filename}`;
-        
+
         await FileSystem.writeAsStringAsync(fileUri, result.data);
 
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(fileUri, {
-            mimeType: 'text/csv',
-            dialogTitle: 'Export Brewprints',
+            mimeType: "text/csv",
+            dialogTitle: "Export Brewprints",
           });
         }
 
-        toast.success('Brewprints exported as CSV!');
+        toast.success("Brewprints exported as CSV!");
       } else {
-        toast.error(result.error || 'CSV export failed');
+        toast.error(result.error || "CSV export failed");
       }
     } catch (error) {
-      console.error('CSV export failed:', error);
-      toast.error('CSV export failed');
+      console.error("CSV export failed:", error);
+      toast.error("CSV export failed");
     } finally {
       setExporting(false);
     }
@@ -127,27 +120,27 @@ export default function DataPrivacyScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
       const result = await ExportService.exportBeansCSV();
-      
+
       if (result.success && result.data) {
-        const filename = 'beans-inventory-export.csv';
+        const filename = "beans-inventory-export.csv";
         const fileUri = `${FileSystem.documentDirectory}${filename}`;
-        
+
         await FileSystem.writeAsStringAsync(fileUri, result.data);
 
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(fileUri, {
-            mimeType: 'text/csv',
-            dialogTitle: 'Export Bean Inventory',
+            mimeType: "text/csv",
+            dialogTitle: "Export Bean Inventory",
           });
         }
 
-        toast.success('Bean inventory exported as CSV!');
+        toast.success("Bean inventory exported as CSV!");
       } else {
-        toast.error(result.error || 'CSV export failed');
+        toast.error(result.error || "CSV export failed");
       }
     } catch (error) {
-      console.error('CSV export failed:', error);
-      toast.error('CSV export failed');
+      console.error("CSV export failed:", error);
+      toast.error("CSV export failed");
     } finally {
       setExporting(false);
     }
@@ -155,23 +148,23 @@ export default function DataPrivacyScreen() {
 
   const handleClearAllData = () => {
     Alert.alert(
-      'Clear All Data',
-      'This will permanently delete ALL your coffee data including beans, recipes, brewing history, and equipment. This action cannot be undone.\n\nAre you absolutely sure?',
+      "Clear All Data",
+      "This will permanently delete ALL your coffee data including beans, recipes, brewing history, and equipment. This action cannot be undone.\n\nAre you absolutely sure?",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'I understand - Delete Everything',
-          style: 'destructive',
+          text: "I understand - Delete Everything",
+          style: "destructive",
           onPress: () => {
             // Double confirmation
             Alert.alert(
-              'Final Confirmation',
+              "Final Confirmation",
               'Type "CONFIRM DELETE" to proceed with deleting all data.',
               [
-                { text: 'Cancel', style: 'cancel' },
+                { text: "Cancel", style: "cancel" },
                 {
-                  text: 'Delete All Data',
-                  style: 'destructive',
+                  text: "Delete All Data",
+                  style: "destructive",
                   onPress: confirmClearAllData,
                 },
               ]
@@ -187,333 +180,432 @@ export default function DataPrivacyScreen() {
       setClearing(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-      const result = await ExportService.clearAllData('CONFIRM_DELETE_ALL_DATA');
-      
+      const result = await ExportService.clearAllData(
+        "CONFIRM_DELETE_ALL_DATA"
+      );
+
       if (result.success) {
-        toast.success('All data cleared successfully');
+        toast.success("All data cleared successfully");
         // Refresh stats
         await loadBackupStats();
       } else {
-        toast.error(result.error || 'Failed to clear data');
+        toast.error(result.error || "Failed to clear data");
       }
     } catch (error) {
-      console.error('Failed to clear data:', error);
-      toast.error('Failed to clear data');
+      console.error("Failed to clear data:", error);
+      toast.error("Failed to clear data");
     } finally {
       setClearing(false);
     }
   };
 
-  return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Data & Privacy" 
-        onBack={() => router.back()}
-        loading={exporting || clearing}
-      />
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    dataCard: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      padding: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 16,
+    },
+    statItem: {
+      alignItems: 'center',
+      padding: 16,
+      minWidth: '45%',
+    },
+    statLabel: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    statValue: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+    },
+    statValueSmall: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+    },
+    exportButtons: {
+      gap: 12,
+    },
+    primaryButton: {
+      backgroundColor: theme.colors.info,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    primaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.inverse,
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    secondaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    dangerButton: {
+      backgroundColor: theme.colors.error,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    dangerButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.inverse,
+    },
+    infoBox: {
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.info,
+      padding: 12,
+      borderRadius: 6,
+      marginTop: 16,
+    },
+    infoText: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      lineHeight: 18,
+    },
+    privacyList: {
+      gap: 20,
+    },
+    privacyItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 12,
+    },
+    privacyIcon: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      backgroundColor: theme.colors.success,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    privacyIconText: {
+      color: theme.colors.text.inverse,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    privacyContent: {
+      flex: 1,
+    },
+    privacyTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 4,
+    },
+    privacyDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+      lineHeight: 18,
+    },
+    dangerZone: {
+      backgroundColor: 'rgba(220, 38, 38, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      borderRadius: 6,
+      padding: 16,
+    },
+    warningBox: {
+      backgroundColor: 'rgba(220, 38, 38, 0.05)',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      padding: 12,
+      borderRadius: 6,
+      marginTop: 16,
+    },
+    warningText: {
+      fontSize: 10,
+      color: theme.colors.error,
+      lineHeight: 18,
+    },
+    loadingContainer: {
+      alignItems: 'center',
+      paddingVertical: 32,
+    },
+    loadingText: {
+      fontSize: 14,
+      color: theme.colors.text.secondary,
+    },
+  });
 
-      <ScrollView 
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Data & Privacy
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Export and manage your coffee data
+        </Text>
+      </View>
+
+      <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Data Overview */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             Your Data
-          </ThemedText>
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Overview of your coffee information
+          </Text>
           
-          {backupStats ? (
-            <View style={styles.statsGrid}>
-              <View style={[styles.statItem, { backgroundColor: colors.surface }]}>
-                <ThemedText type="caption" style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  Total Items
-                </ThemedText>
-                <ThemedText type="title" style={[styles.statValue, { color: colors.text }]}>
-                  {backupStats.total_items}
-                </ThemedText>
-              </View>
-              
-              {Object.entries(backupStats.tables).map(([table, count]) => (
-                <View key={table} style={[styles.statItem, { backgroundColor: colors.surface }]}>
-                  <ThemedText type="caption" style={[styles.statLabel, { color: colors.textSecondary }]}>
-                    {table.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </ThemedText>
-                  <ThemedText type="subtitle" style={[styles.statValue, { color: colors.text }]}>
-                    {count}
-                  </ThemedText>
+          <View style={styles.dataCard}>
+            {backupStats ? (
+              <View style={styles.statsGrid}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>
+                    Total Items
+                  </Text>
+                  <Text style={styles.statValue}>
+                    {backupStats.total_items}
+                  </Text>
                 </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.loadingContainer}>
-              <ThemedText style={{ color: colors.textSecondary }}>
-                Loading data overview...
-              </ThemedText>
-            </View>
-          )}
+
+                {Object.entries(backupStats.tables).map(([table, count]) => (
+                  <View key={table} style={styles.statItem}>
+                    <Text style={styles.statLabel}>
+                      {table
+                        .replace("_", " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </Text>
+                    <Text style={styles.statValueSmall}>
+                      {count}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>
+                  Loading data overview...
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Export Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             Export Data
-          </ThemedText>
-          <ThemedText type="caption" style={[styles.sectionDescription, { color: colors.textSecondary }]}>
+          </Text>
+          <Text style={styles.sectionSubtitle}>
             Download your coffee data for backup or to use in other applications
-          </ThemedText>
-
-          <View style={styles.actionGrid}>
-            <ThemedButton
-              title="Complete Backup (JSON)"
+          </Text>
+          
+          <View style={styles.exportButtons}>
+            <TouchableOpacity
+              style={[styles.primaryButton, exporting && { opacity: 0.5 }]}
               onPress={handleExportAllData}
-              variant="default"
-              size="default"
-              loading={exporting}
-              style={styles.exportButton}
-            />
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.primaryButtonText}>
+                Complete Backup (JSON)
+              </Text>
+            </TouchableOpacity>
 
-            <ThemedButton
-              title="Recipes (CSV)"
+            <TouchableOpacity
+              style={[styles.secondaryButton, exporting && { opacity: 0.5 }]}
               onPress={handleExportBrewprintsCSV}
-              variant="secondary"
-              size="default"
-              loading={exporting}
-              style={styles.exportButton}
-            />
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Recipes (CSV)
+              </Text>
+            </TouchableOpacity>
 
-            <ThemedButton
-              title="Bean Inventory (CSV)"
+            <TouchableOpacity
+              style={[styles.secondaryButton, exporting && { opacity: 0.5 }]}
               onPress={handleExportBeansCSV}
-              variant="secondary"
-              size="default"
-              loading={exporting}
-              style={styles.exportButton}
-            />
-          </View>
+              disabled={exporting}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.secondaryButtonText}>
+                Bean Inventory (CSV)
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.infoBox}>
-            <ThemedText type="caption" style={[styles.infoText, { color: colors.textSecondary }]}>
-              • Complete backup includes all data in JSON format for maximum compatibility
-              {'\n'}• CSV exports are ideal for spreadsheet applications like Excel or Google Sheets
-              {'\n'}• All exports respect your privacy - no data is sent to external servers
-            </ThemedText>
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>
+                • Complete backup includes all data in JSON format for maximum compatibility{"\n"}
+                • CSV exports are ideal for spreadsheet applications like Excel or Google Sheets{"\n"}
+                • All exports respect your privacy - no data is sent to external servers
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Privacy Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             Privacy & Security
-          </ThemedText>
-
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Your data protection and privacy assurance
+          </Text>
+          
           <View style={styles.privacyList}>
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: colors.statusGreen }]}>
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText type="defaultSemiBold" style={[styles.privacyTitle, { color: colors.text }]}>
+                <Text style={styles.privacyTitle}>
                   Local Data Storage
-                </ThemedText>
-                <ThemedText type="caption" style={[styles.privacyDescription, { color: colors.textSecondary }]}>
+                </Text>
+                <Text style={styles.privacyDescription}>
                   All your coffee data is stored securely on your device and in your personal cloud account
-                </ThemedText>
+                </Text>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: colors.statusGreen }]}>
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText type="defaultSemiBold" style={[styles.privacyTitle, { color: colors.text }]}>
+                <Text style={styles.privacyTitle}>
                   No Analytics Tracking
-                </ThemedText>
-                <ThemedText type="caption" style={[styles.privacyDescription, { color: colors.textSecondary }]}>
-                  We don&apos;t track your usage or collect personal data for analytics purposes
-                </ThemedText>
+                </Text>
+                <Text style={styles.privacyDescription}>
+                  We don't track your usage or collect personal data for analytics purposes
+                </Text>
               </View>
             </View>
 
             <View style={styles.privacyItem}>
-              <View style={[styles.privacyIcon, { backgroundColor: colors.statusGreen }]}>
-                <ThemedText style={styles.privacyIconText}>✓</ThemedText>
+              <View style={styles.privacyIcon}>
+                <Text style={styles.privacyIconText}>✓</Text>
               </View>
               <View style={styles.privacyContent}>
-                <ThemedText type="defaultSemiBold" style={[styles.privacyTitle, { color: colors.text }]}>
+                <Text style={styles.privacyTitle}>
                   Data Ownership
-                </ThemedText>
-                <ThemedText type="caption" style={[styles.privacyDescription, { color: colors.textSecondary }]}>
+                </Text>
+                <Text style={styles.privacyDescription}>
                   Your coffee data belongs to you. Export it anytime, no restrictions
-                </ThemedText>
+                </Text>
               </View>
             </View>
           </View>
         </View>
 
         {/* Danger Zone */}
-        <View style={[styles.dangerSection, { backgroundColor: colors.cardBackground, borderColor: colors.error }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.error }]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             Danger Zone
-          </ThemedText>
-          <ThemedText type="caption" style={[styles.sectionDescription, { color: colors.textSecondary }]}>
+          </Text>
+          <Text style={styles.sectionSubtitle}>
             These actions cannot be undone. Please be careful.
-          </ThemedText>
+          </Text>
+          
+          <View style={styles.dangerZone}>
+            <TouchableOpacity
+              style={[styles.dangerButton, clearing && { opacity: 0.5 }]}
+              onPress={handleClearAllData}
+              disabled={clearing}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.dangerButtonText}>
+                Clear All Data
+              </Text>
+            </TouchableOpacity>
 
-          <ThemedButton
-            title="Clear All Data"
-            onPress={handleClearAllData}
-            variant="destructive"
-            size="default"
-            loading={clearing}
-            style={styles.dangerButton}
-          />
-
-          <View style={styles.warningBox}>
-            <ThemedText type="caption" style={[styles.warningText, { color: colors.error }]}>
-              ⚠️ This will permanently delete all your coffee data including recipes, brewing history, beans, equipment, and preferences. Make sure to export your data first!
-            </ThemedText>
+            <View style={styles.warningBox}>
+              <Text style={styles.warningText}>
+                ⚠️ This will permanently delete all your coffee data including recipes, brewing history, beans, equipment, and preferences. Make sure to export your data first!
+              </Text>
+            </View>
           </View>
         </View>
-
-        <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  section: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  dangerSection: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  sectionDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  loadingContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 8,
-  },
-  statItem: {
-    flex: 1,
-    minWidth: '30%',
-    maxWidth: '48%',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 11,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  statValue: {
-    fontWeight: '700',
-  },
-  actionGrid: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  exportButton: {
-    alignSelf: 'stretch',
-  },
-  infoBox: {
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.2)',
-  },
-  infoText: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  privacyList: {
-    gap: 16,
-  },
-  privacyItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  privacyIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  privacyIconText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  privacyContent: {
-    flex: 1,
-  },
-  privacyTitle: {
-    marginBottom: 2,
-  },
-  privacyDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  dangerButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-  },
-  warningBox: {
-    backgroundColor: 'rgba(220, 38, 38, 0.1)',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(220, 38, 38, 0.2)',
-  },
-  warningText: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  bottomSpacing: {
-    height: 20,
-  },
-});

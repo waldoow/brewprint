@@ -133,187 +133,182 @@ The current enhanced template structure will be reorganized into the silo-based 
 
 ## Design System
 
-### Visual Identity - Dark Scheduler Theme
+### Visual Identity - Professional Minimalist Design
 
-- **Primary Color Palette**: Modern dark scheduler interface with purple accents
-  - `background` (#0f0f10) - Primary dark background
-  - `surface` (#1a1a1c) - Card and surface backgrounds
-  - `cardBackground` (#1f1f23) - Individual card backgrounds
-  - `cardSecondary` (#2a2a2e) - Secondary card elements
-  - `primary` (#6d28d9) - Purple primary accent
-  - `accent` (#8b5cf6) - Purple accent for highlights
-  - `progressTrack` (#333338) - Progress bar backgrounds
-  - `progressActive` (#ffffff) - Active progress indicators
-  - `statusGreen` (#22c55e) - Status indicator green
+**"Data-First Minimalism"** - A professional, minimalist design system specifically crafted for coffee specialists who prioritize clear data presentation and functionality over decorative elements.
 
-- **Typography Colors**:
-  - `text` (#ffffff) - Primary white text
-  - `textSecondary` (#a0a0a0) - Secondary light gray text
-  - `textTertiary` (#6c6c70) - Tertiary darker gray text
+#### Color Palette
+- **Foundation**: Pure black (#000000) and white (#FFFFFF)
+- **Gray Scale**: Professional 9-step system from #F9FAFB to #111827
+- **Semantic Colors**: Minimal use only - success (#059669), warning (#D97706), error (#DC2626), info (#2563EB)
+- **Design Principle**: No brand colors, coffee browns, or decorative colors - maintains professional neutrality
 
-- **Navigation & Interface**:
-  - `tint` (#8b5cf6) - Tab bar active tint
-  - `icon` (#a0a0a0) - Icon color
-  - `border` (#2d2d30) - Borders and dividers
+#### Typography System
+```
+H1: 32px, Bold - App titles, primary headers
+H2: 28px, Bold - Section headers  
+H3: 24px, Semibold - Card titles, important labels
+H4: 20px, Semibold - Subsection headers
+Body: 16px, Normal/Medium - Primary content text
+Caption: 14px, Normal - Secondary information
+Label: 12px, Medium - Form labels, metadata
+```
 
-- **Semantic Colors**: Success (#10b981), warning (#f59e0b), error (#ef4444)
-- **Gradient System**: Featured cards use purple gradients (gradientStart to gradientEnd)
-- **Card Hierarchy**: Progress cards with priority indicators and featured styling
-- **Typography**: Clean, modern typography with consistent spacing
-- **Icons**: Expo Symbols with coffee and scheduler-appropriate iconography
+#### Layout Principles
+- **Clean Containers**: Container with minimal styling
+- **16px Standard Spacing**: Consistent padding throughout all screens
+- **Minimal Shadows**: Subtle effects only where necessary for hierarchy
+- **Card-Based Architecture**: Card with 8px border radius
+- **Generous White Space**: Emphasis on clarity through spacing
 
-### Component Philosophy - Scheduler Interface
+### Professional Component System
 
-- **Dark-First Design**: All components designed for dark theme by default
-- **Scheduler-Style Headers**: Hamburger menu, profile avatar, search functionality
-- **Progress Cards**: Main content display with progress bars, status indicators, and priority badges
-- **Search & Filter**: Consistent search bar with filter button across screens
-- **Card-Based Layout**: All content organized in rounded cards with consistent spacing
-- **Priority System**: Visual priority indicators with numbered badges
-- **Status Tracking**: Progress bars with dot indicators showing completion states
-- **Inventory Management**: Coffee-specific progress tracking (beans, brewing, equipment)
-- **Horizontal Information**: Label-value pairs with icons for efficient space usage
-- **Interactive Elements**: Touch-optimized cards with proper feedback
+#### Core Professional Components
+
+- **Container** - Clean, minimal full-screen containers with optional scrolling
+- **PageHeader** - Consistent headers with title + subtitle + single action button
+- **Card** - Primary content containers with clean styling
+- **Text** - Typography system with proper hierarchy and weights
+- **Button** - Clean button variants (primary, outline, ghost, destructive)
+- **Input** - Minimal form inputs with integrated validation
+
+#### Data Presentation Strategy
+
+**Coffee-Specific Data Display**:
+- **Horizontal Label-Value Pairs**: Efficient space usage for brewing parameters
+- **Metric Cards**: Clean display of weights, temperatures, times, ratios
+- **Status Indicators**: Minimal badges for roast levels, freshness, etc.
+- **Information Hierarchy**: Primary data large and bold, secondary data in gray, metadata small
+
+#### Form Design Philosophy
+
+- **Single Column Layout**: Optimal for mobile, easy scanning
+- **Integrated Validation**: Error states with minimal red accents
+- **Label-Above Pattern**: Clear field identification
+- **Minimal Focus States**: Subtle blue outline, no dramatic changes
 
 ## Component Library
 
-The component library is organized into logical folders for better maintainability and alignment with the silo-based architecture:
+The component library follows the professional minimalist design system with emphasis on functionality and data clarity:
 
-### `/components/ui/` - Core UI Components
+### `/components/ui/` - Professional Design Components
 
-**Core Themed Components**
+#### Core Professional Components
 
-- **ThemedView** - Container with automatic dark theme switching
-- **ThemedText** - Typography with dark theme support
-- **ThemedScrollView** - Scrollable container with dark theme-aware styling
+- **Container** - Clean, minimal containers with optional scrolling
+  - Zero decorative elements
+  - Consistent 16px padding
+  - Light/dark theme support
 
-**Scheduler Interface Components**
+- **PageHeader** - Consistent header pattern across all screens
+  - Title + subtitle + single action button
+  - Clean typography hierarchy
+  - No decorative elements
 
-- **ProgressCard** - Main content card component matching scheduler design
-  - Progress bars with dot indicators
-  - Priority badges with numbered indicators
-  - Featured cards with purple gradients
-  - Coffee-specific stat labels (beans in stock, currently brewing, brews planned)
-  - Touch-optimized with proper feedback
-  
-- **SearchBar** - Search input with filter button
-  - Dark theme styling with card background
-  - Consistent with scheduler interface
-  - Filter button integration
-  
-- **Header** - Enhanced header component with scheduler options
-  - Supports scheduler-style layout (hamburger menu + profile avatar)
-  - Search button integration
-  - Maintains original functionality for other screens
-  - Coffee-themed titles and subtitles
+- **Card** - Primary content containers
+  - Minimal 8px border radius
+  - Subtle shadows only where needed
+  - Consistent spacing and hierarchy
 
-**Form Components (React Hook Form Integration)**
+- **Text** - Professional typography system
+  - 7 variants: h1, h2, h3, h4, body, caption, label
+  - 4 weights: normal, medium, semibold, bold
+  - 4 color variants: primary, secondary, tertiary, inverse
 
-- **ThemedInput** - Text input with validation support and dark theme styling
-- **ThemedTextArea** - Multi-line text input for notes and descriptions
-- **ThemedSelect** - Dropdown/picker for equipment and bean selections
-- **ThemedCheckBox** - Checkbox with dark theme support for preferences
-- **ThemedSwitch** - Toggle switch for settings and brewing parameters
-- **ThemedLabel** - Form labels with consistent dark styling
+- **Button** - Clean button system
+  - 4 variants: primary, outline, ghost, destructive
+  - 3 sizes: default, large, small
+  - Loading states with spinner + text
+  - Haptic feedback integration
 
-**Interactive Components**
+- **Input** - Minimal form inputs
+  - Integrated validation display
+  - Support for text, email, password, number types
+  - Clean error states with minimal red accents
 
-- **ThemedButton** - Primary action button with haptic feedback and enhanced loading states
-  - Supports 6 variants: default, destructive, outline, secondary, ghost, link
-  - 4 sizes: default, sm, lg, icon
-  - Loading state shows spinner + text (not just spinner)
-  - Dark theme color handling for all variants
-- **ThemedTabs** - Tab navigation for content organization with dark theme support
-- **ThemedBadge** - Status indicators and semantic color badges
-  - Supports 6 variants: default, secondary, destructive, success, warning, outline
-  - 3 sizes: default, sm, lg
-  - Automatic text color optimization for dark theme readability
-- **ThemedSeparator** - Visual dividers and section breaks
-
-**Platform Components**
-
-- **HapticTab** - Tab bar items with tactile feedback (dark theme)
-- **TabBarBackground** - Platform-specific tab bar styling with dark backgrounds
-- **IconSymbol** - Platform-specific icon rendering with dark theme colors
-
-### `/components/beans/` - Coffee Bean Components
-
-- **StatusCards** - Single horizontal row with roast level (dot + text), freshness badge, and days since roast
-- **DescriptionCard** - Compact card with integrated title and description text, 12px padding
-- **InfoSection** - Horizontal label-value pairs with icons, compact 12px padding layout
-- **InventoryCard** - Compact inventory display with horizontal label-value and borderless progress bar
-- **RatingSection** - Coffee rating with custom circle design (outer ring + inner circle, no color coding)
-- **TastingNotes** - Compact card with small badges for taste descriptors, 12px padding
-- **bean-card** - Individual bean card component for lists with minimalist design
-
-### `/components/screens/` - Screen-Specific Components
-
-- **home/beans-section.tsx** - Home screen beans section layout
-
-### `/components/` - Generic Utility Components
-
-- **ParallaxScrollView** - Enhanced scrolling experience
-- **Collapsible** - Expandable content sections
-- **ExternalLink** - External URL handling
-- **HelloWave** - Animated welcome component
-
-### `/components/examples/` - Component Examples
-
-- **BrewHeaderExample** - Usage examples for Header component (legacy name)
-
-### Import Patterns
+#### Design Tokens (`/constants/ProfessionalDesign.ts`)
 
 ```typescript
-// Scheduler UI components
-import { ProgressCard } from '@/components/ui/ProgressCard';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { Header } from '@/components/ui/Header';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { ThemedInput } from '@/components/ui/ThemedInput';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { ThemedText, ThemedView } from '@/components/ui/ThemedText';
-import { ThemedScrollView } from '@/components/ui/ThemedScrollView';
+export const COLORS = {
+  white: '#FFFFFF',
+  black: '#000000', 
+  gray: {
+    50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB',
+    300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 
+    600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827',
+  },
+  success: '#059669', warning: '#D97706', 
+  error: '#DC2626', info: '#2563EB',
+} as const;
 
-// Coffee-specific components
-import { StatusCards } from '@/components/beans/StatusCards';
-import { bean-card } from '@/components/beans/bean-card';
+export const TYPOGRAPHY = {
+  h1: { fontSize: 32, fontWeight: '700' },
+  h2: { fontSize: 28, fontWeight: '700' },
+  h3: { fontSize: 24, fontWeight: '600' },
+  h4: { fontSize: 20, fontWeight: '600' },
+  body: { fontSize: 16, fontWeight: '400' },
+  caption: { fontSize: 14, fontWeight: '400' },
+  label: { fontSize: 12, fontWeight: '500' },
+} as const;
 
-// Utility components
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { Collapsible } from '@/components/Collapsible';
+export const SPACING = {
+  xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32,
+} as const;
+```
 
-// Dark theme color system
-import { Colors } from '@/constants/Colors';
-import { useThemeColor } from '@/hooks/useThemeColor';
+### Usage Patterns
 
-// Example scheduler interface usage
+```typescript
+// Professional design system imports
+import { Container } from '@/components/ui/Container';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Card } from '@/components/ui/Card';
+import { Text } from '@/components/ui/Text';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { getTheme } from '@/constants/ProfessionalDesign';
+
+// Example professional screen implementation
 const MyScreen = () => {
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
+  
   return (
-    <ThemedView style={styles.container}>
-      <Header 
+    <Container scrollable>
+      <PageHeader
         title="Bean Library"
-        subtitle="Coffee Bean Inventory"
-        showMenuButton={true}
-        showProfileAvatar={true}
-        showSearchButton={true}
+        subtitle="Coffee bean inventory and tracking"
+        action={{
+          title: "Back",
+          onPress: () => router.back(),
+        }}
       />
       
-      <SearchBar 
-        placeholder="Search beans..."
-        onSearch={handleSearch}
-        onFilterPress={handleFilter}
-      />
+      <Card variant="default">
+        <Text variant="h3" weight="semibold">
+          Ethiopian Yirgacheffe
+        </Text>
+        <Text variant="body" color="secondary">
+          Light roast - Floral and citrus notes
+        </Text>
+        
+        <View style={{ flexDirection: 'row', gap: 16, marginTop: 12 }}>
+          <Text variant="caption" color="secondary">
+            Weight: 250g
+          </Text>
+          <Text variant="caption" color="secondary">
+            Roast Date: 2024-01-15
+          </Text>
+        </View>
+      </Card>
       
-      <ProgressCard
-        title="Ethiopian Yirgacheffe"
-        subtitle="Light Roast - Floral Notes"
-        itemsInStock={450}
-        awaitingStock={50}
-        demand={3}
-        priority={1}
-        featured={true}
+      <Button
+        title="Add New Bean"
+        variant="primary"
+        fullWidth
+        onPress={handleAddBean}
       />
-    </ThemedView>
+    </Container>
   );
 };
 ```
@@ -416,34 +411,32 @@ const MyScreen = () => {
 - **Separation of Concerns**: UI and business logic separated
 - **Naming Conventions**: camelCase for files, PascalCase for components
 
-#### Dark Scheduler Theme Standards
+#### Professional Design Standards
 
-- **Dark Theme Colors**: Always use `@constants/Colors.ts` with `useThemeColor()` hook defaulting to dark theme. Never hardcode color values.
-  - **Primary Colors**: Use `primary` (#6d28d9), `accent` (#8b5cf6) for purple scheduler theme
-  - **Background Colors**: Use `background` (#0f0f10), `surface` (#1a1a1c), `cardBackground` (#1f1f23)
-  - **Text Colors**: Use `text` (#ffffff), `textSecondary` (#a0a0a0), `textTertiary` (#6c6c70)
-  - **Progress Elements**: Use `progressTrack` (#333338), `progressActive` (#ffffff), `statusGreen` (#22c55e)
-  - **Semantic colors**: Use `success`, `warning`, `error` for status indicators
+- **Professional Color System**: Always use `@constants/ProfessionalDesign.ts` with `getTheme()`. Never hardcode color values.
+  - **Foundation Colors**: Use `white` (#FFFFFF), `black` (#000000) as primary
+  - **Gray Scale**: Use `gray.50` through `gray.900` for all neutral elements
+  - **Text Hierarchy**: Use `text`, `textSecondary`, `textTertiary` for information hierarchy
+  - **Semantic Colors**: Use `success`, `warning`, `error`, `info` sparingly and only for status
 
-#### Scheduler Interface Standards
+#### Professional Interface Standards
 
-- **Header Design**: Use scheduler-style headers with hamburger menu, profile avatar, and search functionality
-- **Card Layout**: Use ProgressCard component for main content with progress bars, priority badges, and featured gradients
-- **Search Integration**: Include SearchBar with filter button on inventory and listing screens
-- **Progress Indicators**: Show progress bars with dot indicators and coffee-specific statistics
-- **Priority System**: Use numbered priority badges with green status indicators
-- **Information Display**: Use horizontal label-value pairs with icons for space efficiency
-- **Touch Optimization**: Ensure cards and interactive elements are touch-optimized with proper feedback
+- **Header Design**: Use PageHeader with title + subtitle + single action pattern
+- **Card Layout**: Use Card for all content containers with minimal styling
+- **Form Design**: Use Input with integrated validation, single-column layouts
+- **Button Hierarchy**: Primary for main actions, outline for secondary, ghost for tertiary
+- **Information Display**: Use horizontal label-value pairs for efficient space usage
+- **Typography**: Follow strict hierarchy - h1-h4 for headers, body for content, caption for secondary info
 
 #### Coffee App Standards
 
 - **Authentication**: Always use `useAuth()` hook for authentication state, never access Supabase client directly in components
 - **Error Handling**: Centralize toast notifications in parent components, avoid duplicate error messages
-- **Loading States**: Use ThemedButton's built-in loading prop for consistent UX
-- **Component Styling**: Follow dark scheduler design with 16px card padding and consistent border radius
-- **Coffee Context**: Use coffee-appropriate terminology (beans in stock, currently brewing, brews planned)
-- **Inventory Tracking**: Display quantities in grams for beans, units for equipment
-- **ThemedView Background**: Use `noBackground` prop when ThemedView is used purely for layout without visual styling
+- **Loading States**: Use Button's built-in loading prop for consistent UX
+- **Component Styling**: Follow professional design with 16px standard padding and minimal shadows
+- **Coffee Context**: Use precise coffee terminology (weights in grams, temperatures in Celsius, times in seconds)
+- **Data Presentation**: Prioritize clarity and scannability for coffee brewing parameters
+- **Professional Appearance**: Suitable for commercial coffee environments, no decorative elements
 
 ### Security Best Practices
 
@@ -460,39 +453,49 @@ const MyScreen = () => {
 
 ### Project Status
 
-Currently in **Dark Scheduler Design Implementation Complete Phase**:
+Currently in **Professional Design System Implementation Complete Phase**:
 
-#### ✅ **Dark Scheduler Interface Complete**
-- ✅ **Complete dark theme color system with purple accents**
-- ✅ **ProgressCard component matching reference scheduler design**
-- ✅ **SearchBar component with filter integration**
-- ✅ **Enhanced Header component with hamburger menu + profile avatar**
-- ✅ **All screens updated to scheduler interface (Home, Recipes, Beans, Equipment, Settings)**
-- ✅ **Consistent dark navigation with coffee-themed tabs**
-- ✅ **Progress tracking for coffee inventory management**
-- ✅ **Priority indicators and featured card gradients**
-- ✅ **Coffee-specific terminology and data display**
+#### ✅ **Professional Design System Complete**
+- ✅ **Complete professional minimalist design system with black/white/gray palette**
+- ✅ **Container, PageHeader, Card, Text, Button, Input components**
+- ✅ **Professional design tokens in ProfessionalDesign.ts**
+- ✅ **All 44 screens updated to professional design system (Home, Auth, Forms, Details, Brewing, Settings)**
+- ✅ **Consistent professional typography hierarchy and spacing**
+- ✅ **Data-first interface optimized for coffee specialists**
+- ✅ **Clean, minimal aesthetic with zero decorative elements**
+- ✅ **Professional loading states and error handling**
+- ✅ **Complete settings section redesign with strategic card usage and minimal styling**
 
 #### ✅ **Technical Foundation Complete**
-- ✅ **Complete themed component library with dark scheduler styling**
+- ✅ **Complete professional component library**
 - ✅ **React Navigation v7 integrated with Expo Router**
-- ✅ **Form handling with React Hook Form ready**
+- ✅ **Form handling with React Hook Form and professional validation**
 - ✅ **Enhanced UX features (haptics, animations, blur effects) integrated**
 - ✅ **Supabase authentication system fully implemented**
 - ✅ **Protected routes and auth context management**
-- ✅ **Enhanced ThemedButton with proper loading states**
-- ✅ **ThemedBadge with semantic color variants**
+- ✅ **Professional buttons with proper loading states**
 - ✅ **Centralized toast notifications (no duplicates)**
-- ✅ **ThemedView with noBackground prop for layout flexibility**
 - ✅ **Complete security implementation with RLS, validation, and secure storage**
 - ✅ **Rate limiting and audit logging configured**
 - ✅ **Session management with automatic refresh**
 
 #### 🔄 **Next Phase: Feature Development**
-- Need to implement silo-based architecture using existing scheduler components
-- Core type definitions required for coffee data models
-- Ready to build remaining coffee-specific features using ProgressCard design pattern
-- Integrate real coffee data with existing scheduler interface components
+- ✅ **Professional UX/UI redesign complete across all app areas**
+- Ready to implement core coffee tracking features using professional design system
+- Core type definitions required for coffee data models  
+- Implement brewing workflows with professional interface components
+- Integrate real coffee data with professional card and form components
+
+#### 📋 **Recent Completed Work**
+- **Settings Section Complete Redesign** (December 2024)
+  - ✅ Profile & Sync settings with clean form styling and professional theme integration
+  - ✅ About screen with strategic card usage (app info only) and clean feature/link lists  
+  - ✅ Preferences with unit selection grids and clean toggle sections
+  - ✅ Notifications with disabled state styling and info banner design
+  - ✅ Data & Privacy with professional export buttons and privacy assurance list
+  - ✅ Removed all deprecated Colors imports and excessive Card usage
+  - ✅ Applied consistent 14px section titles, 11px subtitles, 10px descriptions
+  - ✅ Strategic card placement: content items only, not forms or quick actions
 
 ### Technology Stack
 
@@ -520,10 +523,11 @@ Currently in **Dark Scheduler Design Implementation Complete Phase**:
 
 #### UI & Assets
 
-- **Styling**: StyleSheet + Theme system (no external styling libraries)
+- **Styling**: StyleSheet + Professional Design System (no external styling libraries)
+- **Design System**: ProfessionalDesign.ts with tokens and themes
 - **Icons**: Expo Symbols v0.4 → migrate to Lucide React Native
 - **Images**: expo-image v2.4 for optimized image handling
-- **Fonts**: expo-font v13.3 for typography management
+- **Fonts**: System fonts only (no custom fonts for professional appearance)
 
 #### Backend & Authentication
 

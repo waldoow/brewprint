@@ -1,93 +1,38 @@
-import { BrewersService, type Brewer } from "@/lib/services/brewers";
-import { Header } from "@/components/ui/Header";
-import { ThemedButton } from "@/components/ui/ThemedButton";
-import { ThemedScrollView } from "@/components/ui/ThemedScrollView";
-import { ThemedText } from "@/components/ui/ThemedText";
-import { ThemedView } from "@/components/ui/ThemedView";
-import { ThemedBadge } from "@/components/ui/ThemedBadge";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Alert, View } from "react-native";
-import { toast } from "sonner-native";
-import * as Haptics from "expo-haptics";
-
-// Mock data for development - remove when real service is working
-const MOCK_BREWER: Brewer = {
-  id: "1",
-  user_id: "user_1",
-  name: "Hario V60 Size 02",
-  type: "v60",
-  brand: "Hario",
-  model: "V60-02",
-  size: "02",
-  material: "ceramic",
-  filter_type: "V60-02 Paper",
-  capacity_ml: 500,
-  optimal_dose_range: [15, 30],
-  optimal_ratio_range: [15, 17],
-  optimal_temp_range: [88, 96],
-  optimal_grind_range: [10, 15],
-  purchase_date: "2024-01-15",
-  purchase_price: 29.99,
-  maintenance_schedule: "weekly",
-  last_maintenance: "2024-08-10",
-  maintenance_notes: "Regular cleaning with mild soap",
-  condition: "excellent",
-  location: "Kitchen",
-  notes: "Perfect for single-origin coffees. Produces clean, bright cups.",
-  brewing_tips: [
-    "Use circular pouring motion",
-    "Start with 30g bloom for 30 seconds",
-    "Maintain steady pour rate",
-    "Total brew time should be 2:30-3:30"
-  ],
-  created_at: "2024-01-15T10:00:00Z",
-  updated_at: "2024-08-10T14:30:00Z"
-};
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Link, router, useLocalSearchParams } from 'expo-router';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
+import { BrewersService, type Brewer } from '@/lib/services/brewers';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { toast } from 'sonner-native';
 
 export default function BrewerDetailScreen() {
   const { id } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
   
   const [brewer, setBrewer] = useState<Brewer | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const loadBrewer = useCallback(async () => {
-    if (!id || typeof id !== 'string') {
-      router.back();
-      return;
-    }
-
+  const loadBrewer = React.useCallback(async () => {
     try {
       setLoading(true);
-      
-      // For now, use mock data. Replace with actual service call:
-      // const result = await BrewersService.getBrewerById(id);
-      
-      // Simulate API call
-      setTimeout(() => {
-        setBrewer(MOCK_BREWER);
-        setLoading(false);
-      }, 500);
-      
-      // When service is ready, use this:
-      /*
-      const result = await BrewersService.getBrewerById(id);
+      const result = await BrewersService.getBrewerById(id as string);
       if (result.success && result.data) {
         setBrewer(result.data);
       } else {
-        toast.error("Failed to load brewer");
-        router.back();
+        toast.error('Brewer not found');
       }
+    } catch {
+      toast.error('Failed to load brewer details');
+    } finally {
       setLoading(false);
-      */
-    } catch (error) {
-      console.error("Failed to load brewer:", error);
-      toast.error("An error occurred while loading brewer");
-      router.back();
     }
   }, [id]);
 
@@ -95,526 +40,628 @@ export default function BrewerDetailScreen() {
     loadBrewer();
   }, [loadBrewer]);
 
-  const handleEdit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/brewers/edit/${id}`);
-  };
-
-
-  const handleRecordMaintenance = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Navigate to maintenance recording screen
-    toast.info("Maintenance recording coming soon!");
-  };
-
-  const handleDelete = () => {
-    if (!brewer) return;
-    
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    
-    Alert.alert(
-      "Delete Brewer",
-      `Are you sure you want to permanently delete "${brewer.name}"? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const result = await BrewersService.deleteBrewer(brewer.id);
-              if (result.success) {
-                toast.success("Brewer deleted successfully");
-                router.back();
-              } else {
-                toast.error("Failed to delete brewer");
-              }
-            } catch (error) {
-              toast.error("An error occurred");
-            }
-          }
-        }
-      ]
-    );
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getConditionColor = (condition: Brewer['condition']) => {
+
+  const getConditionLabel = (condition: Brewer['condition']) => {
     switch (condition) {
-      case 'excellent': return colors.statusGreen;
-      case 'good': return colors.statusGreen;
-      case 'fair': return colors.statusYellow;
-      case 'needs-replacement': return colors.statusRed;
-      default: return colors.textSecondary;
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Good';
+      case 'fair': return 'Fair';
+      case 'needs-replacement': return 'Needs Replacement';
+      default: return 'Unknown';
     }
   };
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? colors.statusGreen : colors.textSecondary;
-  };
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    editButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    editButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    detailsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    detailLabel: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    detailValue: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    notesContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+    },
+    notesText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      lineHeight: 18,
+    },
+    tipsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    tipRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    tipBullet: {
+      fontSize: 12,
+      color: theme.colors.text.tertiary,
+      marginRight: 8,
+      marginTop: 2,
+    },
+    tipText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      flex: 1,
+      lineHeight: 18,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    primaryActionButton: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    secondaryActionButton: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.border,
+    },
+    primaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    secondaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 18,
+    },
+    emptyButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+    },
+    emptyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+  });
 
   if (loading) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Loading..."
-          showBackButton={true}
-          onBackPress={() => router.back()}
-          backButtonTitle="Inventory"
-        />
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Loading brewer details...</ThemedText>
-        </ThemedView>
-      </ThemedView>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Brewer Details
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Loading equipment information...
+          </Text>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading brewer details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (!brewer) {
     return (
-      <ThemedView noBackground={false} style={styles.container}>
-        <Header
-          title="Brewer Not Found"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-          backButtonTitle="Inventory"
-        />
-        <ThemedView style={styles.errorContainer}>
-          <ThemedText>This brewer could not be found.</ThemedText>
-          <ThemedButton
-            title="Go Back"
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
             onPress={() => router.back()}
             style={styles.backButton}
-          />
-        </ThemedView>
-      </ThemedView>
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Brewer Not Found
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Equipment could not be found
+          </Text>
+        </View>
+        
+        <View style={styles.loadingContainer}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              Brewer Not Found
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              The requested brewing equipment could not be found in your library.
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.emptyButtonText}>
+                Back to Library
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
-        title={brewer.name}
-        subtitle={`${brewer.brand || brewer.type.toUpperCase()}${brewer.model ? ` ${brewer.model}` : ''} • ${brewer.size || 'Standard'}`}
-        showBackButton={true}
-        onBackPress={() => router.back()}
-        backButtonTitle="Inventory"
-        customContent={
-          <ThemedView style={styles.headerActions}>
-            <ThemedButton
-              title="Edit"
-              variant="outline"
-              size="sm"
-              onPress={handleEdit}
-            />
-          </ThemedView>
-        }
-      />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          {brewer.name}
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          {brewer.brand || 'Brewing Equipment'} • {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
+        </Text>
+      </View>
 
-      <ThemedScrollView
-        showsVerticalScrollIndicator={false}
+      <ScrollView
         style={styles.scrollView}
-        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Status Cards */}
-        <ThemedView style={styles.statusSection}>
-
-          <ThemedView style={styles.statusCard}>
-            <ThemedText style={[styles.statusLabel, { color: colors.textSecondary }]}>
-              CONDITION
-            </ThemedText>
-            <ThemedBadge 
-              variant={brewer.condition === 'excellent' || brewer.condition === 'good' ? "success" : 
-                      brewer.condition === 'fair' ? "warning" : "destructive"}
-              size="default"
-            >
-              {brewer.condition.toUpperCase()}
-            </ThemedBadge>
-          </ThemedView>
-
-          {brewer.location && (
-            <ThemedView style={styles.statusCard}>
-              <ThemedText style={[styles.statusLabel, { color: colors.textSecondary }]}>
-                LOCATION
-              </ThemedText>
-              <ThemedText style={[styles.statusValue, { color: colors.text }]}>
-                {brewer.location}
-              </ThemedText>
-            </ThemedView>
-          )}
-        </ThemedView>
-
-        {/* Physical Specs */}
-        <ThemedView style={styles.section}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-            Physical Specifications
-          </ThemedText>
-          <ThemedView style={styles.card}>
-            <ThemedView style={styles.specRow}>
-              <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
-                Type
-              </ThemedText>
-              <ThemedText style={[styles.specValue, { color: colors.text }]}>
-                {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
-              </ThemedText>
-            </ThemedView>
-
-            {brewer.material && (
-              <ThemedView style={styles.specRow}>
-                <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
-                  Material
-                </ThemedText>
-                <ThemedText style={[styles.specValue, { color: colors.text }]}>
-                  {brewer.material.charAt(0).toUpperCase() + brewer.material.slice(1)}
-                </ThemedText>
-              </ThemedView>
-            )}
-
-            {brewer.filter_type && (
-              <ThemedView style={styles.specRow}>
-                <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
-                  Filter Type
-                </ThemedText>
-                <ThemedText style={[styles.specValue, { color: colors.text }]}>
-                  {brewer.filter_type}
-                </ThemedText>
-              </ThemedView>
-            )}
-
+        {/* Equipment Status Overview */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Equipment Status
+          </Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Condition</Text>
+              <Text style={styles.statValue}>
+                {getConditionLabel(brewer.condition)}
+              </Text>
+            </View>
+            
             {brewer.capacity_ml && (
-              <ThemedView style={styles.specRow}>
-                <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
-                  Capacity
-                </ThemedText>
-                <ThemedText style={[styles.specValue, { color: colors.text }]}>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Capacity</Text>
+                <Text style={styles.statValue}>
                   {brewer.capacity_ml}ml
-                </ThemedText>
-              </ThemedView>
+                </Text>
+              </View>
             )}
-          </ThemedView>
-        </ThemedView>
+            
+            {brewer.location && (
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Location</Text>
+                <Text style={styles.statValue}>
+                  {brewer.location}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
 
-        {/* Optimal Parameters */}
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Link href={`/(tabs)/brewers/edit/${brewer.id}`} asChild>
+            <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <Text style={styles.editButtonText}>
+                Edit Equipment Details
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {/* Physical Specifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Physical Specifications
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Type, material, and construction details
+          </Text>
+          <View style={styles.detailsContainer}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>
+                Type
+              </Text>
+              <Text style={styles.detailValue}>
+                {brewer.type.charAt(0).toUpperCase() + brewer.type.slice(1).replace('-', ' ')}
+              </Text>
+            </View>
+            
+            {brewer.material && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Material
+                </Text>
+                <Text style={styles.detailValue}>
+                  {brewer.material.charAt(0).toUpperCase() + brewer.material.slice(1)}
+                </Text>
+              </View>
+            )}
+            
+            {brewer.filter_type && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Filter Type
+                </Text>
+                <Text style={styles.detailValue}>
+                  {brewer.filter_type}
+                </Text>
+              </View>
+            )}
+            
+            {brewer.size && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Size
+                </Text>
+                <Text style={styles.detailValue}>
+                  {brewer.size}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Optimal Brewing Parameters */}
         {(brewer.optimal_dose_range || brewer.optimal_ratio_range || 
           brewer.optimal_temp_range || brewer.optimal_grind_range) && (
-          <ThemedView style={styles.section}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
               Optimal Brewing Parameters
-            </ThemedText>
-            <ThemedView style={styles.card}>
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Recommended settings for best results
+            </Text>
+            <View style={styles.detailsContainer}>
               {brewer.optimal_dose_range && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Coffee Dose
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_dose_range[0]}g - {brewer.optimal_dose_range[1]}g
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.optimal_ratio_range && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Brew Ratio
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     1:{brewer.optimal_ratio_range[0]} - 1:{brewer.optimal_ratio_range[1]}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.optimal_temp_range && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Water Temperature
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_temp_range[0]}°C - {brewer.optimal_temp_range[1]}°C
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.optimal_grind_range && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Grind Setting
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.optimal_grind_range[0]} - {brewer.optimal_grind_range[1]}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
-            </ThemedView>
-          </ThemedView>
+            </View>
+          </View>
         )}
 
         {/* Purchase & Maintenance */}
         {(brewer.purchase_date || brewer.purchase_price || brewer.maintenance_schedule || 
           brewer.last_maintenance) && (
-          <ThemedView style={styles.section}>
-            <ThemedView style={styles.sectionHeader}>
-              <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-                Purchase & Maintenance
-              </ThemedText>
-              {brewer.maintenance_schedule && (
-                <ThemedButton
-                  title="Record Maintenance"
-                  variant="outline"
-                  size="sm"
-                  onPress={handleRecordMaintenance}
-                />
-              )}
-            </ThemedView>
-            <ThemedView style={styles.card}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Purchase & Maintenance
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Purchase information and maintenance schedule
+            </Text>
+            <View style={styles.detailsContainer}>
               {brewer.purchase_date && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Purchase Date
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {formatDate(brewer.purchase_date)}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.purchase_price && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Purchase Price
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     ${brewer.purchase_price.toFixed(2)}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.maintenance_schedule && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Maintenance Schedule
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {brewer.maintenance_schedule.charAt(0).toUpperCase() + brewer.maintenance_schedule.slice(1)}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
 
               {brewer.last_maintenance && (
-                <ThemedView style={styles.specRow}>
-                  <ThemedText style={[styles.specLabel, { color: colors.textSecondary }]}>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
                     Last Maintenance
-                  </ThemedText>
-                  <ThemedText style={[styles.specValue, { color: colors.text }]}>
+                  </Text>
+                  <Text style={styles.detailValue}>
                     {formatDate(brewer.last_maintenance)}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               )}
-            </ThemedView>
+            </View>
             
             {brewer.maintenance_notes && (
-              <ThemedView style={styles.card}>
-                <ThemedText style={[styles.cardTitle, { color: colors.text }]}>
+              <View style={[styles.notesContainer, { marginTop: 16 }]}>
+                <Text style={[styles.sectionTitle, { marginBottom: 8 }]}>
                   Maintenance Notes
-                </ThemedText>
-                <ThemedText style={[styles.cardContent, { color: colors.textSecondary }]}>
+                </Text>
+                <Text style={styles.notesText}>
                   {brewer.maintenance_notes}
-                </ThemedText>
-              </ThemedView>
+                </Text>
+              </View>
             )}
-          </ThemedView>
+          </View>
         )}
 
         {/* Brewing Tips */}
         {brewer.brewing_tips && brewer.brewing_tips.length > 0 && (
-          <ThemedView style={styles.section}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
               Brewing Tips
-            </ThemedText>
-            <ThemedView style={styles.card}>
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Expert techniques for optimal results
+            </Text>
+            <View style={styles.tipsContainer}>
               {brewer.brewing_tips.map((tip, index) => (
-                <ThemedView key={index} style={styles.tipRow}>
-                  <ThemedText style={[styles.tipBullet, { color: colors.primary }]}>
-                    •
-                  </ThemedText>
-                  <ThemedText style={[styles.tipText, { color: colors.text }]}>
+                <View key={index} style={styles.tipRow}>
+                  <Text style={styles.tipBullet}>•</Text>
+                  <Text style={styles.tipText}>
                     {tip}
-                  </ThemedText>
-                </ThemedView>
+                  </Text>
+                </View>
               ))}
-            </ThemedView>
-          </ThemedView>
+            </View>
+          </View>
         )}
 
-        {/* Notes */}
+        {/* Personal Notes */}
         {brewer.notes && (
-          <ThemedView style={styles.section}>
-            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
               Notes
-            </ThemedText>
-            <ThemedView style={styles.card}>
-              <ThemedText style={[styles.cardContent, { color: colors.text }]}>
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Personal observations and preferences
+            </Text>
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesText}>
                 {brewer.notes}
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
+              </Text>
+            </View>
+          </View>
         )}
 
-        {/* Danger Zone */}
-        <ThemedView style={styles.dangerZone}>
-          <ThemedText style={[styles.dangerTitle, { color: colors.statusRed }]}>
-            Danger Zone
-          </ThemedText>
-          <ThemedButton
-            title="Delete Brewer"
-            variant="destructive"
-            onPress={handleDelete}
-          />
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+        {/* Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Actions
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Manage equipment or start brewing
+          </Text>
+          <View style={styles.actionRow}>
+            <Link href={`/(tabs)/brewers/edit/${brewer.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.secondaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.secondaryActionText}>
+                  Edit Equipment
+                </Text>
+              </TouchableOpacity>
+            </Link>
+            <Link href={`/brewprints/new?brewer_id=${brewer.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.primaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.primaryActionText}>
+                  Create Recipe
+                </Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-  },
-  backButton: {
-    minWidth: 120,
-  },
-  
-  // Header
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-
-  // Status section
-  statusSection: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  statusCard: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  statusLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  statusValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-
-  // Sections
-  section: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  
-  // Cards
-  card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  cardTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  cardContent: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-
-  // Spec rows
-  specRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  specLabel: {
-    fontSize: 14,
-    flex: 1,
-  },
-  specValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'right',
-    flex: 1,
-  },
-
-  // Brewing tips
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-    gap: 8,
-  },
-  tipBullet: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 1,
-  },
-  tipText: {
-    fontSize: 14,
-    lineHeight: 20,
-    flex: 1,
-  },
-
-  // Danger zone
-  dangerZone: {
-    margin: 16,
-    padding: 16,
-    backgroundColor: 'rgba(255, 0, 0, 0.05)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 0, 0, 0.2)',
-  },
-  dangerTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-});

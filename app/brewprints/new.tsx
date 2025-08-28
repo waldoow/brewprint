@@ -1,9 +1,7 @@
-import { Header } from "@/components/ui/Header";
-import { ThemedView } from "@/components/ui/ThemedView";
+import { DataLayout } from "@/components/ui/DataLayout";
 import { BrewprintForm } from "@/forms/BrewprintForm";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useMemo } from "react";
-import { StyleSheet } from "react-native";
 import { toast } from "sonner-native";
 
 export default function NewBrewprintScreen() {
@@ -24,8 +22,8 @@ export default function NewBrewprintScreen() {
 
   const handleSuccess = (brewprint: any) => {
     const message = initialData
-      ? "Recette dupliquée avec succès!"
-      : "Recette créée avec succès!";
+      ? "Recipe duplicated successfully!"
+      : "Recipe created successfully!";
     toast.success(message);
     router.replace(`/brewprints/${brewprint.id}`);
   };
@@ -34,28 +32,25 @@ export default function NewBrewprintScreen() {
     router.back();
   };
 
-  const title = initialData ? "Dupliquer Recette" : "Nouvelle Recette";
+  const title = initialData ? "Duplicate Recipe" : "New Recipe";
 
   return (
-    <ThemedView noBackground={false} style={styles.container}>
-      <Header
-        title={title}
-        showBackButton={true}
-        onBackPress={handleCancel}
-        backButtonTitle="Recipes"
-      />
-
+    <DataLayout
+      title={title}
+      subtitle={
+        initialData
+          ? "Duplicate and customize existing recipe"
+          : "Create your perfect brewing recipe"
+      }
+      showBackButton={true}
+      onBackPress={() => router.back()}
+      scrollable
+    >
       <BrewprintForm
         initialData={initialData}
         onSuccess={handleSuccess}
         onCancel={handleCancel}
       />
-    </ThemedView>
+    </DataLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

@@ -1,1 +1,1 @@
-export { BrewprintForm } from './BrewprintForm';
+export { BrewprintForm } from '../../forms/BrewprintForm';

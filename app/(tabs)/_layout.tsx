@@ -1,16 +1,14 @@
+import { BlurView } from "expo-blur";
 import { Redirect, Tabs } from "expo-router";
 import React from "react";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
+import { Colors } from "react-native-ui-lib";
 import { useAuth } from "@/context/AuthContext";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -18,7 +16,7 @@ export default function TabLayout() {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator
           size="large"
-          color={Colors[colorScheme ?? "light"].tint}
+          color={Colors.blue30}
         />
       </View>
     );
@@ -31,32 +29,47 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "dark"].accent, // Using purple accent color
-        tabBarInactiveTintColor: Colors[colorScheme ?? "dark"].textTertiary, // More subtle inactive color
+        tabBarActiveTintColor: Colors.blue30,
+        tabBarInactiveTintColor: Colors.grey40,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "dark"].surface,
-          borderTopColor: Colors[colorScheme ?? "dark"].borderSubtle, // More subtle border
+          backgroundColor: Colors.white,
+          borderTopColor: Colors.grey60,
           borderTopWidth: 1,
-          paddingTop: 12, // Increased top padding
-          paddingBottom: Platform.OS === "ios" ? 24 : 12, // Increased bottom padding
-          height: Platform.OS === "ios" ? 88 : 64, // Increased height for better proportions
+          paddingTop: 8,
+          paddingBottom: Platform.OS === "ios" ? 34 : 16,
+          height: Platform.OS === "ios" ? 88 : 70,
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11, // Slightly smaller for professional look
-          fontWeight: "500",
-          letterSpacing: 0.2,
-          marginTop: 2, // Added margin for better spacing
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 2,
+          letterSpacing: 0.3,
         },
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarBackground: () => (
+          <BlurView
+            intensity={80}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
+        ),
         animation: "shift",
+        tabBarHideOnKeyboard: false,
+        tabBarVisibilityAnimationConfig: {
+          show: { animation: "timing", config: { duration: 200 } },
+          hide: { animation: "timing", config: { duration: 200 } },
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="house.fill" color={color} />
           ),
@@ -65,7 +78,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="brewprints"
         options={{
-          title: "Brewprints",
+          title: "Recipes",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="cup.and.saucer.fill" color={color} />
           ),
@@ -74,7 +87,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          title: "Inventory",
+          title: "Library",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="books.vertical" color={color} />
           ),
@@ -83,7 +96,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="folders"
         options={{
-          title: "Organization",
+          title: "Folders",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="folder.fill" color={color} />
           ),
@@ -92,7 +105,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
+          tabBarLabel: "Settings",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={24} name="gearshape.fill" color={color} />
           ),

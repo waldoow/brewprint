@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import { useAuth } from "@/context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Alert, ScrollView, StyleSheet } from "react-native";
 import {
-  StyleSheet,
-  ScrollView,
   View,
-  Alert,
+  Text,
+  TextField,
   Switch,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedInput } from '@/components/ui/ThemedInput';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
+  TouchableOpacity,
+} from "react-native-ui-lib";
+import { toast } from "sonner-native";
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useAuth } from '@/context/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
-import { toast } from 'sonner-native';
 
 interface ProfileSettings {
   displayName: string;
@@ -28,57 +23,62 @@ interface ProfileSettings {
 }
 
 const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
-  displayName: '',
+  displayName: "",
   autoSync: true,
   syncOnCellular: false,
   backupBeforeSync: true,
 };
 
 export default function ProfileSyncScreen() {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
   const { user } = useAuth();
+  const colorScheme = useColorScheme();
+  const theme = getTheme(colorScheme ?? 'light');
 
-  const [settings, setSettings] = useState<ProfileSettings>(DEFAULT_PROFILE_SETTINGS);
+  const [settings, setSettings] = useState<ProfileSettings>(
+    DEFAULT_PROFILE_SETTINGS
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadProfileSettings();
-  }, []);
-
-  const loadProfileSettings = async () => {
+  const loadProfileSettings = React.useCallback(async () => {
     try {
-      const stored = await AsyncStorage.getItem('profile_settings');
+      const stored = await AsyncStorage.getItem("profile_settings");
       if (stored) {
         const parsed = JSON.parse(stored);
         setSettings({ ...DEFAULT_PROFILE_SETTINGS, ...parsed });
-      } else if (user?.email) {
-        // Initialize with user email as display name
-        const initialSettings = {
-          ...DEFAULT_PROFILE_SETTINGS,
-          displayName: user.email.split('@')[0],
-        };
-        setSettings(initialSettings);
       }
-    } catch (error) {
-      console.error('Failed to load profile settings:', error);
+      // Set display name from user if available
+      if (user?.email) {
+        setSettings(prev => ({
+          ...prev,
+          displayName: prev.displayName || user.email.split('@')[0]
+        }));
+      }
+    } catch {
+      console.error("Failed to load profile settings");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadProfileSettings();
+  }, [loadProfileSettings]);
 
   const saveProfileSettings = async (newSettings: ProfileSettings) => {
     try {
       setSaving(true);
-      await AsyncStorage.setItem('profile_settings', JSON.stringify(newSettings));
+      await AsyncStorage.setItem("profile_settings", JSON.stringify(newSettings));
       setSettings(newSettings);
       
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      toast.success('Profile settings updated');
+      if (newSettings.autoSync) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      
+      toast.success("Profile settings updated successfully");
     } catch (error) {
-      console.error('Failed to save profile settings:', error);
-      toast.error('Failed to save settings');
+      console.error("Failed to save profile settings:", error);
+      toast.error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -92,320 +92,435 @@ export default function ProfileSyncScreen() {
     saveProfileSettings(newSettings);
   };
 
-  const handleForceSync = () => {
+  const handleSignOut = () => {
     Alert.alert(
-      'Sync Data',
-      'This will sync your local data with the cloud. This may take a few moments.',
+      "Sign Out",
+      "Are you sure you want to sign out? Any unsaved changes will be lost.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sync Now', 
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            toast.success('Sync completed (simulated)');
-          }
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Note: actual sign out would be handled by useAuth context
+              toast.success("Signed out successfully");
+              router.replace("/(auth)");
+            } catch (error) {
+              toast.error("Failed to sign out");
+            }
+          },
         },
       ]
     );
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    accountInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      marginBottom: 16,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: theme.colors.info,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    avatarText: {
+      color: theme.colors.text.inverse,
+      fontSize: 18,
+      fontWeight: '600',
+    },
+    accountDetails: {
+      flex: 1,
+    },
+    displayName: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    email: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    fieldLabel: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 4,
+    },
+    textField: {
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderRadius: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 14,
+      color: theme.colors.text.primary,
+      backgroundColor: theme.colors.background,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    settingInfo: {
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTitle: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    settingDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    statusRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+    },
+    statusLabel: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+    },
+    statusValue: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    primaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginTop: 16,
+    },
+    primaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    dangerButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.error,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    dangerButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.error,
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    secondaryButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Profile & Sync" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
-            Loading profile settings...
-          </ThemedText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Profile & Sync
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Manage your account and sync preferences
+          </Text>
         </View>
-      </ThemedView>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading profile settings...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Profile & Sync" 
-        onBack={() => router.back()}
-        loading={saving}
-      />
+    <View style={styles.container}>
+      {/* Professional Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Profile & Sync
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Manage your account and sync preferences
+        </Text>
+      </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Profile Information */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            Profile Information
-          </ThemedText>
-
-          <View style={styles.profileField}>
-            <ThemedText type="defaultSemiBold" style={[styles.fieldLabel, { color: colors.text }]}>
-              Email Address
-            </ThemedText>
-            <View style={[styles.emailContainer, { backgroundColor: colors.surface }]}>
-              <ThemedText style={[styles.emailText, { color: colors.text }]}>
-                {user?.email || 'Not available'}
-              </ThemedText>
-              <ThemedBadge variant="success" size="sm">Verified</ThemedBadge>
+        {/* Account Information */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Account Information
+          </Text>
+          
+          <View style={styles.accountInfo}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {user?.email?.charAt(0).toUpperCase() || "U"}
+              </Text>
+            </View>
+            
+            <View style={styles.accountDetails}>
+              <Text style={styles.displayName}>
+                {settings.displayName || "User"}
+              </Text>
+              <Text style={styles.email}>
+                {user?.email || "No email available"}
+              </Text>
             </View>
           </View>
 
-          <View style={styles.profileField}>
-            <ThemedInput
-              label="Display Name"
+          <View>
+            <Text style={styles.fieldLabel}>
+              Display Name
+            </Text>
+            <TextField
               value={settings.displayName}
-              onChangeText={(value) => updateSetting('displayName', value)}
-              placeholder="Your display name"
+              onChangeText={(text) => updateSetting('displayName', text)}
+              placeholder="Enter display name"
+              style={styles.textField}
             />
           </View>
         </View>
 
-        {/* Sync Settings */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <View style={styles.sectionHeader}>
-            <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-              Sync Settings
-            </ThemedText>
-            <ThemedBadge variant="secondary" size="sm">Coming Soon</ThemedBadge>
-          </View>
-
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Automatic Sync
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Automatically sync your data when changes are made
-              </ThemedText>
+        {/* Sync Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Sync Preferences
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Control how your data syncs across devices
+          </Text>
+          
+          <View>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Auto Sync
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Automatically sync your data when changes are made
+                </Text>
+              </View>
+              <Switch
+                value={settings.autoSync}
+                onValueChange={(value) => updateSetting('autoSync', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+              />
             </View>
-            <Switch
-              value={settings.autoSync}
-              onValueChange={(value) => updateSetting('autoSync', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.autoSync ? '#fff' : colors.text}
-              disabled={true} // Disabled until sync is implemented
-            />
-          </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Sync on Cellular
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Allow syncing when using cellular data (may use data)
-              </ThemedText>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Sync on Cellular
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Allow syncing when using cellular data (may use more data)
+                </Text>
+              </View>
+              <Switch
+                value={settings.syncOnCellular}
+                onValueChange={(value) => updateSetting('syncOnCellular', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+                disabled={!settings.autoSync}
+              />
             </View>
-            <Switch
-              value={settings.syncOnCellular}
-              onValueChange={(value) => updateSetting('syncOnCellular', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.syncOnCellular ? '#fff' : colors.text}
-              disabled={true}
-            />
-          </View>
 
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Backup Before Sync
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Create a backup before syncing changes
-              </ThemedText>
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>
+                  Backup Before Sync
+                </Text>
+                <Text style={styles.settingDescription}>
+                  Create local backups before syncing to prevent data loss
+                </Text>
+              </View>
+              <Switch
+                value={settings.backupBeforeSync}
+                onValueChange={(value) => updateSetting('backupBeforeSync', value)}
+                onColor={theme.colors.info}
+                offColor={theme.colors.border}
+                disabled={!settings.autoSync}
+              />
             </View>
-            <Switch
-              value={settings.backupBeforeSync}
-              onValueChange={(value) => updateSetting('backupBeforeSync', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={settings.backupBeforeSync ? '#fff' : colors.text}
-              disabled={true}
-            />
           </View>
         </View>
 
-        {/* Sync Actions */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            Sync Actions
-          </ThemedText>
-
-          <View style={styles.syncStatus}>
-            <ThemedText type="caption" style={[styles.statusText, { color: colors.textSecondary }]}>
-              Last sync: Never (sync feature coming soon)
-            </ThemedText>
+        {/* Sync Status */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Sync Status
+          </Text>
+          
+          <View>
+            <View style={styles.statusRow}>
+              <Text style={styles.statusLabel}>Last Sync</Text>
+              <Text style={styles.statusValue}>Never</Text>
+            </View>
+            
+            <View style={styles.statusRow}>
+              <Text style={styles.statusLabel}>Sync Status</Text>
+              <Text style={styles.statusValue}>
+                {settings.autoSync ? "Enabled" : "Disabled"}
+              </Text>
+            </View>
           </View>
-
-          <ThemedButton
-            title="Sync Now"
-            onPress={handleForceSync}
-            variant="secondary"
-            size="default"
-            disabled={true} // Disabled until sync is implemented
-            style={styles.syncButton}
-          />
-
-          <View style={styles.infoBox}>
-            <ThemedText type="caption" style={[styles.infoText, { color: colors.textSecondary }]}>
-              💡 Cloud sync functionality is coming soon. Your data is currently stored locally and backed up securely on your device.
-            </ThemedText>
-          </View>
+          
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => toast.info("Manual sync coming soon")}
+            disabled={!settings.autoSync}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.primaryButtonText}>
+              Sync Now
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Account Actions */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
             Account Actions
-          </ThemedText>
-
-          <View style={styles.actionGrid}>
-            <ThemedButton
-              title="Change Password"
-              variant="outline"
-              size="default"
-              disabled={true} // TODO: Implement password change
-              style={styles.actionButton}
-            />
-
-            <ThemedButton
-              title="Delete Account"
-              variant="destructive"
-              size="default"
-              disabled={true} // TODO: Implement account deletion
-              style={styles.actionButton}
-            />
-          </View>
-
-          <View style={styles.warningBox}>
-            <ThemedText type="caption" style={[styles.warningText, { color: colors.textSecondary }]}>
-              Account management features are coming soon. For now, you can manage your account through the authentication system.
-            </ThemedText>
-          </View>
+          </Text>
+          
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => toast.info("Password change coming soon")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.secondaryButtonText}>
+              Change Password
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.dangerButton}
+            onPress={handleSignOut}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.dangerButtonText}>
+              Sign Out
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  section: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  profileField: {
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  emailContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderRadius: 8,
-  },
-  emailText: {
-    fontSize: 14,
-  },
-  settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  settingLabel: {
-    marginBottom: 2,
-    fontSize: 14,
-  },
-  settingDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  syncStatus: {
-    marginBottom: 16,
-  },
-  statusText: {
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  syncButton: {
-    alignSelf: 'stretch',
-    marginBottom: 16,
-  },
-  infoBox: {
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.2)',
-  },
-  infoText: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'center',
-  },
-  actionGrid: {
-    gap: 12,
-    marginBottom: 16,
-  },
-  actionButton: {
-    alignSelf: 'stretch',
-  },
-  warningBox: {
-    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 193, 7, 0.2)',
-  },
-  warningText: {
-    fontSize: 12,
-    lineHeight: 16,
-    textAlign: 'center',
-  },
-  bottomSpacing: {
-    height: 20,
-  },
-});

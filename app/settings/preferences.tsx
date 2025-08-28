@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Switch,
   StyleSheet,
   ScrollView,
-  View,
-  TouchableOpacity,
-  Switch,
 } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
 import { router } from 'expo-router';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedBadge } from '@/components/ui/ThemedBadge';
-import { Header } from '@/components/ui/Header';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { toast } from 'sonner-native';
+import { getTheme } from '@/constants/ProfessionalDesign';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 interface UserPreferences {
   temperatureUnit: 'celsius' | 'fahrenheit';
@@ -64,7 +63,7 @@ const BREW_METHODS = [
 
 export default function PreferencesScreen() {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
 
   const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [loading, setLoading] = useState(true);
@@ -98,7 +97,7 @@ export default function PreferencesScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
       
-      toast.success('Preferences updated');
+      toast.success('Preferences updated successfully');
     } catch (error) {
       console.error('Failed to save preferences:', error);
       toast.error('Failed to save preferences');
@@ -115,361 +114,402 @@ export default function PreferencesScreen() {
     savePreferences(newPreferences);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    unitGroup: {
+      marginBottom: 20,
+      gap: 12,
+    },
+    unitLabel: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+    },
+    unitRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    unitOption: {
+      flex: 1,
+      padding: 12,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: 'center',
+    },
+    unitOptionSelected: {
+      borderColor: theme.colors.info,
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+    },
+    unitOptionText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    unitOptionTextSelected: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: theme.colors.info,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    settingInfo: {
+      flex: 1,
+      marginRight: 16,
+    },
+    settingTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    settingDescription: {
+      fontSize: 10,
+      color: theme.colors.text.secondary,
+    },
+    methodOption: {
+      padding: 16,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    methodOptionSelected: {
+      borderColor: theme.colors.info,
+      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+    },
+    methodText: {
+      fontSize: 14,
+      color: theme.colors.text.secondary,
+    },
+    methodTextSelected: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.info,
+    },
+    methodList: {
+      gap: 8,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+  });
+
   if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header title="Preferences" onBack={() => router.back()} />
-        <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
-            Loading preferences...
-          </ThemedText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Preferences
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Customize your brewing experience
+          </Text>
         </View>
-      </ThemedView>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading preferences...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title="Preferences" 
-        onBack={() => router.back()}
-        loading={saving}
-      />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          Preferences
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          Customize your brewing experience
+        </Text>
+      </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         {/* Units Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            Units
-          </ThemedText>
-
-          {/* Temperature Unit */}
-          <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-              Temperature
-            </ThemedText>
-            <View style={styles.unitOptions}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Units of Measurement
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Choose your preferred units for brewing
+          </Text>
+          
+          <View style={styles.unitGroup}>
+            <Text style={styles.unitLabel}>Temperature</Text>
+            <View style={styles.unitRow}>
               {TEMPERATURE_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.temperatureUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
-                      borderColor: preferences.temperatureUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.temperatureUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('temperatureUnit', unit.value as 'celsius' | 'fahrenheit')}
+                  activeOpacity={0.7}
                 >
-                  <ThemedText
-                    type="caption"
+                  <Text 
                     style={[
-                      styles.unitText,
-                      { color: preferences.temperatureUnit === unit.value ? '#fff' : colors.text }
+                      styles.unitOptionText,
+                      preferences.temperatureUnit === unit.value && styles.unitOptionTextSelected
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          {/* Weight Unit */}
-          <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-              Weight
-            </ThemedText>
-            <View style={styles.unitOptions}>
+          <View style={styles.unitGroup}>
+            <Text style={styles.unitLabel}>Weight</Text>
+            <View style={styles.unitRow}>
               {WEIGHT_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.weightUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
-                      borderColor: preferences.weightUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.weightUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('weightUnit', unit.value as 'grams' | 'ounces')}
+                  activeOpacity={0.7}
                 >
-                  <ThemedText
-                    type="caption"
+                  <Text 
                     style={[
-                      styles.unitText,
-                      { color: preferences.weightUnit === unit.value ? '#fff' : colors.text }
+                      styles.unitOptionText,
+                      preferences.weightUnit === unit.value && styles.unitOptionTextSelected
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          {/* Volume Unit */}
-          <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-              Volume
-            </ThemedText>
-            <View style={styles.unitOptions}>
+          <View style={styles.unitGroup}>
+            <Text style={styles.unitLabel}>Volume</Text>
+            <View style={styles.unitRow}>
               {VOLUME_UNITS.map((unit) => (
                 <TouchableOpacity
                   key={unit.value}
                   style={[
-                    styles.unitButton,
-                    {
-                      backgroundColor: preferences.volumeUnit === unit.value 
-                        ? colors.primary 
-                        : colors.surface,
-                      borderColor: preferences.volumeUnit === unit.value 
-                        ? colors.primary 
-                        : colors.border,
-                    }
+                    styles.unitOption,
+                    preferences.volumeUnit === unit.value && styles.unitOptionSelected
                   ]}
                   onPress={() => updatePreference('volumeUnit', unit.value as 'ml' | 'fl_oz')}
+                  activeOpacity={0.7}
                 >
-                  <ThemedText
-                    type="caption"
+                  <Text 
                     style={[
-                      styles.unitText,
-                      { color: preferences.volumeUnit === unit.value ? '#fff' : colors.text }
+                      styles.unitOptionText,
+                      preferences.volumeUnit === unit.value && styles.unitOptionTextSelected
                     ]}
                   >
                     {unit.label}
-                  </ThemedText>
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         </View>
 
-        {/* Brewing Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            Brewing
-          </ThemedText>
+        {/* Brewing Preferences */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Brewing Preferences
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Customize your brewing workflow
+          </Text>
+          
+          <View>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Timer Auto-Start</Text>
+                <Text style={styles.settingDescription}>
+                  Automatically start timer when brewing begins
+                </Text>
+              </View>
+              <Switch
+                value={preferences.timerAutoStart}
+                onValueChange={(value) => updatePreference('timerAutoStart', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
 
-          {/* Default Brew Method */}
-          <View style={styles.settingRow}>
-            <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-              Default Method
-            </ThemedText>
-            <View style={styles.methodOptions}>
-              {BREW_METHODS.map((method) => (
-                <TouchableOpacity
-                  key={method.value}
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Auto-Save Brews</Text>
+                <Text style={styles.settingDescription}>
+                  Automatically save brewing sessions when completed
+                </Text>
+              </View>
+              <Switch
+                value={preferences.autoSaveBrews}
+                onValueChange={(value) => updatePreference('autoSaveBrews', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Detailed Metrics</Text>
+                <Text style={styles.settingDescription}>
+                  Show advanced brewing metrics and analytics
+                </Text>
+              </View>
+              <Switch
+                value={preferences.showDetailedMetrics}
+                onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* App Experience */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            App Experience
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Customize interface and feedback
+          </Text>
+          
+          <View>
+            <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingTitle}>Haptic Feedback</Text>
+                <Text style={styles.settingDescription}>
+                  Enable vibration feedback for interactions
+                </Text>
+              </View>
+              <Switch
+                value={preferences.hapticFeedback}
+                onValueChange={(value) => updatePreference('hapticFeedback', value)}
+                trackColor={{ false: theme.colors.border, true: theme.colors.info }}
+                thumbColor={theme.colors.background}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Default Brew Method */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Default Brew Method
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Select your preferred brewing method
+          </Text>
+          
+          <View style={styles.methodList}>
+            {BREW_METHODS.map((method) => (
+              <TouchableOpacity
+                key={method.value}
+                style={[
+                  styles.methodOption,
+                  preferences.defaultBrewMethod === method.value && styles.methodOptionSelected
+                ]}
+                onPress={() => updatePreference('defaultBrewMethod', method.value)}
+                activeOpacity={0.7}
+              >
+                <Text 
                   style={[
-                    styles.methodButton,
-                    {
-                      backgroundColor: preferences.defaultBrewMethod === method.value 
-                        ? colors.primary 
-                        : colors.surface,
-                      borderColor: preferences.defaultBrewMethod === method.value 
-                        ? colors.primary 
-                        : colors.border,
-                    }
+                    styles.methodText,
+                    preferences.defaultBrewMethod === method.value && styles.methodTextSelected
                   ]}
-                  onPress={() => updatePreference('defaultBrewMethod', method.value)}
                 >
-                  <ThemedText
-                    type="caption"
-                    style={[
-                      styles.methodText,
-                      { color: preferences.defaultBrewMethod === method.value ? '#fff' : colors.text }
-                    ]}
-                  >
-                    {method.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Auto-start Timer */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Auto-start Timer
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Start timer automatically when brewing begins
-              </ThemedText>
-            </View>
-            <Switch
-              value={preferences.timerAutoStart}
-              onValueChange={(value) => updatePreference('timerAutoStart', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.timerAutoStart ? '#fff' : colors.text}
-            />
-          </View>
-
-          {/* Auto-save Brews */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Auto-save Brews
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Automatically save completed brewing sessions
-              </ThemedText>
-            </View>
-            <Switch
-              value={preferences.autoSaveBrews}
-              onValueChange={(value) => updatePreference('autoSaveBrews', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.autoSaveBrews ? '#fff' : colors.text}
-            />
-          </View>
-
-          {/* Show Detailed Metrics */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Detailed Metrics
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Show advanced brewing metrics and analytics
-              </ThemedText>
-            </View>
-            <Switch
-              value={preferences.showDetailedMetrics}
-              onValueChange={(value) => updatePreference('showDetailedMetrics', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.showDetailedMetrics ? '#fff' : colors.text}
-            />
+                  {method.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
-
-        {/* Interface Section */}
-        <View style={[styles.section, { backgroundColor: colors.cardBackground }]}>
-          <ThemedText type="subtitle" style={[styles.sectionTitle, { color: colors.text }]}>
-            Interface
-          </ThemedText>
-
-          {/* Haptic Feedback */}
-          <View style={styles.switchRow}>
-            <View style={styles.switchInfo}>
-              <ThemedText type="defaultSemiBold" style={[styles.settingLabel, { color: colors.text }]}>
-                Haptic Feedback
-              </ThemedText>
-              <ThemedText type="caption" style={[styles.settingDescription, { color: colors.textSecondary }]}>
-                Vibration feedback for button taps and interactions
-              </ThemedText>
-            </View>
-            <Switch
-              value={preferences.hapticFeedback}
-              onValueChange={(value) => updatePreference('hapticFeedback', value)}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor={preferences.hapticFeedback ? '#fff' : colors.text}
-            />
-          </View>
-        </View>
-
-        <View style={styles.bottomSpacing} />
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  section: {
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  settingRow: {
-    marginBottom: 20,
-  },
-  settingLabel: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  settingDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  unitOptions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  unitButton: {
-    flex: 1,
-    minWidth: '45%',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  unitText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  methodOptions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  methodButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  methodText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  switchInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  bottomSpacing: {
-    height: 20,
-  },
-});

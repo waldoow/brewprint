@@ -1,328 +1,621 @@
-import { Header } from '@/components/ui/Header';
-import { ThemedScrollView } from '@/components/ui/ThemedScrollView';
-import { ThemedText } from '@/components/ui/ThemedText';
-import { ThemedView } from '@/components/ui/ThemedView';
-import { ThemedButton } from '@/components/ui/ThemedButton';
-import { Colors } from '@/constants/Colors';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Link, router, useLocalSearchParams } from 'expo-router';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+} from 'react-native-ui-lib';
+import { getTheme } from '@/constants/ProfessionalDesign';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { GrindersService, type Grinder } from '@/lib/services/grinders';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
 import { toast } from 'sonner-native';
-import * as Haptics from 'expo-haptics';
 
 export default function GrinderDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'dark'];
+  const theme = getTheme(colorScheme ?? 'light');
   
   const [grinder, setGrinder] = useState<Grinder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      loadGrinder();
-    }
-  }, [id]);
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      paddingHorizontal: 16,
+      paddingTop: 64,
+      paddingBottom: 24,
+    },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingVertical: 8,
+    },
+    backButtonText: {
+      fontSize: 14,
+      color: theme.colors.text.primary,
+    },
+    pageTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    pageSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      gap: 32,
+    },
+    section: {
+      gap: 16,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+    },
+    sectionSubtitle: {
+      fontSize: 11,
+      color: theme.colors.text.secondary,
+      marginBottom: 16,
+    },
+    statsGrid: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 16,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    statValue: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    statLabel: {
+      fontSize: 9,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    conditionBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+      marginTop: 4,
+    },
+    conditionText: {
+      fontSize: 8,
+      fontWeight: '600',
+      color: theme.colors.text.inverse,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    editButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    editButtonText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    detailsContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 12,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    detailLabel: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+    },
+    detailValue: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    notesContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+    },
+    notesText: {
+      fontSize: 12,
+      color: theme.colors.text.primary,
+      lineHeight: 18,
+    },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    primaryActionButton: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.border,
+    },
+    secondaryActionButton: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.border,
+    },
+    primaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+    secondaryActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.secondary,
+    },
+    emptyState: {
+      alignItems: 'center',
+      paddingVertical: 48,
+      paddingHorizontal: 24,
+      backgroundColor: theme.colors.surface,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text.primary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 12,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: 24,
+      lineHeight: 18,
+    },
+    emptyButton: {
+      backgroundColor: theme.colors.surface,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+    },
+    emptyButtonText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.colors.text.primary,
+    },
+  });
 
-  const loadGrinder = async () => {
+  const loadGrinder = React.useCallback(async () => {
     try {
-      const result = await GrindersService.getGrinderById(id!);
+      setLoading(true);
+      const result = await GrindersService.getGrinderById(id as string);
       if (result.success && result.data) {
         setGrinder(result.data);
       } else {
-        toast.error('Failed to load grinder details');
-        router.back();
+        toast.error('Grinder not found');
       }
-    } catch (error) {
-      console.error('Error loading grinder:', error);
+    } catch {
       toast.error('Failed to load grinder details');
-      router.back();
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadGrinder();
+  }, [loadGrinder]);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getConditionColor = (condition: Grinder['condition']) => {
+    switch (condition) {
+      case 'excellent': return theme.colors.success;
+      case 'good': return theme.colors.success;
+      case 'fair': return theme.colors.warning;
+      case 'needs-replacement': return theme.colors.error;
+      default: return theme.colors.surface;
     }
   };
 
-  const handleEdit = () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch (error) {
-      // Haptics not available, continue without feedback
-    }
-    router.push(`/grinders/edit/${id}`);
-  };
-
-  const handleDelete = () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (error) {
-      // Haptics not available, continue without feedback
-    }
-    
-    Alert.alert(
-      "Delete Grinder",
-      "Are you sure you want to delete this grinder? This action cannot be undone.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: confirmDelete
-        }
-      ]
-    );
-  };
-
-  const confirmDelete = async () => {
-    if (!grinder) return;
-    
-    try {
-      const result = await GrindersService.deleteGrinder(grinder.id);
-      if (result.success) {
-        toast.success('Grinder deleted successfully');
-        router.back();
-      } else {
-        toast.error(result.error || 'Failed to delete grinder');
-      }
-    } catch (error) {
-      console.error('Error deleting grinder:', error);
-      toast.error('Failed to delete grinder');
+  const getConditionLabel = (condition: Grinder['condition']) => {
+    switch (condition) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Good';
+      case 'fair': return 'Fair';
+      case 'needs-replacement': return 'Needs Replacement';
+      default: return 'Unknown';
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <ThemedView style={styles.container}>
-        <Header 
-          title="Grinder Details"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <View style={styles.loadingContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
-            Loading grinder details...
-          </ThemedText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Grinder Details
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Loading equipment information...
+          </Text>
         </View>
-      </ThemedView>
+        
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>
+            Loading grinder details...
+          </Text>
+        </View>
+      </View>
     );
   }
 
   if (!grinder) {
     return (
-      <ThemedView style={styles.container}>
-        <Header 
-          title="Grinder Details"
-          showBackButton={true}
-          onBackPress={() => router.back()}
-        />
-        <View style={styles.errorContainer}>
-          <ThemedText style={{ color: colors.textSecondary }}>
-            Grinder not found
-          </ThemedText>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>
+            Grinder Not Found
+          </Text>
+          <Text style={styles.pageSubtitle}>
+            Equipment could not be found
+          </Text>
         </View>
-      </ThemedView>
+        
+        <View style={styles.loadingContainer}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>
+              Grinder Not Found
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              The requested grinder could not be found in your library.
+            </Text>
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.emptyButtonText}>
+                Back to Library
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <Header 
-        title={grinder.name}
-        subtitle={`${grinder.brand} ${grinder.model}`}
-        showBackButton={true}
-        onBackPress={() => router.back()}
-        rightAction={{
-          icon: 'ellipsis-horizontal',
-          onPress: () => console.log('More options pressed')
-        }}
-      />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()}
+          style={styles.backButton}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageTitle}>
+          {grinder.name}
+        </Text>
+        <Text style={styles.pageSubtitle}>
+          {grinder.brand ? `${grinder.brand}${grinder.model ? ` ${grinder.model}` : ''}` : grinder.type.toUpperCase()} • {grinder.burr_material || 'Steel'} Burrs
+        </Text>
+      </View>
 
-      <ThemedScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
-          {/* Basic Info Card */}
-          <ThemedView style={[styles.card, { backgroundColor: colors.cardBackground }]}>
-            <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
-              Basic Information
-            </ThemedText>
-            
-            <View style={styles.infoRow}>
-              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                Type
-              </ThemedText>
-              <ThemedText style={[styles.value, { color: colors.text }]}>
-                {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1)}
-              </ThemedText>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Edit Action */}
+        <View style={styles.section}>
+          <Link href={`/(tabs)/grinders/edit/${grinder.id}`} asChild>
+            <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+              <Text style={styles.editButtonText}>
+                Edit Grinder Details
+              </Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {/* Status & Condition */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Status & Condition
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Current condition and burr information
+          </Text>
+          
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Condition</Text>
+              <Text style={styles.statValue}>
+                {getConditionLabel(grinder.condition)}
+              </Text>
+              <View style={[styles.conditionBadge, { backgroundColor: getConditionColor(grinder.condition) }]}>
+                <Text style={styles.conditionText}>
+                  {grinder.condition?.toUpperCase() || 'UNKNOWN'}
+                </Text>
+              </View>
             </View>
-
-            {grinder.burr_type && (
-              <View style={styles.infoRow}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Burr Type
-                </ThemedText>
-                <ThemedText style={[styles.value, { color: colors.text }]}>
-                  {grinder.burr_type.charAt(0).toUpperCase() + grinder.burr_type.slice(1)}
-                </ThemedText>
-              </View>
-            )}
-
-            {grinder.burr_material && (
-              <View style={styles.infoRow}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Burr Material
-                </ThemedText>
-                <ThemedText style={[styles.value, { color: colors.text }]}>
-                  {grinder.burr_material.charAt(0).toUpperCase() + grinder.burr_material.slice(1).replace('-', ' ')}
-                </ThemedText>
-              </View>
-            )}
-
-            {grinder.default_setting && (
-              <View style={styles.infoRow}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Default Setting
-                </ThemedText>
-                <ThemedText style={[styles.value, { color: colors.text }]}>
-                  {grinder.default_setting}
-                </ThemedText>
-              </View>
-            )}
-
-            {grinder.setting_range && (
-              <View style={styles.infoRow}>
-                <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                  Setting Range
-                </ThemedText>
-                <ThemedText style={[styles.value, { color: colors.text }]}>
-                  {grinder.setting_range.min} - {grinder.setting_range.max}
-                </ThemedText>
-              </View>
-            )}
-          </ThemedView>
-
-          {/* Maintenance Card */}
-          {(grinder.last_cleaned || grinder.cleaning_frequency) && (
-            <ThemedView style={[styles.card, { backgroundColor: colors.cardBackground }]}>
-              <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
-                Maintenance
-              </ThemedText>
-              
-              {grinder.last_cleaned && (
-                <View style={styles.infoRow}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                    Last Cleaned
-                  </ThemedText>
-                  <ThemedText style={[styles.value, { color: colors.text }]}>
-                    {new Date(grinder.last_cleaned).toLocaleDateString()}
-                  </ThemedText>
-                </View>
-              )}
-
-              {grinder.cleaning_frequency && (
-                <View style={styles.infoRow}>
-                  <ThemedText style={[styles.label, { color: colors.textSecondary }]}>
-                    Cleaning Frequency
-                  </ThemedText>
-                  <ThemedText style={[styles.value, { color: colors.text }]}>
-                    Every {grinder.cleaning_frequency} days
-                  </ThemedText>
-                </View>
-              )}
-            </ThemedView>
-          )}
-
-          {/* Notes Card */}
-          {grinder.notes && (
-            <ThemedView style={[styles.card, { backgroundColor: colors.cardBackground }]}>
-              <ThemedText type="subtitle" style={[styles.cardTitle, { color: colors.text }]}>
-                Notes
-              </ThemedText>
-              <ThemedText style={[styles.notesText, { color: colors.textSecondary }]}>
-                {grinder.notes}
-              </ThemedText>
-            </ThemedView>
-          )}
-
-          {/* Action Buttons */}
-          <ThemedView style={styles.actions} noBackground>
-            <ThemedButton
-              title="Edit Grinder"
-              onPress={handleEdit}
-              style={styles.actionButton}
-            />
             
-            <ThemedButton
-              title="Delete Grinder"
-              variant="destructive"
-              onPress={handleDelete}
-              style={styles.actionButton}
-            />
-          </ThemedView>
-        </ThemedView>
-      </ThemedScrollView>
-    </ThemedView>
+            {grinder.burr_size && (
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Burr Size</Text>
+                <Text style={styles.statValue}>
+                  {grinder.burr_size}mm
+                </Text>
+              </View>
+            )}
+            
+            {grinder.motor_power_watts && (
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Motor Power</Text>
+                <Text style={styles.statValue}>
+                  {grinder.motor_power_watts}W
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Physical Specifications */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Physical Specifications
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Type, construction, and technical details
+          </Text>
+          <View style={styles.detailsContainer}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>
+                Type
+              </Text>
+              <Text style={styles.detailValue}>
+                {grinder.type.charAt(0).toUpperCase() + grinder.type.slice(1).replace('-', ' ')}
+              </Text>
+            </View>
+            
+            {grinder.burr_material && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Burr Material
+                </Text>
+                <Text style={styles.detailValue}>
+                  {grinder.burr_material.charAt(0).toUpperCase() + grinder.burr_material.slice(1)}
+                </Text>
+              </View>
+            )}
+            
+            {grinder.weight_grams && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Weight
+                </Text>
+                <Text style={styles.detailValue}>
+                  {grinder.weight_grams}g
+                </Text>
+              </View>
+            )}
+            
+            {grinder.hopper_capacity_grams && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  Hopper Capacity
+                </Text>
+                <Text style={styles.detailValue}>
+                  {grinder.hopper_capacity_grams}g
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Optimal Settings */}
+        {(grinder.optimal_dose_range || grinder.optimal_grind_settings) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Optimal Settings
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Recommended grind settings and parameters
+            </Text>
+            <View style={styles.detailsContainer}>
+              {grinder.optimal_dose_range && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Dose Range
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {grinder.optimal_dose_range[0]}g - {grinder.optimal_dose_range[1]}g
+                  </Text>
+                </View>
+              )}
+
+              {grinder.optimal_grind_settings && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Grind Settings
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {Array.isArray(grinder.optimal_grind_settings) 
+                      ? grinder.optimal_grind_settings.join(', ')
+                      : grinder.optimal_grind_settings}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Purchase & Maintenance */}
+        {(grinder.purchase_date || grinder.purchase_price || grinder.last_burr_replacement || 
+          grinder.burr_life_shots) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Purchase & Maintenance
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Purchase information and burr maintenance
+            </Text>
+            <View style={styles.detailsContainer}>
+              {grinder.purchase_date && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Purchase Date
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {formatDate(grinder.purchase_date)}
+                  </Text>
+                </View>
+              )}
+
+              {grinder.purchase_price && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Purchase Price
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    ${grinder.purchase_price.toFixed(2)}
+                  </Text>
+                </View>
+              )}
+
+              {grinder.last_burr_replacement && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Last Burr Replacement
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {formatDate(grinder.last_burr_replacement)}
+                  </Text>
+                </View>
+              )}
+
+              {grinder.burr_life_shots && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>
+                    Burr Life Shots
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {grinder.burr_life_shots.toLocaleString()}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Notes */}
+        {grinder.notes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Notes
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Personal observations and settings
+            </Text>
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesText}>
+                {grinder.notes}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Actions
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Edit details or manage this grinder
+          </Text>
+          <View style={styles.actionRow}>
+            <Link href={`/(tabs)/grinders/edit/${grinder.id}`} asChild>
+              <TouchableOpacity style={[styles.actionButton, styles.secondaryActionButton]} activeOpacity={0.7}>
+                <Text style={styles.secondaryActionText}>
+                  Edit Grinder
+                </Text>
+              </TouchableOpacity>
+            </Link>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.primaryActionButton]}
+              onPress={() => router.push(`/brewprints/new?grinder_id=${grinder.id}`)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.primaryActionText}>
+                New Recipe
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-  cardTitle: {
-    marginBottom: 4,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  label: {
-    fontSize: 14,
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: '500',
-    textAlign: 'right',
-    flex: 1,
-    marginLeft: 16,
-  },
-  notesText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  actions: {
-    gap: 12,
-    marginTop: 8,
-  },
-  actionButton: {
-    flex: 1,
-  },
-});
